@@ -702,6 +702,31 @@ if(NOT USE_SYSTEM_ZLIB)
         Engine/zlib/uncompr.c)
 endif()
 
+
+set(ENGINE_SAFEMATH_SRCS
+    Engine/Brushes/Brush.cpp
+    Engine/Brushes/BrushPolygon.cpp
+    Engine/Brushes/BrushSector.cpp
+    Engine/Entities/Entity.cpp
+    Engine/Entities/EntityClass.cpp
+    Engine/Entities/EntityCollision.cpp
+    Engine/Entities/PlayerCharacter.cpp
+    Engine/Terrain/TerrainMisc.cpp
+    Engine/Terrain/TerrainRayCasting.cpp
+    Engine/World/WorldCSG.cpp
+    Engine/World/WorldRayCasting.cpp
+    Engine/World/WorldCollision.cpp
+    Engine/World/WorldCollisionGrid.cpp
+
+    Engine/Math/Projection_Simple_DOUBLE.cpp
+    Engine/Math/Geometry_DOUBLE.cpp
+)
+add_library(engine_safemath STATIC
+    ${ENGINE_SAFEMATH_SRCS}
+)
+target_compile_options(engine_safemath PRIVATE "-fno-unsafe-math-optimizations")
+add_dependencies(engine_safemath ParseEntities)
+
 set(ENGINE_SRCS
     ${ENGINE_ENTITIES_CPP}
     Engine/Engine.cpp
@@ -741,23 +766,16 @@ set(ENGINE_SRCS
     Engine/Base/SDL/SDLInput.cpp
     Engine/Base/SDL/SDLEvents.cpp
     ${SYNCHRO_SRCS}
-    Engine/Brushes/Brush.cpp
     Engine/Brushes/BrushIO.cpp
     Engine/Brushes/BrushShadows.cpp
     Engine/Brushes/BrushTriangularize.cpp
     Engine/Brushes/BrushArchive.cpp
     Engine/Brushes/BrushImport.cpp
     Engine/Brushes/BrushMip.cpp
-    Engine/Brushes/BrushPolygon.cpp
     Engine/Brushes/BrushExport.cpp
-    Engine/Brushes/BrushSector.cpp
-    Engine/Entities/Entity.cpp
     Engine/Entities/NearestPolygon.cpp
     Engine/Entities/EntityProperties.cpp
-    Engine/Entities/PlayerCharacter.cpp
-    Engine/Entities/EntityClass.cpp
     Engine/Entities/FieldBSPTesting.cpp
-    Engine/Entities/EntityCollision.cpp
     Engine/Entities/EntityCopying.cpp
     Engine/Entities/LastPositions.cpp
     Engine/Math/Projection_Isometric.cpp
@@ -767,14 +785,12 @@ set(ENGINE_SRCS
     Engine/Math/Float.cpp
     Engine/Math/Object3D_CSG.cpp
     Engine/Math/Projection_Simple.cpp
-    Engine/Math/Projection_Simple_DOUBLE.cpp
     Engine/Math/Functions.cpp
     Engine/Math/ObjectSector.cpp
     Engine/Math/Placement.cpp
     Engine/Math/TextureMapping.cpp
     Engine/Math/Geometry.cpp
     Engine/Math/Projection.cpp
-    Engine/Math/Geometry_DOUBLE.cpp
     #Engine/Math/Object3D_IO.cpp  # Exploration 3D support.
     #Engine/Models/EditModel.cpp
     Engine/Models/Model.cpp
@@ -837,8 +853,6 @@ set(ENGINE_SRCS
     Engine/Terrain/TerrainArchive.cpp
     Engine/Terrain/TerrainEditing.cpp
     Engine/Terrain/TerrainLayer.cpp
-    Engine/Terrain/TerrainMisc.cpp
-    Engine/Terrain/TerrainRayCasting.cpp
     Engine/Terrain/TerrainRender.cpp
     Engine/Terrain/TerrainTile.cpp
     Engine/Rendering/Render.cpp
@@ -873,20 +887,29 @@ set(ENGINE_SRCS
     Engine/Templates/NameTable_CTFileName.cpp
     Engine/Templates/NameTable_CTranslationPair.cpp
     Engine/Templates/BSP.cpp
-    Engine/World/WorldCSG.cpp
     Engine/World/PhysicsProfile.cpp
-    Engine/World/WorldCollision.cpp
-    Engine/World/WorldIO.cpp
-    Engine/World/WorldRayCasting.cpp
     Engine/World/World.cpp
-    Engine/World/WorldCollisionGrid.cpp
     Engine/World/WorldEditingProfile.cpp
+    Engine/World/WorldIO.cpp
     ${ADDITIONAL_ENGINE_SRCS}
     ${ZLIB_SRCS}
 )
 
-add_executable(ssam
+set(SENGINELIB "SEngine${DEBUGSUFFIX}")
+add_library(${SENGINELIB} SHARED
     ${ENGINE_SRCS}
+)
+
+target_link_libraries(${SENGINELIB} engine_safemath)
+set_target_properties(${SENGINELIB} PROPERTIES ENABLE_EXPORTS ON)
+
+if(DEBUG)
+    set_target_properties(${SENGINELIB} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+endif()
+
+
+set(SSAM "ssam${DEBUGSUFFIX}")
+add_executable(${SSAM}
     SeriousSam/LevelInfo.cpp
     SeriousSam/CmdLine.cpp
     SeriousSam/SeriousSam.cpp
@@ -900,9 +923,38 @@ add_executable(ssam
     SeriousSam/MenuGadgets.cpp
     SeriousSam/MenuPrinting.cpp
 )
-add_dependencies(ssam ParseEntities)
+
+target_link_libraries(${SSAM} ${SENGINELIB})
+add_dependencies(${SSAM} ParseEntities)
+
 # Make symbols in the main executable available to dynamic objects
-set_target_properties(ssam PROPERTIES ENABLE_EXPORTS ON)
+set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
+
+set(SSAMFM "ssamfm")
+add_executable(${SSAMFM}
+    SeriousSamMF/main.cpp
+    SeriousSamMF/SplashScreen.cpp
+    SeriousSamMF/Game.cpp
+    SeriousSamMF/Menu.cpp
+    SeriousSamMF/MainWindow.cpp
+    SeriousSamMF/InterfaceSDL.cpp
+)
+
+target_link_libraries(${SSAMFM} ${SENGINELIB})
+add_dependencies(${SSAMFM} ParseEntities)
+
+if(LINUX)
+    set_target_properties(${SSAMFM} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+    target_link_libraries(${SSAMFM} "m")
+    target_link_libraries(${SSAMFM} "dl")
+    target_link_libraries(${SSAMFM} "pthread")
+    target_link_libraries(${SSAMFM} ${SDL2_LIBRARY})
+    target_link_libraries(${SSAMFM} ${ZLIB_LIBRARIES})
+    if(PANDORA)
+    	target_link_libraries(${SSAMFM} "rt")
+    endif()
+endif()
+
 
 # !!! FIXME: this is an option because you have to recompile the entire engine twice.
 # !!! FIXME:  If we can put the engine in a static library and not lose symbols,
@@ -916,13 +968,13 @@ if(BUILD_DEDICATED_SERVER)
 endif()
 
 if(MACOSX)
-    target_link_libraries(ssam ${ZLIB_LIBRARIES})
+    target_link_libraries(${SSAM} ${ZLIB_LIBRARIES})
     if(USE_SYSTEM_SDL2) # use sdl2 framework on system
-      target_link_libraries(ssam ${SDL2_LIBRARY})
+      target_link_libraries(${SSAM} ${SDL2_LIBRARY})
     else() # use local libsdl2
 	  find_library(COCOA_FRAMEWORK Cocoa)
-      target_link_libraries(ssam "${COCOA_FRAMEWORK}")
-      target_link_libraries(ssam "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
+      target_link_libraries(${SSAM} "${COCOA_FRAMEWORK}")
+      target_link_libraries(${SSAM} "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
     endif()
     
     if(BUILD_DEDICATED_SERVER)
@@ -937,14 +989,14 @@ if(MACOSX)
 endif()
 
 if(LINUX)
-    set_target_properties(ssam PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-    target_link_libraries(ssam "m")
-    target_link_libraries(ssam "dl")
-    target_link_libraries(ssam "pthread")
-    target_link_libraries(ssam ${SDL2_LIBRARY})
-    target_link_libraries(ssam ${ZLIB_LIBRARIES})
+    set_target_properties(${SSAM} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+    target_link_libraries(${SSAM} "m")
+    target_link_libraries(${SSAM} "dl")
+    target_link_libraries(${SSAM} "pthread")
+    target_link_libraries(${SSAM} ${SDL2_LIBRARY})
+    target_link_libraries(${SSAM} ${ZLIB_LIBRARIES})
     if(PANDORA)
-    	target_link_libraries(ssam "rt")
+    	target_link_libraries(${SSAM} "rt")
     endif()
     if(BUILD_DEDICATED_SERVER)
         set_target_properties(SeriousSamDedicated PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
@@ -957,11 +1009,11 @@ if(LINUX)
 endif()
 
 if(FREEBSD)
-    set_target_properties(ssam PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-    target_link_libraries(ssam "m")
-    target_link_libraries(ssam "pthread")
-    target_link_libraries(ssam ${SDL2_LIBRARY})
-    target_link_libraries(ssam ${ZLIB_LIBRARIES})
+    set_target_properties(${SSAM} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+    target_link_libraries(${SSAM} "m")
+    target_link_libraries(${SSAM} "pthread")
+    target_link_libraries(${SSAM} ${SDL2_LIBRARY})
+    target_link_libraries(${SSAM} ${ZLIB_LIBRARIES})
     if(BUILD_DEDICATED_SERVER)
         set_target_properties(SeriousSamDedicated PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
         target_link_libraries(SeriousSamDedicated "m")
@@ -972,12 +1024,12 @@ if(FREEBSD)
 endif()
 
 if(TFE)
- set_target_properties(ssam PROPERTIES OUTPUT_NAME "ssam-tfe")
+ set_target_properties(${SSAM} PROPERTIES OUTPUT_NAME "ssam-tfe")
 endif()
 
 # RAKE! Install Section.
 if(DEBUG) # RAKE! Will this work with TFE?
-    install(TARGETS ssam ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
+    install(TARGETS ${SSAM} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin/Debug"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
@@ -987,7 +1039,7 @@ if(DEBUG) # RAKE! Will this work with TFE?
                 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif()
 else()
-    install(TARGETS ssam ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
+    install(TARGETS ${SSAM} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

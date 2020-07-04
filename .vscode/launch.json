@@ -8,7 +8,27 @@
             "name": "debug-sam",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Bin/ssam",
+            "program": "${workspaceFolder}/Bin/ssamD",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/Bin/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Abilita la riformattazione per gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "debug-sammf",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Bin/ssamfm",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/Bin/",
