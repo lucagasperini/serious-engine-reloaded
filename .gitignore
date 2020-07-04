@@ -29,6 +29,15 @@
 !Bison.exe
 !Flex.exe
 
+# Build Directory
+Bin/*
+
+# Controls Directory
+Controls/*
+
+# Unexclude empty
+!empty
+
 # CMake Build dirs (temp)
 Build/
 Debug/
