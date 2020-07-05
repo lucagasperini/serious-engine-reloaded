@@ -20,14 +20,15 @@ int SEInterfaceSDL::init()
     return TRUE;
 }
 
-HWND SEInterfaceSDL::createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, INDEX api, INDEX mode, BOOL resizable, INDEX status)
+HWND SEInterfaceSDL::createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, GfxAPIType api, INDEX mode, BOOL resizable, INDEX status)
 {
     UINT flags = 0;
     /* FIXME: Make sense to create a separated function for handle this process */
     /* NOTE: This can be a switch-case statement*/
-    if(api == SE_WINDOW_API_OPENGL)
+    /* FIXME: Handle GAT_NONE and other definitions */
+    if(api == GfxAPIType::GAT_OGL)
         flags = SDL_WINDOW_OPENGL;
-    else
+    else if(api == GfxAPIType::GAT_VULKAN)
         flags = SDL_WINDOW_VULKAN;
 
     if(mode == SE_WINDOW_MODE_FULLSCREEN)
@@ -47,7 +48,7 @@ HWND SEInterfaceSDL::createWindow(const CTString &title, PIX x, PIX y, PIX w, PI
         flags = flags | SDL_WINDOW_MINIMIZED;
     else if (status == SE_WINDOW_STATUS_MAXIMIZED)
         flags = flags | SDL_WINDOW_MAXIMIZED;
-        
+
     return SDL_CreateWindow(title, x, y, w, h, flags);
 }
 

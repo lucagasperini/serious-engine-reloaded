@@ -14,6 +14,9 @@
 #include "MainWindow.h"
 #include "InterfaceSDL.h"
 
+#define SSMF_WINDOW_RECOVERY_W 640
+#define SSMF_WINDOW_RECOVERY_H 480
+
 static char *argv0 = NULL;
 
 HWND _hwndMain = NULL; /* FIXME: Cant compile without this global variable */
@@ -27,24 +30,18 @@ PIX  _pixDesktopWidth = 0;    // desktop width when started (for some tests)
 
 CTString sam_strGameName = "serioussammf";
 
-#ifdef PLATFORM_UNIX
-
-#endif
-
 SESplashScreen* scr_splashscreen = NULL;
 SEGame* pGame = NULL;
 SEMenu* pMenu = NULL;
 SEMainWindow* pMainWin = NULL;
-/* FIXME: Remove direct access to this interface! */
-SEInterfaceSDL* pSDL = NULL;
 
 // display mode settings
-INDEX sam_bFullScreenActive = FALSE;
-INDEX sam_iScreenSizeI = 640;  // current size of the window
-INDEX sam_iScreenSizeJ = 480;  // current size of the window
-INDEX sam_iDisplayDepth  = 0;  // 0==default, 1==16bit, 2==32bit
-INDEX sam_iDisplayAdapter = 0; 
-INDEX sam_iGfxAPI = 0;         // 0==OpenGL
+INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
+INDEX iWindowAPI = 0;         // 0==OpenGL
+INDEX iWindowW = 640;  // current size of the window
+INDEX iWindowH = 480;  // current size of the window
+INDEX iWindowDepth  = 0;  // 0==default, 1==16bit, 2==32bit
+INDEX iWindowAdapter = 0; 
 
 // 0...app started for the first time
 // 1...all ok
@@ -67,33 +64,7 @@ const INDEX aDefaultModes[][3] =
 };
 const INDEX ctDefaultModes = ARRAYCOUNT(aDefaultModes);
 
-
-// list of settings data
-static CListHead _lhSettings;
-extern INDEX sam_iVideoSetup;  // 0==speed, 1==normal, 2==quality, 3==custom
-
-class CSettingsEntry {
-public:
-   CListNode se_lnNode;
-    CTString se_strRenderer;
-    CTString se_strDescription;
-  CTFileName se_fnmScript;
-  // check if this entry matches given info
-  BOOL Matches( const CTString &strRenderer) const;
-};
-
-// last valid settings info
-static CTString _strLastRenderer;
-CTString _strPreferencesDescription = "";
-INDEX    _iLastPreferences = 1;
-
-// check if this entry matches given info
-BOOL CSettingsEntry::Matches( const CTString &strRenderer) const
-{
-  return strRenderer.Matches(se_strRenderer);
-}
-
-
+/*
 void InitGLSettings()
 {
   ASSERT(_lhSettings.IsEmpty());
@@ -135,151 +106,21 @@ void InitGLSettings()
 
   _strLastRenderer= "none";
   _iLastPreferences = 1;
-  /*
+  
   _pShell->DeclareSymbol("persistent CTString sam_strLastRenderer;", (void *) &_strLastRenderer);
   _pShell->DeclareSymbol("persistent INDEX    sam_iLastSetup;",      (void *) &_iLastPreferences);
-  */
-}
-
-BOOL _bWindowChanging = FALSE;    // ignores window messages while this is set
-
-// main window canvas
-CDrawPort *pdp;
-CDrawPort *pdpNormal;
-CDrawPort *pdpWideScreen;
-CViewPort *pvpViewPort;
-
-// try to start a new display mode
-BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI, PIX pixSizeJ,
-                          enum DisplayDepth eColorDepth, BOOL bFullScreenMode)
-{
-  CDisplayMode dmTmp;
-  dmTmp.dm_ddDepth = eColorDepth;
-  CPrintF( TRANS("  Starting display mode: %dx%dx%s (%s)\n"),
-           pixSizeI, pixSizeJ, (const char *) dmTmp.DepthString(),
-           bFullScreenMode ? TRANS("fullscreen") : TRANS("window"));
-
-  // mark to start ignoring window size/position messages until settled down
-  _bWindowChanging = TRUE;
   
-  // destroy canvas if existing
-  //_pGame->DisableLoadingHook();
-  if( pvpViewPort!=NULL) {
-    _pGfx->DestroyWindowCanvas( pvpViewPort);
-    pvpViewPort = NULL;
-    pdpNormal = NULL;
-  }
-
-  // close the application window
-  pMainWin->close();
-
-  pMainWin->setW(pixSizeI);
-  pMainWin->setH(pixSizeJ);
-
-  // try to set new display mode
-  BOOL bSuccess;
-  if( bFullScreenMode) {
-#ifdef SE1_D3D
-    if( eGfxAPI==GAT_D3D) OpenMainWindowFullScreen( pixSizeI, pixSizeJ);
-#endif // SE1_D3D
-    pMainWin->setMode(SE_WINDOW_MODE_FULLSCREEN);
-    bSuccess = _pGfx->SetDisplayMode( eGfxAPI, iAdapter, pixSizeI, pixSizeJ, eColorDepth);
-    if( bSuccess && eGfxAPI==GAT_OGL) pMainWin->open();
-  } else {
-#ifdef SE1_D3D
-    if( eGfxAPI==GAT_D3D) OpenMainWindowNormal( pixSizeI, pixSizeJ);
-#endif // SE1_D3D
-    bSuccess = _pGfx->ResetDisplayMode( eGfxAPI);
-    if( bSuccess && eGfxAPI==GAT_OGL) pMainWin->open();
-#ifdef SE1_D3D
-    if( bSuccess && eGfxAPI==GAT_D3D) ResetMainWindowNormal();
-#endif // SE1_D3D
-  }
-
-  // if new mode was set
-  if( bSuccess) {
-    // create canvas
-    ASSERT( pvpViewPort==NULL);
-    ASSERT( pdpNormal==NULL);
-    _pGfx->CreateWindowCanvas( pMainWin->getPWindow(), &pvpViewPort, &pdpNormal);
-
-    // erase context of both buffers (for the sake of wide-screen)
-    pdp = pdpNormal;
-    if( pdp!=NULL && pdp->Lock()) {
-      pdp->Fill(C_BLACK|CT_OPAQUE);
-      pdp->Unlock();
-      pvpViewPort->SwapBuffers();
-      pdp->Lock();
-      pdp->Fill(C_BLACK|CT_OPAQUE);
-      pdp->Unlock();
-      pvpViewPort->SwapBuffers();
-    }
-/*
-    // lets try some wide screen screaming :)
-    const PIX pixYBegAdj = pdp->GetHeight() * 21/24;
-    const PIX pixYEndAdj = pdp->GetHeight() * 3/24;
-    const PIX pixXEnd    = pdp->GetWidth();
-    pdpWideScreen = new CDrawPort( pdp, PIXaabbox2D( PIX2D(0,pixYBegAdj), PIX2D(pixXEnd, pixYEndAdj)));
-    pdpWideScreen->dp_fWideAdjustment = 9.0f / 12.0f;
-    if( sam_bWideScreen) pdp = pdpWideScreen;
-*/
-    // initial screen fill and swap, just to get context running
-    BOOL bSuccess = FALSE;
-    if( pdp!=NULL && pdp->Lock()) {
-      pdp->Fill(pGame->LCDGetColor(C_dGREEN|CT_OPAQUE, "disabled unselected"));
-      pdp->Unlock();
-      pvpViewPort->SwapBuffers();
-      bSuccess = TRUE;
-    }/*
-    _pGame->EnableLoadingHook(pdp);
-
-    // if the mode is not working, or is not accelerated
-    if( !bSuccess || !_pGfx->IsCurrentModeAccelerated())
-    { // report error
-      CPrintF( TRANS("This mode does not support hardware acceleration.\n"));
-      // destroy canvas if existing
-      if( pvpViewPort!=NULL) {
-        _pGame->DisableLoadingHook();
-        _pGfx->DestroyWindowCanvas( pvpViewPort);
-        pvpViewPort = NULL;
-        pdpNormal = NULL;
-      }
-      // close the application window
-      CloseMainWindow();
-      // report failure
-      return FALSE;
-    }
-
-    // remember new settings
-    sam_bFullScreenActive = bFullScreenMode;
-    sam_iScreenSizeI = pixSizeI;
-    sam_iScreenSizeJ = pixSizeJ;
-    sam_iDisplayDepth = eColorDepth;
-    sam_iDisplayAdapter = iAdapter;
-    sam_iGfxAPI = eGfxAPI;
-
-    // report success
-    return TRUE;
-  // if couldn't set new mode
-  */
-  }/* else {
-    // close the application window
-    CloseMainWindow();
-    // report failure
-    return FALSE;
-  }
-  */
 }
-
+*/
+/*
 // start new display mode
-void StartNewMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI, PIX pixSizeJ,
-                   enum DisplayDepth eColorDepth, BOOL bFullScreenMode)
+void StartNewMode( )
 {
   CPrintF( TRANS("\n* START NEW DISPLAY MODE ...\n"));
 
   // try to set the mode
-  BOOL bSuccess = TryToSetDisplayMode( eGfxAPI, iAdapter, pixSizeI, pixSizeJ, eColorDepth, bFullScreenMode);
-
+  BOOL bSuccess = TryToSetDisplayMode();
+/*
   // if failed
   if( !bSuccess)
   {
@@ -312,24 +153,22 @@ void StartNewMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI, PIX pi
   } else {
     _iDisplayModeChangeFlag = 1;  // all ok
   }
-
+*/
   // apply 3D-acc settings
   //ApplyGLSettings(FALSE);
 
-  // remember time of mode setting
-  _tmDisplayModeChanged = _pTimer->GetRealTimeTick();
+/*
 }
-
+*/
 BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
   pMenu = new SEMenu();
   pGame = new SEGame();
   pMainWin = new SEMainWindow();
-  pSDL = new SEInterfaceSDL();
 
-  if(!pSDL->init()) {
-      FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", pSDL->getError());
+  if(!SEInterfaceSDL::init()) {
+      FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SEInterfaceSDL::getError());
       return FALSE;
   }
 
@@ -337,7 +176,7 @@ BOOL Init(CTString strCmdLine)
   scr_splashscreen->show();
   
   // remember desktop width
-  _pixDesktopWidth = pSDL->desktopWidth();
+  _pixDesktopWidth = SEInterfaceSDL::desktopWidth();
 
   // parse command line before initializing engine
   // FIXME: Maybe add this in future
@@ -416,15 +255,43 @@ BOOL Init(CTString strCmdLine)
   }
 */
   // init gl settings module
-  InitGLSettings();
+  //InitGLSettings();
 /*
   // init level-info subsystem
   LoadLevelsList();
   LoadDemosList();
 */
   // apply application mode
-  StartNewMode( (GfxAPIType)sam_iGfxAPI, sam_iDisplayAdapter, sam_iScreenSizeI, sam_iScreenSizeJ,
-                (enum DisplayDepth)sam_iDisplayDepth, sam_bFullScreenActive);
+  pMainWin->setTitle(sam_strGameName);
+  pMainWin->setW(iWindowW);
+  pMainWin->setH(iWindowH);
+  pMainWin->setDepth(DisplayDepth::DD_DEFAULT);
+  pMainWin->setAdapter(iWindowAdapter);
+  BOOL winResult = pMainWin->create();
+
+  if(! winResult) {
+    pMainWin->setW(SSMF_WINDOW_RECOVERY_W);
+    pMainWin->setH(SSMF_WINDOW_RECOVERY_H);
+    for(int i = 0; i < ctDefaultModes; i++) {
+      pMainWin->setDepth((DisplayDepth) aDefaultModes[i][0]);
+      pMainWin->setAPI( (GfxAPIType)  aDefaultModes[i][1]);
+      pMainWin->setAdapter(aDefaultModes[i][2]);
+      CPrintF(TRANSV("\nTrying recovery mode %d...\n"), i);
+      winResult = pMainWin->create();
+      if( winResult ) break;
+    }
+  }
+    // if all failed
+    if( !winResult) {
+      FatalError(TRANS(
+        "Cannot set display mode!\n"
+        "Serious Sam was unable to find display mode with hardware acceleration.\n"
+        "Make sure you install proper drivers for your video card as recommended\n"
+        "in documentation and set your desktop to 16 bit (65536 colors).\n"
+        "Please see ReadMe file for troubleshooting information.\n"));
+    }
+  // remember time of mode setting
+  _tmDisplayModeChanged = _pTimer->GetRealTimeTick();
 /*
   // set default mode reporting
   if( sam_bFirstStarted) {

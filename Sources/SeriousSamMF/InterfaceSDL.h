@@ -5,13 +5,9 @@
 
 #include <Engine/Base/CTString.h>
 #include <Engine/Base/Types.h>
+#include <Engine/Graphics/GfxLibrary.h>
 
 /* FIXME: Those definitions should be on other header for generic purpose */
-#define SE_WINDOW_API_OPENGL 0
-/* FIXME: Actually this engine doesn't support Vulkan, btw adding this for future purpose */
-#define SE_WINDOW_API_VULKAN 1
-/* NOTE: You can append DirectX without SDL */
-
 #define SE_WINDOW_MODE_WINDOWED 0
 #define SE_WINDOW_MODE_FULLSCREEN 1
 #define SE_WINDOW_MODE_FULLSCREEN_DESKTOP 2
@@ -45,12 +41,12 @@ public:
     SEInterfaceSDL();
     ~SEInterfaceSDL();
 
-    int init();
+    static int init();
 
     static CTString getError() { return SDL_GetError(); }
 
     static PIX posWinCentered() { return SDL_WINDOWPOS_CENTERED; }
-    static HWND createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, INDEX api, INDEX mode, BOOL resizable, INDEX status);
+    static HWND createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, GfxAPIType api, INDEX mode, BOOL resizable, INDEX status);
     static void quit();
 
     static ULONG desktopWidth();

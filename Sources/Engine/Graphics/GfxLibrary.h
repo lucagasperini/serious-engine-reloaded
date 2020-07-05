@@ -67,6 +67,7 @@ enum GfxAPIType
 #ifdef SE1_D3D
   GAT_D3D  =  1,     // Direct3D
 #endif // SE1_D3D
+  GAT_VULKAN = 2,    /* FIXME: Actually this engine doesn't support Vulkan, btw adding this for future purpose */
   GAT_CURRENT = 9,   // current API
 };
 
