@@ -1,11 +1,19 @@
 #include <SDL.h>
 
-#include "MainWindow.h"
 #include <Engine/Engine.h>
+
+#include "MainWindow.h"
+#include "InterfaceSDL.h"
 
 SEMainWindow::SEMainWindow()
 {
-
+    /* Set default values */
+    x = SEInterfaceSDL::posWinCentered();
+    y = SEInterfaceSDL::posWinCentered();
+    api = SE_WINDOW_API_OPENGL;
+    mode = SE_WINDOW_MODE_WINDOWED;
+    resizable = FALSE;
+    status = SE_WINDOW_STATUS_NORMAL;
 }
 
 SEMainWindow::~SEMainWindow()
@@ -17,28 +25,18 @@ SEMainWindow::~SEMainWindow()
 void SEMainWindow::close()
 {
   // if window exists
-  if( hwndMain!=NULL) {
+  if( pWindow!=NULL) {
     // destroy it
-    SDL_DestroyWindow((SDL_Window *) hwndMain);
-    hwndMain = NULL;
+    SDL_DestroyWindow((SDL_Window *) pWindow);
+    pWindow = NULL;
   }
 }
 
-void SEMainWindow::open(BOOL _fullscreen, PIX pixSizeI, PIX pixSizeJ)
+void SEMainWindow::open()
 {
-    int length = str_title.Length();
-    char* title = new char[str_title.Length()];
-    strcpy(title, str_title.str_String);
-    SDL_snprintf( title, length, TRANS("Serious Sam (FullScreen %dx%d)"), pixSizeI, pixSizeJ);
+    pWindow = SEInterfaceSDL::createWindow(title, x, y, w, h, api, mode, resizable, status);
 
-    if(_fullscreen)
-        hwndMain = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
-    else
-        hwndMain = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL);
-
-    if( hwndMain==NULL) FatalError(TRANS("Cannot open main window!"));
+    if( pWindow == NULL) FatalError(TRANS("Cannot open main window!"));
     
-    SE_UpdateWindowHandle( hwndMain);
-    _pixLastSizeI = pixSizeI;
-    _pixLastSizeJ = pixSizeJ;
+    SE_UpdateWindowHandle(pWindow);
 }

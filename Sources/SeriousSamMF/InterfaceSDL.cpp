@@ -20,6 +20,37 @@ int SEInterfaceSDL::init()
     return TRUE;
 }
 
+HWND SEInterfaceSDL::createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, INDEX api, INDEX mode, BOOL resizable, INDEX status)
+{
+    UINT flags = 0;
+    /* FIXME: Make sense to create a separated function for handle this process */
+    /* NOTE: This can be a switch-case statement*/
+    if(api == SE_WINDOW_API_OPENGL)
+        flags = SDL_WINDOW_OPENGL;
+    else
+        flags = SDL_WINDOW_VULKAN;
+
+    if(mode == SE_WINDOW_MODE_FULLSCREEN)
+        flags = flags | SDL_WINDOW_FULLSCREEN;
+    else if(mode == SE_WINDOW_MODE_FULLSCREEN_DESKTOP)
+        flags = flags | SDL_WINDOW_FULLSCREEN_DESKTOP;
+    else if (mode == SE_WINDOW_MODE_BORDERLESS)
+        flags = flags | SDL_WINDOW_BORDERLESS;
+    else if (mode == SE_WINDOW_MODE_HIDDEN)
+        flags = flags | SDL_WINDOW_HIDDEN;
+    /* else SE_WINDOW_MODE_WINDOWED */
+
+    if(resizable)
+        flags = flags | SDL_WINDOW_RESIZABLE;
+    
+    if(status == SE_WINDOW_STATUS_MINIMIZED)
+        flags = flags | SDL_WINDOW_MINIMIZED;
+    else if (status == SE_WINDOW_STATUS_MAXIMIZED)
+        flags = flags | SDL_WINDOW_MAXIMIZED;
+        
+    return SDL_CreateWindow(title, x, y, w, h, flags);
+}
+
 // FIXME: Remove copy of this function from Engine/Graphics/SDL/SDLAdapter.cpp 
 
 ULONG SEInterfaceSDL::desktopWidth()

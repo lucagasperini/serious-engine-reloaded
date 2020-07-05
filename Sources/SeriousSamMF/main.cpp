@@ -32,10 +32,11 @@ CTString sam_strGameName = "serioussammf";
 #endif
 
 SESplashScreen* scr_splashscreen = NULL;
-SEGame* _pGame = NULL;
-SEMenu* _pMenu = NULL;
-SEMainWindow* _pMainWin = NULL;
-SEInterfaceSDL* _interfaceSDL = NULL;
+SEGame* pGame = NULL;
+SEMenu* pMenu = NULL;
+SEMainWindow* pMainWin = NULL;
+/* FIXME: Remove direct access to this interface! */
+SEInterfaceSDL* pSDL = NULL;
 
 // display mode settings
 INDEX sam_bFullScreenActive = FALSE;
@@ -170,7 +171,10 @@ BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI,
   }
 
   // close the application window
-  _pMainWin->close();
+  pMainWin->close();
+
+  pMainWin->setW(pixSizeI);
+  pMainWin->setH(pixSizeJ);
 
   // try to set new display mode
   BOOL bSuccess;
@@ -178,14 +182,15 @@ BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI,
 #ifdef SE1_D3D
     if( eGfxAPI==GAT_D3D) OpenMainWindowFullScreen( pixSizeI, pixSizeJ);
 #endif // SE1_D3D
+    pMainWin->setMode(SE_WINDOW_MODE_FULLSCREEN);
     bSuccess = _pGfx->SetDisplayMode( eGfxAPI, iAdapter, pixSizeI, pixSizeJ, eColorDepth);
-    if( bSuccess && eGfxAPI==GAT_OGL) _pMainWin->open(TRUE, pixSizeI, pixSizeJ);
+    if( bSuccess && eGfxAPI==GAT_OGL) pMainWin->open();
   } else {
 #ifdef SE1_D3D
     if( eGfxAPI==GAT_D3D) OpenMainWindowNormal( pixSizeI, pixSizeJ);
 #endif // SE1_D3D
     bSuccess = _pGfx->ResetDisplayMode( eGfxAPI);
-    if( bSuccess && eGfxAPI==GAT_OGL) _pMainWin->open(FALSE, pixSizeI, pixSizeJ);
+    if( bSuccess && eGfxAPI==GAT_OGL) pMainWin->open();
 #ifdef SE1_D3D
     if( bSuccess && eGfxAPI==GAT_D3D) ResetMainWindowNormal();
 #endif // SE1_D3D
@@ -196,7 +201,7 @@ BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI,
     // create canvas
     ASSERT( pvpViewPort==NULL);
     ASSERT( pdpNormal==NULL);
-    _pGfx->CreateWindowCanvas( _pMainWin->getHandler(), &pvpViewPort, &pdpNormal);
+    _pGfx->CreateWindowCanvas( pMainWin->getPWindow(), &pvpViewPort, &pdpNormal);
 
     // erase context of both buffers (for the sake of wide-screen)
     pdp = pdpNormal;
@@ -221,7 +226,7 @@ BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI,
     // initial screen fill and swap, just to get context running
     BOOL bSuccess = FALSE;
     if( pdp!=NULL && pdp->Lock()) {
-      pdp->Fill(_pGame->LCDGetColor(C_dGREEN|CT_OPAQUE, "disabled unselected"));
+      pdp->Fill(pGame->LCDGetColor(C_dGREEN|CT_OPAQUE, "disabled unselected"));
       pdp->Unlock();
       pvpViewPort->SwapBuffers();
       bSuccess = TRUE;
@@ -318,13 +323,13 @@ void StartNewMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI, PIX pi
 BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
-  _pMenu = new SEMenu();
-  _pGame = new SEGame();
-  _pMainWin = new SEMainWindow();
-  _interfaceSDL = new SEInterfaceSDL();
+  pMenu = new SEMenu();
+  pGame = new SEGame();
+  pMainWin = new SEMainWindow();
+  pSDL = new SEInterfaceSDL();
 
-  if(!_interfaceSDL->init()) {
-      FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", _interfaceSDL->getError());
+  if(!pSDL->init()) {
+      FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", pSDL->getError());
       return FALSE;
   }
 
@@ -332,7 +337,7 @@ BOOL Init(CTString strCmdLine)
   scr_splashscreen->show();
   
   // remember desktop width
-  _pixDesktopWidth = _interfaceSDL->desktopWidth();
+  _pixDesktopWidth = pSDL->desktopWidth();
 
   // parse command line before initializing engine
   // FIXME: Maybe add this in future
@@ -343,7 +348,7 @@ BOOL Init(CTString strCmdLine)
 
 
   // init game - this will load persistent symbols
-  _pGame->init(CTString("Data\\SeriousSam.gms"));
+  pGame->init(CTString("Data\\SeriousSam.gms"));
 
   SE_LoadDefaultFonts();
 
@@ -402,7 +407,7 @@ BOOL Init(CTString strCmdLine)
   CPrintF(TRANSV("Active mod: %s\n"), (const char *) sam_strModName);
   */
 
-  _pMenu->init();
+  pMenu->init();
   /*
   // if there is a mod
   if (_fnmMod!="") {
