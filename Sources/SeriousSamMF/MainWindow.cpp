@@ -1,6 +1,7 @@
 #include <SDL.h>
 
 #include <Engine/Engine.h>
+#include <Engine/Base/SDL/SDLEvents.h>
 
 #include "MainWindow.h"
 #include "InterfaceSDL.h"
@@ -81,4 +82,9 @@ BOOL SEMainWindow::create()
       viewPort->SwapBuffers();
     }
     return TRUE;
+}
+
+BOOL SEMainWindow::isIconic()
+{
+    return IsIconic(pWindow);
 }

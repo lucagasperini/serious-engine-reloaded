@@ -56,6 +56,7 @@ public:
     CDrawPort* getDrawPort() { return drawPort; }
     CViewPort* getViewPort() { return viewPort; }
 
+    BOOL isIconic();
     BOOL create();
     void destroy();
 };

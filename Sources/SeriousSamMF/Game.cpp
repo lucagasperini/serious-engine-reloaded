@@ -153,12 +153,7 @@ static FLOAT bMenuRendering = 0.25f;
 // do the main game loop and render screen
 void SEGame::run()
 {
-  ASSERT(mainWin != NULL);
-  ASSERT(menu != NULL);
 
-  #ifdef SINGLE_THREADED
-    _pTimer->HandleTimerHandlers();
-  #endif
 /*
   // set flag if not in game
   if( !_pGame->gm_bGameOn) _gmRunningGameMode = GM_NONE;
@@ -199,7 +194,7 @@ void SEGame::run()
   }
 */
   // redraw the view
-  if( !IsIconic(mainWin->getPWindow()) && mainWin->getDrawPort()!=NULL && mainWin->getDrawPort()->Lock())
+  if( !mainWin->isIconic() && mainWin->getDrawPort()!=NULL && mainWin->getDrawPort()->Lock())
   {
     /*
     if( _gmRunningGameMode!=GM_NONE && !bMenuActive ) {

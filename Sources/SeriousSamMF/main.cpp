@@ -7,10 +7,10 @@
 #include <Engine/Base/SDL/SDLEvents.h>
 
 #include "SplashScreen.h"
-#include "Game.h"
 #include "Menu.h"
 #include "MainWindow.h"
 #include "InterfaceSDL.h"
+#include "Colors.h"
 
 #define SSMF_WINDOW_RECOVERY_W 640
 #define SSMF_WINDOW_RECOVERY_H 480
@@ -29,7 +29,6 @@ PIX  _pixDesktopWidth = 0;    // desktop width when started (for some tests)
 CTString sam_strGameName = "serioussammf";
 
 SESplashScreen* scr_splashscreen = NULL;
-SEGame* pGame = NULL;
 SEMenu* pMenu = NULL;
 SEMainWindow* pMainWin = NULL;
 
@@ -158,11 +157,34 @@ void StartNewMode( )
 /*
 }
 */
+
+static FLOAT bMenuRendering = 0.25f;
+
+BOOL GameLoop()
+{
+  #ifdef SINGLE_THREADED
+    _pTimer->HandleTimerHandlers();
+  #endif
+  if( !pMainWin->isIconic() && pMainWin->getDrawPort()!=NULL && pMainWin->getDrawPort()->Lock())
+  {
+    pMainWin->getDrawPort()->Fill(SE_COL_ORANGE_NEUTRAL|255);
+    // do menu
+    if( bMenuRendering) {
+      // clear z-buffer
+      pMainWin->getDrawPort()->FillZBuffer( ZBUF_BACK);
+      // remember if we should render menus next tick
+      bMenuRendering = pMenu->run(pMainWin->getDrawPort());
+    }
+    // done with all
+    pMainWin->getDrawPort()->Unlock();
+    pMainWin->getViewPort()->SwapBuffers();
+  }
+}
+
 BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
   pMenu = new SEMenu();
-  pGame = new SEGame();
   pMainWin = new SEMainWindow();
 
   if(!SEInterfaceSDL::init()) {
@@ -182,10 +204,6 @@ BOOL Init(CTString strCmdLine)
 
   // initialize engine
   SE_InitEngine(argv0, sam_strGameName);
-
-
-  // init game - this will load persistent symbols
-  pGame->init(CTString("Data\\SeriousSam.gms"));
 
   SE_LoadDefaultFonts();
 
@@ -352,8 +370,6 @@ int SubMain(LPSTR lpCmdLine)
   if( !Init(lpCmdLine)) return FALSE;
 
   pMenu->setActive(TRUE);
-  pGame->setMainWindow(pMainWin);
-  pGame->setMenu(pMenu);
 
   // initialy, application is running and active, console and menu are off
   _bRunning    = TRUE;
@@ -653,7 +669,7 @@ int SubMain(LPSTR lpCmdLine)
     _pGame->gm_bMenuOn = bMenuActive;
 */
     // do the main game loop and render screen
-    pGame->run();
+    GameLoop();
 /*
     // limit current frame rate if neeeded
     LimitFrameRate();
