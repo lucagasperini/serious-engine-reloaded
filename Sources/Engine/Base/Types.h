@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Engine/Base/Base.h>
 #include <Engine/Graphics/gl_types.h>
 
+#include <stddef.h>
 #include <stdint.h>
 // use the defined typesizes from MSDN to create an equivalent translation on
 // non windows platforms

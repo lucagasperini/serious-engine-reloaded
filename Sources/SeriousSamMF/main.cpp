@@ -1,5 +1,3 @@
-#include <stddef.h>
-
 #include <SDL.h>
 
 #include <Engine/Base/CTString.h>
@@ -234,12 +232,9 @@ BOOL Init(CTString strCmdLine)
     strCmd.PrintF("include \"%s\"", (const char *) cmd_strScript);
     _pShell->Execute(strCmd);
   }
-  
-  // load logo textures
-  LoadAndForceTexture(_toLogoCT,   _ptoLogoCT,   CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-  LoadAndForceTexture(_toLogoODI,  _ptoLogoODI,  CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-  LoadAndForceTexture(_toLogoEAX,  _ptoLogoEAX,  CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
+  */
 
+/*
   LoadStringVar(CTString("Data\\Var\\Sam_Version.var"), sam_strVersion);
   LoadStringVar(CTString("Data\\Var\\ModName.var"), sam_strModName);
   CPrintF(TRANSV("Serious Sam version: %s\n"), (const char *) sam_strVersion);
@@ -356,6 +351,10 @@ int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
 
+  pMenu->setActive(TRUE);
+  pGame->setMainWindow(pMainWin);
+  pGame->setMenu(pMenu);
+
   // initialy, application is running and active, console and menu are off
   _bRunning    = TRUE;
   _bQuitScreen = TRUE;
@@ -398,6 +397,11 @@ int SubMain(LPSTR lpCmdLine)
       // if application should stop
       if( msg.message==WM_QUIT || msg.message==WM_CLOSE) {
         // stop running
+        _bRunning = FALSE;
+        _bQuitScreen = FALSE;
+      }
+      if (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE) {
+          // stop running
         _bRunning = FALSE;
         _bQuitScreen = FALSE;
       }
@@ -647,10 +651,10 @@ int SubMain(LPSTR lpCmdLine)
     UpdatePauseState();
     // notify game whether menu is active
     _pGame->gm_bMenuOn = bMenuActive;
-
+*/
     // do the main game loop and render screen
-    DoGame();
-
+    pGame->run();
+/*
     // limit current frame rate if neeeded
     LimitFrameRate();
     */

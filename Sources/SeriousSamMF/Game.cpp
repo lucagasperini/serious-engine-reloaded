@@ -25,6 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
+#include <Engine/Base/SDL/SDLEvents.h>
+
 #include <Engine/Engine.h>
 #include <Engine/Base/Statistics.h>
 #include <Engine/CurrentVersion.h>
@@ -61,7 +63,7 @@ static CStaticStackArray<INDEX> _actTriangles;  // world, model, particle, total
 
 SEGame::SEGame()
 {
-
+  mainWin = NULL;
 }
 
 SEGame::~SEGame()
@@ -145,6 +147,110 @@ static FLOAT gam_fChatSoundVolume = 0.25f;
 
 BOOL map_bIsFirstEncounter = FALSE;
 BOOL _bUserBreakEnabled = FALSE;
+
+static FLOAT bMenuRendering = 0.25f;
+
+// do the main game loop and render screen
+void SEGame::run()
+{
+  ASSERT(mainWin != NULL);
+  ASSERT(menu != NULL);
+
+  #ifdef SINGLE_THREADED
+    _pTimer->HandleTimerHandlers();
+  #endif
+/*
+  // set flag if not in game
+  if( !_pGame->gm_bGameOn) _gmRunningGameMode = GM_NONE;
+
+  if( (_gmRunningGameMode==GM_DEMO  && _pNetwork->IsDemoPlayFinished())
+    ||(_gmRunningGameMode==GM_INTRO && _pNetwork->IsGameFinished())) {
+    _pGame->StopGame();
+    _gmRunningGameMode = GM_NONE;
+
+    // load next demo
+    StartNextDemo();
+    if (!_bInAutoPlayLoop) {
+      // start menu
+      StartMenus();
+    }
+  }
+
+  // do the main game loop
+  if( _gmRunningGameMode != GM_NONE) {
+    _pGame->GameMainLoop();
+  // if game is not started
+  } else {
+    // just handle broadcast messages
+    _pNetwork->GameInactive();
+  }
+
+  if (sam_iStartCredits>0) {
+    Credits_On(sam_iStartCredits);
+    sam_iStartCredits = 0;
+  }
+  if (sam_iStartCredits<0) {
+    Credits_Off();
+    sam_iStartCredits = 0;
+  }
+  if( _gmRunningGameMode==GM_NONE) {
+    Credits_Off();
+    sam_iStartCredits = 0;
+  }
+*/
+  // redraw the view
+  if( !IsIconic(mainWin->getPWindow()) && mainWin->getDrawPort()!=NULL && mainWin->getDrawPort()->Lock())
+  {
+    /*
+    if( _gmRunningGameMode!=GM_NONE && !bMenuActive ) {
+      // handle pretouching of textures and shadowmaps
+      pdp->Unlock();
+      _pGame->GameRedrawView( pdp, (_pGame->gm_csConsoleState!=CS_OFF || bMenuActive)?0:GRV_SHOWEXTRAS);
+      pdp->Lock();
+      _pGame->ComputerRender(pdp);
+      pdp->Unlock();
+      CDrawPort dpScroller(pdp, TRUE);
+      dpScroller.Lock();
+      if (Credits_Render(&dpScroller)==0) {
+        Credits_Off();
+      }
+      dpScroller.Unlock();
+      pdp->Lock();
+    } else */{
+      mainWin->getDrawPort()->Fill(SE_COL_ORANGE_NEUTRAL|255);
+    }
+
+    // do menu
+    if( bMenuRendering) {
+      // clear z-buffer
+      mainWin->getDrawPort()->FillZBuffer( ZBUF_BACK);
+      // remember if we should render menus next tick
+      bMenuRendering = menu->run(mainWin->getDrawPort());
+    }
+/*
+    // print display mode info if needed
+    PrintDisplayModeInfo();
+
+    // render console
+    _pGame->ConsoleRender(pdp);
+*/
+    // done with all
+    mainWin->getDrawPort()->Unlock();
+/*
+    // clear upper and lower parts of screen if in wide screen mode
+    if( pdp==pdpWideScreen && pdpNormal->Lock()) {
+      const PIX pixWidth  = pdpWideScreen->GetWidth();
+      const PIX pixHeight = (pdpNormal->GetHeight() - pdpWideScreen->GetHeight()) /2;
+      const PIX pixJOfs   = pixHeight + pdpWideScreen->GetHeight()-1;
+      pdpNormal->Fill( 0, 0,       pixWidth, pixHeight, C_BLACK|CT_OPAQUE);
+      pdpNormal->Fill( 0, pixJOfs, pixWidth, pixHeight, C_BLACK|CT_OPAQUE);
+      pdpNormal->Unlock();
+    }*/
+    // show
+    mainWin->getViewPort()->SwapBuffers();
+  }
+}
+
 
 COLOR SEGame::LCDGetColor(COLOR colDefault, const char *strName)
 {

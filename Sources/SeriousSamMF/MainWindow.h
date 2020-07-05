@@ -2,6 +2,8 @@
 #define SSMF_MAINWINDOW_H
 
 #include <Engine/Base/CTString.h>
+#include <Engine/Graphics/ViewPort.h> /* CViewPort */
+#include <Engine/Graphics/DrawPort.h> /* CDrawPort */
 
 class SEMainWindow {
 private:
