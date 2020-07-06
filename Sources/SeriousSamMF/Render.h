@@ -20,8 +20,8 @@ public:
 
     PIX getVirtX() { return virtX; }
     PIX getVirtY() { return virtY; }
-    const CDrawPort* getDrawPort() { return drawPort; }
-    const CViewPort* getViewPort() { return viewPort; }
+    CDrawPort* getDrawPort() { return drawPort; }
+    CViewPort* getViewPort() { return viewPort; }
 
     void destroy();
     BOOL create(HWND _window);
@@ -34,6 +34,7 @@ public:
     PIX height();
 
     void putTexture(class CTextureObject *pTO, PIX _x, PIX _y, PIX _w, PIX _h);
+    CTextureObject* loadTexture(const CTFileName &fnm);
 
     BOOL lock();
     void unlock();

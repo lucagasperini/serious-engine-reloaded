@@ -3,6 +3,55 @@
 
 #include <Engine/Graphics/Texture.h>
 #include "Render.h"
+#include "MenuGadget.h"
+
+class CGameMenu {
+public:
+  CListHead gm_lhGadgets;
+  CGameMenu *gm_pgmParentMenu;
+  BOOL gm_bPopup;
+  const char *gm_strName;   // menu name (for mod interface only)
+  class CMenuGadget *gm_pmgSelectedByDefault;
+  class CMenuGadget *gm_pmgArrowUp;
+  class CMenuGadget *gm_pmgArrowDn;
+  class CMenuGadget *gm_pmgListTop;
+  class CMenuGadget *gm_pmgListBottom;
+  INDEX gm_iListOffset;
+  INDEX gm_iListWantedItem;   // item you want to focus initially
+  INDEX gm_ctListVisible;
+  INDEX gm_ctListTotal;
+  CGameMenu(void);
+  void ScrollList(INDEX iDir);
+  void KillAllFocuses(void);
+  virtual void Initialize_t(void);
+  virtual void Destroy(void);
+  virtual void StartMenu(void);
+  virtual void FillListItems(void);
+  virtual void EndMenu(void);
+  // return TRUE if handled
+  virtual BOOL OnKeyDown( int iVKey);
+  virtual BOOL OnChar(MSG msg);
+  virtual void Think(void);
+};
+
+class CMainMenu : public CGameMenu {
+public:
+    //CMGTitle mgMainTitle;
+CMGButton mgMainVersionLabel;
+CMGButton mgMainModLabel;
+CMGButton mgMainSingle;
+CMGButton mgMainNetwork;
+CMGButton mgMainSplitScreen;
+CMGButton mgMainDemo;
+CMGButton mgMainMods;
+CMGButton mgMainHighScore;
+CMGButton mgMainOptions;
+CMGButton mgMainQuit;
+
+  void Initialize_t(void);
+  void StartMenu(void);
+};
+
 
 class SEMenu 
 {
@@ -12,15 +61,19 @@ private:
     CTextureObject _toLogoMenuB;
 
     SERender* render;
-public:
+
 // logo textures
-    CTextureObject  _toLogoCT;
-    CTextureObject  _toLogoODI;
-    CTextureObject  _toLogoEAX;
     CTextureObject *_ptoLogoCT  = NULL;
     CTextureObject *_ptoLogoODI = NULL;
     CTextureObject *_ptoLogoEAX = NULL;
+    
+// ptr to current menu
+CGameMenu *pgmCurrentMenu = NULL;
+    // -------- Main menu
+CMainMenu gmMainMenu;
+
     BOOL active;
+public:
     SEMenu();
     ~SEMenu();
 
@@ -30,24 +83,7 @@ public:
 
     void LoadAndForceTexture(CTextureObject &to, CTextureObject *&pto, const CTFileName &fnm);
 
-    // interface rendering functions
-  void LCDInit(void);
-  void LCDEnd(void);
-  void LCDPrepare(FLOAT fFade);
-  void LCDSetDrawport(CDrawPort *pdp);
-  void LCDDrawBox(PIX pixUL, PIX pixDR, const PIXaabbox2D &box, COLOR col);
-  void LCDScreenBox(COLOR col);
-  void LCDScreenBoxOpenLeft(COLOR col);
-  void LCDScreenBoxOpenRight(COLOR col);
-  void LCDRenderClouds1(void);
-  void LCDRenderClouds2(void);
-    void LCDRenderCloudsForComp(void);
-    void LCDRenderCompGrid(void);
-    void LCDRenderGrid(void);
-    void LCDDrawPointer(PIX pixI, PIX pixJ);
-    COLOR LCDGetColor(COLOR colDefault, const char *strName);
-    COLOR LCDFadedColor(COLOR col);
-    COLOR LCDBlinkingColor(COLOR col0, COLOR col1);
+
 
 
     void init(SERender* _render);

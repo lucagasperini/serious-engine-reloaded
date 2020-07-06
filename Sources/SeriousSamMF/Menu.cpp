@@ -3,6 +3,485 @@
 #include <Engine/Graphics/ViewPort.h> /* CViewPort */
 #include <Engine/Graphics/DrawPort.h> /* CDrawPort */
 #include <Engine/Math/AABBox.h> /* PIXaabbox2D */
+#include <Engine/Base/ListIterator.inl>
+#include <Engine/Graphics/Font.h>
+
+
+CFontData _fdBig;
+CFontData _fdMedium;
+CFontData _fdSmall;
+CFontData _fdTitle;
+
+// ------------------------ SGameMenu implementation
+CGameMenu::CGameMenu( void)
+{
+  gm_pgmParentMenu = NULL;
+  gm_pmgSelectedByDefault = NULL;
+  gm_pmgArrowUp = NULL;
+  gm_pmgArrowDn = NULL;
+  gm_pmgListTop = NULL;
+  gm_pmgListBottom = NULL;
+  gm_iListOffset = 0;
+  gm_ctListVisible = 0;
+  gm_ctListTotal = 0;
+  gm_bPopup = FALSE;
+}
+
+void CGameMenu::Initialize_t( void)
+{
+}
+
+void CGameMenu::Destroy(void)
+{
+}
+void CGameMenu::FillListItems(void)
+{
+  ASSERT(FALSE);  // must be implemented to scroll up/down
+}
+
+// +-1 -> hit top/bottom when pressing up/down on keyboard
+// +-2 -> pressed pageup/pagedown on keyboard
+// +-3 -> pressed arrow up/down  button in menu
+// +-4 -> scrolling with mouse wheel
+void CGameMenu::ScrollList(INDEX iDir)
+{/*
+  // if not valid for scrolling
+  if (gm_ctListTotal<=0
+    || gm_pmgArrowUp == NULL || gm_pmgArrowDn == NULL
+    || gm_pmgListTop == NULL || gm_pmgListBottom == NULL) {
+    // do nothing
+    return;
+  }
+
+  INDEX iOldTopKey = gm_iListOffset;
+  // change offset
+  switch(iDir) {
+    case -1:
+      gm_iListOffset -= 1;
+      break;
+    case -4:
+      gm_iListOffset -= 3;
+      break;
+    case -2:
+    case -3:
+      gm_iListOffset -= gm_ctListVisible;
+      break;
+    case +1:
+      gm_iListOffset += 1;
+      break;
+    case +4:
+      gm_iListOffset += 3;
+      break;
+    case +2:
+    case +3:
+      gm_iListOffset += gm_ctListVisible;
+      break;
+    default:
+      ASSERT(FALSE);
+      return;
+  }
+  if (gm_ctListTotal<=gm_ctListVisible) {
+    gm_iListOffset = 0;
+  } else {
+    gm_iListOffset = Clamp(gm_iListOffset, INDEX(0), INDEX(gm_ctListTotal-gm_ctListVisible));
+  }
+
+  // set new names
+  FillListItems();
+
+  // if scroling with wheel
+  if (iDir==+4 || iDir==-4) {
+    // no focus changing
+    return;
+  }
+
+  // delete all focuses
+  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
+    itmg->OnKillFocus();
+  }
+
+  // set new focus
+  //const INDEX iFirst = 0;
+  //const INDEX iLast = gm_ctListVisible-1;
+  switch(iDir) {
+    case +1:
+      gm_pmgListBottom->OnSetFocus();
+      break;
+    case +2:
+      if (gm_iListOffset!=iOldTopKey) {
+        gm_pmgListTop->OnSetFocus();
+      } else {
+        gm_pmgListBottom->OnSetFocus();
+      }
+    break;
+    case +3:
+      gm_pmgArrowDn->OnSetFocus();
+      break;
+    case -1:
+      gm_pmgListTop->OnSetFocus();
+      break;
+    case -2:
+      gm_pmgListTop->OnSetFocus();
+      break;
+    case -3:
+      gm_pmgArrowUp->OnSetFocus();
+      break;
+  }*/
+}
+
+void CGameMenu::KillAllFocuses(void)
+{/*
+  // for each menu gadget in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg) {
+    itmg->mg_bFocused = FALSE;
+  }*/
+}
+
+void CGameMenu::StartMenu(void)
+{/*
+  // for each menu gadget in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg)
+  {
+    itmg->mg_bFocused = FALSE;
+    // call appear
+    itmg->Appear();
+  }
+
+  // if there is a list
+  if (gm_pmgListTop!=NULL) {
+    // scroll it so that the wanted tem is centered
+    gm_iListOffset = gm_iListWantedItem-gm_ctListVisible/2;
+    // clamp the scrolling
+    gm_iListOffset = Clamp(gm_iListOffset, 0, Max(0, gm_ctListTotal-gm_ctListVisible));
+
+    // fill the list
+    FillListItems();
+
+    // for each menu gadget in menu
+    FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg) {
+      // if in list, but disabled
+      if (itmg->mg_iInList==-2) {
+        // hide it
+        itmg->mg_bVisible = FALSE;
+      // if in list
+      } else if (itmg->mg_iInList>=0) {
+        // show it
+        itmg->mg_bVisible = TRUE;
+      }
+      // if wanted
+      if (itmg->mg_iInList==gm_iListWantedItem) {
+        // focus it
+        itmg->OnSetFocus();
+        gm_pmgSelectedByDefault = itmg;
+      }
+    }
+  }*/
+}
+
+void CGameMenu::EndMenu(void)
+{/*
+  // for each menu gadget in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg)
+  {
+    // call disappear
+    itmg->Disappear();
+  }*/
+}
+
+// return TRUE if handled
+BOOL CGameMenu::OnKeyDown( int iVKey)
+{/*
+  // find curently active gadget
+  CMenuGadget *pmgActive = NULL;
+  // for each menu gadget in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
+    // if focused
+    if( itmg->mg_bFocused) {
+      // remember as active
+      pmgActive = &itmg.Current();
+    }
+  }
+
+  // if none focused
+  if( pmgActive == NULL) {
+    // do nothing
+    return FALSE;
+  }
+
+  // if active gadget handles it
+  if( pmgActive->OnKeyDown( iVKey)) {
+    // key is handled
+    return TRUE;
+  }
+
+  // process normal in menu movement
+  switch( iVKey) {
+  case VK_PRIOR:
+    ScrollList(-2);
+    return TRUE;
+  case VK_NEXT:
+    ScrollList(+2);
+    return TRUE;
+
+  case 11:
+    ScrollList(-4);
+    return TRUE;
+  case 10:
+    ScrollList(+4);
+    return TRUE;
+
+  case VK_UP:
+    // if this is top button in list
+    if (pmgActive==gm_pmgListTop) {
+      // scroll list up
+      ScrollList(-1);
+      // key is handled
+      return TRUE;
+    }
+    // if we can go up
+    if(pmgActive->mg_pmgUp != NULL && pmgActive->mg_pmgUp->mg_bVisible) {
+      // call lose focus to still active gadget and
+      pmgActive->OnKillFocus();
+      // set focus to new one
+      pmgActive = pmgActive->mg_pmgUp;
+      pmgActive->OnSetFocus();
+      // key is handled
+      return TRUE;
+    }
+    break;
+  case VK_DOWN:
+    // if this is bottom button in list
+    if (pmgActive==gm_pmgListBottom) {
+      // scroll list down
+      ScrollList(+1);
+      // key is handled
+      return TRUE;
+    }
+    // if we can go down
+    if(pmgActive->mg_pmgDown != NULL && pmgActive->mg_pmgDown->mg_bVisible) {
+      // call lose focus to still active gadget and
+      pmgActive->OnKillFocus();
+      // set focus to new one
+      pmgActive = pmgActive->mg_pmgDown;
+      pmgActive->OnSetFocus();
+      // key is handled
+      return TRUE;
+    }
+    break;
+  case VK_LEFT:
+    // if we can go left
+    if(pmgActive->mg_pmgLeft != NULL) {
+      // call lose focus to still active gadget and
+      pmgActive->OnKillFocus();
+      // set focus to new one
+      if (!pmgActive->mg_pmgLeft->mg_bVisible && gm_pmgSelectedByDefault!=NULL) {
+        pmgActive = gm_pmgSelectedByDefault;
+      } else {
+        pmgActive = pmgActive->mg_pmgLeft;
+      }
+      pmgActive->OnSetFocus();
+      // key is handled
+      return TRUE;
+    }
+    break;
+  case VK_RIGHT:
+    // if we can go right
+    if(pmgActive->mg_pmgRight != NULL) {
+      // call lose focus to still active gadget and
+      pmgActive->OnKillFocus();
+      // set focus to new one
+      if (!pmgActive->mg_pmgRight->mg_bVisible && gm_pmgSelectedByDefault!=NULL) {
+        pmgActive = gm_pmgSelectedByDefault;
+      } else {
+        pmgActive = pmgActive->mg_pmgRight;
+      }
+      pmgActive->OnSetFocus();
+      // key is handled
+      return TRUE;
+    }
+    break;
+  }
+
+  // key is not handled
+  return FALSE;*/
+}
+
+void CGameMenu::Think(void)
+{
+}
+
+BOOL CGameMenu::OnChar(MSG msg)
+{/*
+  // find curently active gadget
+  CMenuGadget *pmgActive = NULL;
+  // for each menu gadget in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
+    // if focused
+    if( itmg->mg_bFocused) {
+      // remember as active
+      pmgActive = &itmg.Current();
+    }
+  }
+
+  // if none focused
+  if( pmgActive == NULL) {
+    // do nothing
+    return FALSE;
+  }
+
+  // if active gadget handles it
+  if( pmgActive->OnChar(msg)) {
+    // key is handled
+    return TRUE;
+  }
+
+  // key is not handled
+  return FALSE;*/
+}
+
+static const FLOAT _fBigStartJ = 0.25f;
+static const FLOAT _fBigSizeJ = 0.066f;
+static const FLOAT _fMediumSizeJ = 0.04f;
+
+static const FLOAT _fNoStartI = 0.25f;
+static const FLOAT _fNoSizeI = 0.04f;
+static const FLOAT _fNoSpaceI = 0.01f;
+static const FLOAT _fNoUpStartJ = 0.24f;
+static const FLOAT _fNoDownStartJ = 0.44f;
+static const FLOAT _fNoSizeJ = 0.04f;
+
+FLOATaabbox2D BoxVersion(void)
+{
+  return FLOATaabbox2D(
+    FLOAT2D(0.05f, _fBigStartJ+-5.5f*_fMediumSizeJ),
+    FLOAT2D(0.97f, _fBigStartJ+(-5.5f+1)*_fMediumSizeJ));
+}
+FLOATaabbox2D BoxMediumRow(FLOAT fRow)
+{
+  return FLOATaabbox2D(
+    FLOAT2D(0.05f, _fBigStartJ+fRow*_fMediumSizeJ),
+    FLOAT2D(0.95f, _fBigStartJ+(fRow+1)*_fMediumSizeJ));
+}
+
+FLOATaabbox2D BoxBigRow(FLOAT fRow)
+{
+  return FLOATaabbox2D(
+    FLOAT2D(0.1f, _fBigStartJ+fRow*_fBigSizeJ),
+    FLOAT2D(0.9f, _fBigStartJ+(fRow+1)*_fBigSizeJ));
+}
+// ------------------------ CMainMenu implementation
+void CMainMenu::Initialize_t(void)
+{
+  // intialize main menu
+/*
+  mgMainTitle.mg_strText = "SERIOUS SAM - BETA";  // nothing to see here, kazuya
+  mgMainTitle.mg_boxOnScreen = BoxTitle();
+  gm_lhGadgets.AddTail( mgMainTitle.mg_lnNode);
+  */
+
+  CTString sam_strVersion = "VERSIONE DA AGGIUNGERE";
+  mgMainVersionLabel.mg_strText = sam_strVersion;
+  mgMainVersionLabel.mg_boxOnScreen = BoxVersion();
+  mgMainVersionLabel.mg_bfsFontSize = BFS_MEDIUM;
+  mgMainVersionLabel.mg_iCenterI = +1;
+  mgMainVersionLabel.mg_bEnabled = FALSE;
+  mgMainVersionLabel.mg_bLabel = TRUE;
+  gm_lhGadgets.AddTail( mgMainVersionLabel.mg_lnNode);
+
+  CTString sam_strModName = "MOD DA AGGIUNGERE";
+  mgMainModLabel.mg_strText = sam_strModName;
+  mgMainModLabel.mg_boxOnScreen = BoxMediumRow(-2.0f);
+  mgMainModLabel.mg_bfsFontSize = BFS_MEDIUM;
+  mgMainModLabel.mg_iCenterI = 0;
+  mgMainModLabel.mg_bEnabled = FALSE;
+  mgMainModLabel.mg_bLabel = TRUE;
+  gm_lhGadgets.AddTail( mgMainModLabel.mg_lnNode);
+
+  mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
+  mgMainSingle.mg_bfsFontSize = BFS_LARGE;
+  mgMainSingle.mg_boxOnScreen = BoxBigRow(0.0f);
+  mgMainSingle.mg_strTip = TRANS("single player game menus");
+  gm_lhGadgets.AddTail( mgMainSingle.mg_lnNode);
+  mgMainSingle.mg_pmgUp = &mgMainQuit;
+  mgMainSingle.mg_pmgDown = &mgMainNetwork;
+  //mgMainSingle.mg_pActivatedFunction = &StartSinglePlayerMenu;
+
+  mgMainNetwork.mg_strText = TRANS("NETWORK");
+  mgMainNetwork.mg_bfsFontSize = BFS_LARGE;
+  mgMainNetwork.mg_boxOnScreen = BoxBigRow(1.0f);
+  mgMainNetwork.mg_strTip = TRANS("LAN/iNet multiplayer menus");
+  gm_lhGadgets.AddTail( mgMainNetwork.mg_lnNode);
+  mgMainNetwork.mg_pmgUp = &mgMainSingle;
+  mgMainNetwork.mg_pmgDown = &mgMainSplitScreen;
+  //mgMainNetwork.mg_pActivatedFunction = StartNetworkMenu;
+
+  mgMainSplitScreen.mg_strText = TRANS("SPLIT SCREEN");
+  mgMainSplitScreen.mg_bfsFontSize = BFS_LARGE;
+  mgMainSplitScreen.mg_boxOnScreen = BoxBigRow(2.0f);
+  mgMainSplitScreen.mg_strTip = TRANS("play with multiple players on one computer");
+  gm_lhGadgets.AddTail( mgMainSplitScreen.mg_lnNode);
+  mgMainSplitScreen.mg_pmgUp = &mgMainNetwork;
+  mgMainSplitScreen.mg_pmgDown = &mgMainDemo;
+  //mgMainSplitScreen.mg_pActivatedFunction = &StartSplitScreenMenu;
+
+  mgMainDemo.mg_strText = TRANS("DEMO");
+  mgMainDemo.mg_bfsFontSize = BFS_LARGE;
+  mgMainDemo.mg_boxOnScreen = BoxBigRow(3.0f);
+  mgMainDemo.mg_strTip = TRANS("play a game demo");
+  gm_lhGadgets.AddTail( mgMainDemo.mg_lnNode);
+  mgMainDemo.mg_pmgUp = &mgMainSplitScreen;
+  mgMainDemo.mg_pmgDown = &mgMainMods;
+  //mgMainDemo.mg_pActivatedFunction = &StartDemoLoadMenu;
+
+  mgMainMods.mg_strText = TRANS("MODS");
+  mgMainMods.mg_bfsFontSize = BFS_LARGE;
+  mgMainMods.mg_boxOnScreen = BoxBigRow(4.0f);
+  mgMainMods.mg_strTip = TRANS("run one of installed game modifications");
+  gm_lhGadgets.AddTail( mgMainMods.mg_lnNode);
+  mgMainMods.mg_pmgUp = &mgMainDemo;
+  mgMainMods.mg_pmgDown = &mgMainHighScore;
+
+  #if TECHTESTONLY
+    mgMainMods.mg_pActivatedFunction = &DisabledFunction;
+  #else
+    //mgMainMods.mg_pActivatedFunction = &StartModsLoadMenu;
+  #endif
+
+  mgMainHighScore.mg_strText = TRANS("HIGH SCORES");
+  mgMainHighScore.mg_bfsFontSize = BFS_LARGE;
+  mgMainHighScore.mg_boxOnScreen = BoxBigRow(5.0f);
+  mgMainHighScore.mg_strTip = TRANS("view list of top ten best scores");
+  gm_lhGadgets.AddTail( mgMainHighScore.mg_lnNode);
+  mgMainHighScore.mg_pmgUp = &mgMainMods;
+  mgMainHighScore.mg_pmgDown = &mgMainOptions;
+  //mgMainHighScore.mg_pActivatedFunction = &StartHighScoreMenu;
+
+  mgMainOptions.mg_strText = TRANS("OPTIONS");
+  mgMainOptions.mg_bfsFontSize = BFS_LARGE;
+  mgMainOptions.mg_boxOnScreen = BoxBigRow(6.0f);
+  mgMainOptions.mg_strTip = TRANS("adjust video, audio and input options");
+  gm_lhGadgets.AddTail( mgMainOptions.mg_lnNode);
+  mgMainOptions.mg_pmgUp = &mgMainHighScore;
+  mgMainOptions.mg_pmgDown = &mgMainQuit;
+  //mgMainOptions.mg_pActivatedFunction = &StartOptionsMenu;
+  
+  mgMainQuit.mg_strText = TRANS("QUIT");
+  mgMainQuit.mg_bfsFontSize = BFS_LARGE;
+  mgMainQuit.mg_boxOnScreen = BoxBigRow(7.0f);
+  mgMainQuit.mg_strTip = TRANS("exit game immediately");
+  gm_lhGadgets.AddTail( mgMainQuit.mg_lnNode);
+  mgMainQuit.mg_pmgUp = &mgMainOptions;
+  mgMainQuit.mg_pmgDown = &mgMainSingle;
+  //mgMainQuit.mg_pActivatedFunction = &ExitConfirm;
+}
+void CMainMenu::StartMenu(void)
+{/*
+  mgMainSingle.mg_bEnabled      = IsMenuEnabled("Single Player");
+  mgMainNetwork.mg_bEnabled     = IsMenuEnabled("Network");
+  mgMainSplitScreen.mg_bEnabled = IsMenuEnabled("Split Screen");
+  mgMainHighScore.mg_bEnabled   = IsMenuEnabled("High Score");
+  CGameMenu::StartMenu();*/
+}
 
 SEMenu::SEMenu()
 {
@@ -14,31 +493,16 @@ SEMenu::~SEMenu()
     
 }
 
-void SEMenu::LoadAndForceTexture(CTextureObject &to, CTextureObject *&pto, const CTFileName &fnm)
-{
-  try {
-    to.SetData_t(fnm);
-    CTextureData *ptd = (CTextureData*)to.GetData();
-    ptd->Force( TEX_CONSTANT);
-    ptd = ptd->td_ptdBaseTexture;
-    if( ptd!=NULL) ptd->Force( TEX_CONSTANT);
-    pto = &to;
-  } catch( char *pchrError) {
-    (void*)pchrError;
-    pto = NULL;
-  }
-}
-
 void SEMenu::init(SERender *_render)
 {
     
   try {
     render = _render;
       // load logo textures
-  LoadAndForceTexture(_toLogoCT,   _ptoLogoCT,   CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-  LoadAndForceTexture(_toLogoODI,  _ptoLogoODI,  CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-  LoadAndForceTexture(_toLogoEAX,  _ptoLogoEAX,  CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
-    /*
+    _ptoLogoCT  = render->loadTexture(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
+    _ptoLogoODI = render->loadTexture(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
+    _ptoLogoEAX = render->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
+    
     // initialize and load corresponding fonts
     _fdSmall.Load_t(  CTFILENAME( "Fonts\\Display3-narrow.fnt"));
     _fdMedium.Load_t( CTFILENAME( "Fonts\\Display3-normal.fnt"));
@@ -54,7 +518,7 @@ void SEMenu::init(SERender *_render)
     _fdBig.SetLineSpacing( 0);
     _fdTitle.SetCharSpacing(+1);
     _fdTitle.SetLineSpacing( 0);
-
+/*
     // load menu sounds
     _psdSelect = _pSoundStock->Obtain_t( CTFILENAME("Sounds\\Menu\\Select.wav"));
     _psdPress  = _pSoundStock->Obtain_t( CTFILENAME("Sounds\\Menu\\Press.wav"));
@@ -102,12 +566,14 @@ void SEMenu::init(SERender *_render)
     gmConfirmMenu.gm_strName="Confirm";
     gmConfirmMenu.gm_pmgSelectedByDefault = &mgConfirmYes;
     gmConfirmMenu.gm_pgmParentMenu = NULL;
-
+*/
     gmMainMenu.Initialize_t();
     gmMainMenu.gm_strName="Main";
-    gmMainMenu.gm_pmgSelectedByDefault = &mgMainSingle;
+    gmMainMenu.gm_pmgSelectedByDefault = &gmMainMenu.mgMainSingle;
     gmMainMenu.gm_pgmParentMenu = NULL;
 
+    pgmCurrentMenu = &gmMainMenu;
+/*
     gmInGameMenu.Initialize_t();
     gmInGameMenu.gm_strName="InGame";
     gmInGameMenu.gm_pmgSelectedByDefault = &mgInGameQuickLoad;
@@ -375,17 +841,20 @@ BOOL SEMenu::run()
 
   BOOL bStillInMenus = FALSE;
   _pGame->MenuPreRenderMenu(pgmCurrentMenu->gm_strName);
+  */
+  CDrawPort* dp = render->getDrawPort();
   // for each menu gadget
   FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
     // if gadget is visible
     if( itmg->mg_bVisible) {
-      bStillInMenus = TRUE;
-      itmg->Render( &dpMenu);
+      //bStillInMenus = TRUE;
+      itmg->Render(dp);/*
       if (FloatBoxToPixBox(&dpMenu, itmg->mg_boxOnScreen)>=PIX2D(_pixCursorPosI, _pixCursorPosJ)) {
         _pmgUnderCursor = itmg;
-      }
+      }*/
     }
   }
+  /*
   _pGame->MenuPostRenderMenu(pgmCurrentMenu->gm_strName);
 
   // no currently active gadget initially

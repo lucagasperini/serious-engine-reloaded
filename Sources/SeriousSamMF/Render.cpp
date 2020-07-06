@@ -74,8 +74,6 @@ PIX SERender::height()
 
 void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w, PIX _h)
 {
-    CTextureData &td = (CTextureData&)*texture->GetData();
-
     FLOAT scaleX = (FLOAT)drawPort->GetWidth() / (FLOAT)virtX;
     FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
     PIX   pixX, pixY, pixW, pixH;
@@ -86,4 +84,11 @@ void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w,
     pixH = pixY + ( _h * scaleY );
 
     drawPort->PutTexture( texture, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
+}
+
+CTextureObject* SERender::loadTexture(const CTFileName &fntex)
+{
+    CTextureObject* tex = new CTextureObject;
+    tex->SetData_t(fntex);
+    return tex;
 }
