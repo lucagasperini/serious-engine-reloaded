@@ -2,6 +2,7 @@
 #define SSMF_MENU_H
 
 #include <Engine/Graphics/Texture.h>
+#include "Render.h"
 
 class SEMenu 
 {
@@ -10,6 +11,8 @@ private:
     CTextureObject _toLogoMenuA;
     CTextureObject _toLogoMenuB;
 
+    SERender* render;
+public:
 // logo textures
     CTextureObject  _toLogoCT;
     CTextureObject  _toLogoODI;
@@ -18,7 +21,6 @@ private:
     CTextureObject *_ptoLogoODI = NULL;
     CTextureObject *_ptoLogoEAX = NULL;
     BOOL active;
-public:
     SEMenu();
     ~SEMenu();
 
@@ -48,8 +50,8 @@ public:
     COLOR LCDBlinkingColor(COLOR col0, COLOR col1);
 
 
-    void init();
-    BOOL run(CDrawPort *pdp);
+    void init(SERender* _render);
+    BOOL run();
 };
 
 #endif

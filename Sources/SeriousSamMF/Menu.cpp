@@ -29,10 +29,11 @@ void SEMenu::LoadAndForceTexture(CTextureObject &to, CTextureObject *&pto, const
   }
 }
 
-void SEMenu::init()
+void SEMenu::init(SERender *_render)
 {
     
   try {
+    render = _render;
       // load logo textures
   LoadAndForceTexture(_toLogoCT,   _ptoLogoCT,   CTFILENAME("Textures\\Logo\\LogoCT.tex"));
   LoadAndForceTexture(_toLogoODI,  _ptoLogoODI,  CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
@@ -228,12 +229,9 @@ void SEMenu::init()
   */
 }
 
-BOOL SEMenu::run( CDrawPort *pdp)
+BOOL SEMenu::run()
 {
   
-  pdp->Unlock();
-  CDrawPort dpMenu(pdp, TRUE);
-  dpMenu.Lock();
 /*
   MenuUpdateMouseFocus();
 
@@ -267,8 +265,7 @@ BOOL SEMenu::run( CDrawPort *pdp)
 
   SetMenuLerping();
 */
-  PIX pixW = dpMenu.GetWidth();
-  PIX pixH = dpMenu.GetHeight();
+
 
   // blend background if menu is on
   if(active)
@@ -289,49 +286,16 @@ BOOL SEMenu::run( CDrawPort *pdp)
     _pGame->LCDRenderGrid();
     _pGame->LCDRenderClouds2();
 */
-    FLOAT fScaleW = (FLOAT)pixW / 640.0f;
-    FLOAT fScaleH = (FLOAT)pixH / 480.0f;
-    PIX   pixI0, pixJ0, pixI1, pixJ1;
     // put logo(s) to main menu (if logos exist)
     /*
     if( pgmCurrentMenu==&gmMainMenu)
     {*/
-      if( _ptoLogoODI!=NULL) {
-        CTextureData &td = (CTextureData&)*_ptoLogoODI->GetData();
-        #define LOGOSIZE 50
-        const PIX pixLogoWidth  = (PIX) (LOGOSIZE * dpMenu.dp_fWideAdjustment);
-        const PIX pixLogoHeight = (PIX) (LOGOSIZE* td.GetHeight() / td.GetWidth());
-        pixI0 = (PIX) ((640-pixLogoWidth -16)*fScaleW);
-        pixJ0 = (PIX) ((480-pixLogoHeight-16)*fScaleH);
-        pixI1 = (PIX) (pixI0+ pixLogoWidth *fScaleW);
-        pixJ1 = (PIX) (pixJ0+ pixLogoHeight*fScaleH);
-        dpMenu.PutTexture( _ptoLogoODI, PIXaabbox2D( PIX2D( pixI0, pixJ0),PIX2D( pixI1, pixJ1)));
-        #undef LOGOSIZE
-      }  
-      if( _ptoLogoCT!=NULL) {
-        CTextureData &td = (CTextureData&)*_ptoLogoCT->GetData();
-        #define LOGOSIZE 50
-        const PIX pixLogoWidth  = (PIX) (LOGOSIZE * dpMenu.dp_fWideAdjustment);
-        const PIX pixLogoHeight = (PIX) (LOGOSIZE* td.GetHeight() / td.GetWidth());
-        pixI0 = (PIX) (12*fScaleW);
-        pixJ0 = (PIX) ((480-pixLogoHeight-16)*fScaleH);
-        pixI1 = (PIX) (pixI0+ pixLogoWidth *fScaleW);
-        pixJ1 = (PIX) (pixJ0+ pixLogoHeight*fScaleH);
-        dpMenu.PutTexture( _ptoLogoCT, PIXaabbox2D( PIX2D( pixI0, pixJ0),PIX2D( pixI1, pixJ1)));
-        #undef LOGOSIZE
-      } 
-      
-      {
-        FLOAT fResize = Min(dpMenu.GetWidth()/640.0f, dpMenu.GetHeight()/480.0f);
-        PIX pixSizeI = (PIX) (256*fResize);
-        PIX pixSizeJ = (PIX) (64*fResize);
-        PIX pixCenterI = (PIX) (dpMenu.GetWidth()/2);
-        PIX pixHeightJ = (PIX) (10*fResize);
-        dpMenu.PutTexture(&_toLogoMenuA, PIXaabbox2D( 
-          PIX2D( pixCenterI-pixSizeI, pixHeightJ),PIX2D( pixCenterI, pixHeightJ+pixSizeJ)));
-        dpMenu.PutTexture(&_toLogoMenuB, PIXaabbox2D( 
-          PIX2D( pixCenterI, pixHeightJ),PIX2D( pixCenterI+pixSizeI, pixHeightJ+pixSizeJ)));
-      }
+    render->putTexture(_ptoLogoODI, render->getVirtX() - 50 - 16, render->getVirtY() - 16 - 50, 50, 50);
+    render->putTexture(_ptoLogoCT, 16, render->getVirtY() - 16 - 50, 50, 50);
+
+    PIX pixCenter = (PIX) (render->getVirtX()/2);
+    render->putTexture(&_toLogoMenuA, pixCenter-256, 10, 256, 64);
+    render->putTexture(&_toLogoMenuB, pixCenter, 10, 256, 64);
 
     /*} else if (pgmCurrentMenu==&gmAudioOptionsMenu) {
       if( _ptoLogoEAX!=NULL) {
@@ -469,8 +433,6 @@ BOOL SEMenu::run( CDrawPort *pdp)
 
   RenderMouseCursor(&dpMenu);
 */
-  dpMenu.Unlock();
-  pdp->Lock();
 /*
   return bStillInMenus;
   */

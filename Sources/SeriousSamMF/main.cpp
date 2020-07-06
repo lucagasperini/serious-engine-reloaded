@@ -31,6 +31,7 @@ CTString sam_strGameName = "serioussammf";
 SESplashScreen* scr_splashscreen = NULL;
 SEMenu* pMenu = NULL;
 SEMainWindow* pMainWin = NULL;
+SERender* pRender = NULL;
 
 // display mode settings
 INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
@@ -165,19 +166,19 @@ BOOL GameLoop()
   #ifdef SINGLE_THREADED
     _pTimer->HandleTimerHandlers();
   #endif
-  if( !pMainWin->isIconic() && pMainWin->getDrawPort()!=NULL && pMainWin->getDrawPort()->Lock())
+  if( !pMainWin->isIconic() && pRender->lock())
   {
-    pMainWin->getDrawPort()->Fill(SE_COL_ORANGE_NEUTRAL|255);
+    pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
     // do menu
     if( bMenuRendering) {
       // clear z-buffer
-      pMainWin->getDrawPort()->FillZBuffer( ZBUF_BACK);
+      pRender->fillZBuffer(ZBUF_BACK);
       // remember if we should render menus next tick
-      bMenuRendering = pMenu->run(pMainWin->getDrawPort());
+      bMenuRendering = pMenu->run();
     }
     // done with all
-    pMainWin->getDrawPort()->Unlock();
-    pMainWin->getViewPort()->SwapBuffers();
+    pRender->unlock();
+    pRender->SwapBuffers();
   }
 }
 
@@ -186,6 +187,7 @@ BOOL Init(CTString strCmdLine)
   scr_splashscreen = new SESplashScreen();
   pMenu = new SEMenu();
   pMainWin = new SEMainWindow();
+  pRender = new SERender();
 
   if(!SEInterfaceSDL::init()) {
       FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SEInterfaceSDL::getError());
@@ -258,8 +260,6 @@ BOOL Init(CTString strCmdLine)
   CPrintF(TRANSV("Serious Sam version: %s\n"), (const char *) sam_strVersion);
   CPrintF(TRANSV("Active mod: %s\n"), (const char *) sam_strModName);
   */
-
-  pMenu->init();
   /*
   // if there is a mod
   if (_fnmMod!="") {
@@ -281,6 +281,7 @@ BOOL Init(CTString strCmdLine)
   pMainWin->setDepth(DisplayDepth::DD_DEFAULT);
   pMainWin->setAdapter(iWindowAdapter);
   BOOL winResult = pMainWin->create();
+  pRender->create(pMainWin->getPWindow());
 
   if(! winResult) {
     pMainWin->setW(SSMF_WINDOW_RECOVERY_W);
@@ -303,6 +304,11 @@ BOOL Init(CTString strCmdLine)
         "in documentation and set your desktop to 16 bit (65536 colors).\n"
         "Please see ReadMe file for troubleshooting information.\n"));
     }
+
+  pRender->setVirtX(640);
+  pRender->setVirtY(480);
+
+  pMenu->init(pRender);
   // remember time of mode setting
   _tmDisplayModeChanged = _pTimer->GetRealTimeTick();
 /*
@@ -364,6 +370,18 @@ BOOL Init(CTString strCmdLine)
   return TRUE;
 }
 
+BOOL canChangeResolution(PIX w, PIX h)
+{
+    if(pMainWin->getW() != w || pMainWin->getH() != h) {
+        pRender->destroy();
+        pMainWin->setW(w);
+        pMainWin->setH(h);
+        pMainWin->create();
+        pRender->create(pMainWin->getPWindow());
+    }
+    return TRUE;
+}
+
 
 int SubMain(LPSTR lpCmdLine)
 {
@@ -421,7 +439,19 @@ int SubMain(LPSTR lpCmdLine)
         _bRunning = FALSE;
         _bQuitScreen = FALSE;
       }
-/*
+      if (msg.message==WM_KEYDOWN && msg.wParam==VK_ADD) { //SVGA 4:3
+          canChangeResolution(800, 600);
+      }      
+      if (msg.message==WM_KEYDOWN && msg.wParam==VK_SUBTRACT) { //VGA 4:3 
+          canChangeResolution(640, 480);
+      }
+      if (msg.message==WM_KEYDOWN && msg.wParam==VK_MULTIPLY) { //16:9
+          canChangeResolution(1280, 720);
+      }
+      if (msg.message==WM_KEYDOWN && msg.wParam==VK_DIVIDE) { //16:9
+          canChangeResolution(640, 360);
+      }
+      /*
       if (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE && 
         (_gmRunningGameMode==GM_DEMO || _gmRunningGameMode==GM_INTRO)) {
         _pGame->StopGame();

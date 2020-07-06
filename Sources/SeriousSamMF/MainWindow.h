@@ -2,8 +2,6 @@
 #define SSMF_MAINWINDOW_H
 
 #include <Engine/Base/CTString.h>
-#include <Engine/Graphics/ViewPort.h> /* CViewPort */
-#include <Engine/Graphics/DrawPort.h> /* CDrawPort */
 
 class SEMainWindow {
 private:
@@ -20,8 +18,6 @@ private:
     INDEX adapter;
 
     DisplayDepth depth;
-    CDrawPort* drawPort;
-    CViewPort* viewPort;
 public:
     SEMainWindow();
     ~SEMainWindow();
@@ -38,8 +34,6 @@ public:
     void setStatus(INDEX _status) { status = _status; }
     void setAdapter(INDEX _adapter) { adapter = _adapter; }
     void setDepth(DisplayDepth _depth) { depth = _depth; }
-    void setDrawPort(const CDrawPort &_drawPort) { drawPort = new CDrawPort(_drawPort); }
-    void setViewPort(const CViewPort &_viewPort) { viewPort = new CViewPort(_viewPort); }
 
     CTString getTitle() { return title; }
     HWND getPWindow() { return pWindow; }
@@ -53,8 +47,6 @@ public:
     INDEX getStatus() { return status; }
     INDEX getAdapter() { return adapter; }
     DisplayDepth getDepth() { return depth; }
-    CDrawPort* getDrawPort() { return drawPort; }
-    CViewPort* getViewPort() { return viewPort; }
 
     BOOL isIconic();
     BOOL create();
