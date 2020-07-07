@@ -12,7 +12,7 @@ CFontData _fdBig;
 CFontData _fdMedium;
 CFontData _fdSmall;
 CFontData _fdTitle;
-
+/*
 // ------------------------ SGameMenu implementation
 CGameMenu::CGameMenu( void)
 {
@@ -45,7 +45,7 @@ void CGameMenu::FillListItems(void)
 // +-3 -> pressed arrow up/down  button in menu
 // +-4 -> scrolling with mouse wheel
 void CGameMenu::ScrollList(INDEX iDir)
-{/*
+{
   // if not valid for scrolling
   if (gm_ctListTotal<=0
     || gm_pmgArrowUp == NULL || gm_pmgArrowDn == NULL
@@ -127,19 +127,19 @@ void CGameMenu::ScrollList(INDEX iDir)
     case -3:
       gm_pmgArrowUp->OnSetFocus();
       break;
-  }*/
+  }
 }
 
 void CGameMenu::KillAllFocuses(void)
-{/*
+{
   // for each menu gadget in menu
   FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg) {
     itmg->mg_bFocused = FALSE;
-  }*/
+  }
 }
 
 void CGameMenu::StartMenu(void)
-{/*
+{
   // for each menu gadget in menu
   FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg)
   {
@@ -176,22 +176,22 @@ void CGameMenu::StartMenu(void)
         gm_pmgSelectedByDefault = itmg;
       }
     }
-  }*/
+  }
 }
 
 void CGameMenu::EndMenu(void)
-{/*
+{
   // for each menu gadget in menu
   FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg)
   {
     // call disappear
     itmg->Disappear();
-  }*/
+  }
 }
 
 // return TRUE if handled
 BOOL CGameMenu::OnKeyDown( int iVKey)
-{/*
+{
   // find curently active gadget
   CMenuGadget *pmgActive = NULL;
   // for each menu gadget in menu
@@ -304,7 +304,7 @@ BOOL CGameMenu::OnKeyDown( int iVKey)
   }
 
   // key is not handled
-  return FALSE;*/
+  return FALSE;
 }
 
 void CGameMenu::Think(void)
@@ -312,7 +312,7 @@ void CGameMenu::Think(void)
 }
 
 BOOL CGameMenu::OnChar(MSG msg)
-{/*
+{
   // find curently active gadget
   CMenuGadget *pmgActive = NULL;
   // for each menu gadget in menu
@@ -337,9 +337,9 @@ BOOL CGameMenu::OnChar(MSG msg)
   }
 
   // key is not handled
-  return FALSE;*/
+  return FALSE;
 }
-
+*/
 static const FLOAT _fBigStartJ = 0.25f;
 static const FLOAT _fBigSizeJ = 0.066f;
 static const FLOAT _fMediumSizeJ = 0.04f;
@@ -371,7 +371,7 @@ FLOATaabbox2D BoxBigRow(FLOAT fRow)
     FLOAT2D(0.9f, _fBigStartJ+(fRow+1)*_fBigSizeJ));
 }
 
-PIXaabbox2D CMainMenu::positionMenuItem(FLOAT row)
+PIXaabbox2D CMainMenu::positionMenuItem(const SERender* render, FLOAT row)
 {
   return render->box2D(0.0f, 
                       positionStart + row * fontSize, 
@@ -380,10 +380,10 @@ PIXaabbox2D CMainMenu::positionMenuItem(FLOAT row)
   );
 }
 // ------------------------ CMainMenu implementation
-void CMainMenu::Initialize_t(SERender *_render)
+
+CMainMenu::CMainMenu()
 {
-  render = _render;
-  // intialize main menu
+    // intialize main menu
 /*
   mgMainTitle.mg_strText = "SERIOUS SAM - BETA";  // nothing to see here, kazuya
   mgMainTitle.mg_boxOnScreen = BoxTitle();
@@ -412,7 +412,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 */
   mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
   mgMainSingle.mg_bfsFontSize = BFS_LARGE;
-  mgMainSingle.mg_boxOnScreen = positionMenuItem(0.0f);
   mgMainSingle.mg_strTip = TRANS("single player game menus");
   gm_lhGadgets.AddTail( mgMainSingle.mg_lnNode);
   mgMainSingle.mg_pmgUp = &mgMainQuit;
@@ -423,7 +422,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainNetwork.mg_strText = TRANS("NETWORK");
   mgMainNetwork.mg_bfsFontSize = BFS_LARGE;
-  mgMainNetwork.mg_boxOnScreen = positionMenuItem(1.0f);
   mgMainNetwork.mg_strTip = TRANS("LAN/iNet multiplayer menus");
   gm_lhGadgets.AddTail( mgMainNetwork.mg_lnNode);
   mgMainNetwork.mg_pmgUp = &mgMainSingle;
@@ -433,7 +431,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainSplitScreen.mg_strText = TRANS("SPLIT SCREEN");
   mgMainSplitScreen.mg_bfsFontSize = BFS_LARGE;
-  mgMainSplitScreen.mg_boxOnScreen = positionMenuItem(2.0f);
   mgMainSplitScreen.mg_strTip = TRANS("play with multiple players on one computer");
   gm_lhGadgets.AddTail( mgMainSplitScreen.mg_lnNode);
   mgMainSplitScreen.mg_pmgUp = &mgMainNetwork;
@@ -442,7 +439,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainDemo.mg_strText = TRANS("DEMO");
   mgMainDemo.mg_bfsFontSize = BFS_LARGE;
-  mgMainDemo.mg_boxOnScreen = positionMenuItem(3.0f);
   mgMainDemo.mg_strTip = TRANS("play a game demo");
   gm_lhGadgets.AddTail( mgMainDemo.mg_lnNode);
   mgMainDemo.mg_pmgUp = &mgMainSplitScreen;
@@ -451,7 +447,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainMods.mg_strText = TRANS("MODS");
   mgMainMods.mg_bfsFontSize = BFS_LARGE;
-  mgMainMods.mg_boxOnScreen = positionMenuItem(4.0f);
   mgMainMods.mg_strTip = TRANS("run one of installed game modifications");
   gm_lhGadgets.AddTail( mgMainMods.mg_lnNode);
   mgMainMods.mg_pmgUp = &mgMainDemo;
@@ -465,7 +460,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainHighScore.mg_strText = TRANS("HIGH SCORES");
   mgMainHighScore.mg_bfsFontSize = BFS_LARGE;
-  mgMainHighScore.mg_boxOnScreen = positionMenuItem(5.0f);
   mgMainHighScore.mg_strTip = TRANS("view list of top ten best scores");
   gm_lhGadgets.AddTail( mgMainHighScore.mg_lnNode);
   mgMainHighScore.mg_pmgUp = &mgMainMods;
@@ -474,7 +468,6 @@ void CMainMenu::Initialize_t(SERender *_render)
 
   mgMainOptions.mg_strText = TRANS("OPTIONS");
   mgMainOptions.mg_bfsFontSize = BFS_LARGE;
-  mgMainOptions.mg_boxOnScreen = positionMenuItem(6.0f);
   mgMainOptions.mg_strTip = TRANS("adjust video, audio and input options");
   gm_lhGadgets.AddTail( mgMainOptions.mg_lnNode);
   mgMainOptions.mg_pmgUp = &mgMainHighScore;
@@ -483,12 +476,16 @@ void CMainMenu::Initialize_t(SERender *_render)
   
   mgMainQuit.mg_strText = TRANS("QUIT");
   mgMainQuit.mg_bfsFontSize = BFS_LARGE;
-  mgMainQuit.mg_boxOnScreen = positionMenuItem(7.0f);
   mgMainQuit.mg_strTip = TRANS("exit game immediately");
   gm_lhGadgets.AddTail( mgMainQuit.mg_lnNode);
   mgMainQuit.mg_pmgUp = &mgMainOptions;
   mgMainQuit.mg_pmgDown = &mgMainSingle;
   //mgMainQuit.mg_pActivatedFunction = &ExitConfirm;
+}
+
+CMainMenu::~CMainMenu()
+{
+
 }
 void CMainMenu::StartMenu(void)
 {/*
@@ -497,6 +494,22 @@ void CMainMenu::StartMenu(void)
   mgMainSplitScreen.mg_bEnabled = IsMenuEnabled("Split Screen");
   mgMainHighScore.mg_bEnabled   = IsMenuEnabled("High Score");
   CGameMenu::StartMenu();*/
+}
+void CMainMenu::render(const SERender* render)
+{
+    mgMainSingle.mg_boxOnScreen = positionMenuItem(render, 0.0f);
+    mgMainNetwork.mg_boxOnScreen = positionMenuItem(render, 1.0f);
+    mgMainSplitScreen.mg_boxOnScreen = positionMenuItem(render, 2.0f);
+    mgMainDemo.mg_boxOnScreen = positionMenuItem(render, 3.0f);
+    mgMainMods.mg_boxOnScreen = positionMenuItem(render, 4.0f);
+    mgMainHighScore.mg_boxOnScreen = positionMenuItem(render, 5.0f);
+    mgMainOptions.mg_boxOnScreen = positionMenuItem(render, 6.0f);
+    mgMainQuit.mg_boxOnScreen = positionMenuItem(render, 7.0f);
+
+    FOREACHINLIST( CMenuGadget, mg_lnNode, gm_lhGadgets, itmg) {
+        itmg->render(render);
+    }
+
 }
 
 SEMenu::SEMenu()
@@ -509,15 +522,11 @@ SEMenu::~SEMenu()
     
 }
 
-void SEMenu::init(SERender *_render)
+void SEMenu::init()
 {
     
   try {
-    render = _render;
       // load logo textures
-    _ptoLogoCT  = render->loadTexture(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-    _ptoLogoODI = render->loadTexture(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-    _ptoLogoEAX = render->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
     
     // initialize and load corresponding fonts
     _fdSmall.Load_t(  CTFILENAME( "Fonts\\Display3-narrow.fnt"));
@@ -583,12 +592,7 @@ void SEMenu::init(SERender *_render)
     gmConfirmMenu.gm_pmgSelectedByDefault = &mgConfirmYes;
     gmConfirmMenu.gm_pgmParentMenu = NULL;
 */
-    gmMainMenu.Initialize_t(render);
-    gmMainMenu.gm_strName="Main";
-    gmMainMenu.gm_pmgSelectedByDefault = &gmMainMenu.mgMainSingle;
-    gmMainMenu.gm_pgmParentMenu = NULL;
 
-    pgmCurrentMenu = &gmMainMenu;
 /*
     gmInGameMenu.Initialize_t();
     gmInGameMenu.gm_strName="InGame";
@@ -711,9 +715,17 @@ void SEMenu::init(SERender *_render)
   */
 }
 
-BOOL SEMenu::run()
-{
-  
+void SEMenu::render(const SERender* render)
+{/*
+  if(gmMainMenu == NULL) {
+    gmMainMenu = new CMainMenu();
+    gmMainMenu->init(render);
+    gmMainMenu->gm_strName="Main";
+    gmMainMenu->gm_pmgSelectedByDefault = &gmMainMenu->mgMainSingle;
+    gmMainMenu->gm_pgmParentMenu = NULL;
+
+    pgmCurrentMenu = gmMainMenu;
+  }*/
 /*
   MenuUpdateMouseFocus();
 
@@ -858,18 +870,19 @@ BOOL SEMenu::run()
   BOOL bStillInMenus = FALSE;
   _pGame->MenuPreRenderMenu(pgmCurrentMenu->gm_strName);
   */
-  CDrawPort* dp = render->getDrawPort();
   // for each menu gadget
+  /*
   FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
     // if gadget is visible
     if( itmg->mg_bVisible) {
       //bStillInMenus = TRUE;
-      itmg->Render(render);/*
+      itmg->render(render);
       if (FloatBoxToPixBox(&dpMenu, itmg->mg_boxOnScreen)>=PIX2D(_pixCursorPosI, _pixCursorPosJ)) {
         _pmgUnderCursor = itmg;
-      }*/
+      }
     }
   }
+  */
   /*
   _pGame->MenuPostRenderMenu(pgmCurrentMenu->gm_strName);
 
@@ -921,7 +934,12 @@ BOOL SEMenu::run()
 /*
   return bStillInMenus;
   */
- return TRUE;
+ return;
+}
+
+void SEMenu::update()
+{
+
 }
 /*
 

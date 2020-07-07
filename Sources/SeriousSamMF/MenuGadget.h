@@ -43,7 +43,7 @@ public:
   virtual void OnMouseOver(PIX pixI, PIX pixJ);
 
   virtual COLOR GetCurrentColor(void);
-  virtual void  Render( SERender *render);
+  virtual void  render(const SERender *render);
   virtual BOOL  IsSeparator(void) { return FALSE; };
 };
 

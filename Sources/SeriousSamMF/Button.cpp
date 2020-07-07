@@ -144,19 +144,18 @@ COLOR SEButton::currentColor()
     return colEnable;
 }
 
-void SEButton::Render(SERender* render)
+void SEButton::render(const SERender* render)
 {
   if (mg_bfsFontSize==BFS_LARGE) {
-    render->setFont(&_fdBig);
+    render->setText(&_fdBig, mg_iTextMode);
   } else if (mg_bfsFontSize==BFS_MEDIUM) {
-    render->setFont(&_fdMedium);
+    render->setText(&_fdMedium, mg_iTextMode);
   } else {/*
     ASSERT(mg_bfsFontSize==BFS_SMALL);
     SetFontSmall(pdp);*/
   }
 
-  CDrawPort* pdp = render->getDrawPort();
-  pdp->SetTextMode(mg_iTextMode);
+  const CDrawPort* pdp = render->getDrawPort();
 
   COLOR col = currentColor();
   if(mg_bEditing) {

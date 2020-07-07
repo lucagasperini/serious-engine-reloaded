@@ -104,6 +104,6 @@ COLOR CMenuGadget::GetCurrentColor(void)
   return colRet|CT_OPAQUE;*/
 }
 
-void CMenuGadget::Render(SERender *render)
+void CMenuGadget::render(const SERender *render)
 {
 }

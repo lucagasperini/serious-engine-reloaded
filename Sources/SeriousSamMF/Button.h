@@ -3,6 +3,8 @@
 
 #include "MenuGadget.h"
 #include "Render.h"
+#include "Object.h"
+
 
 class SEButton : public CMenuGadget {
 public:
@@ -29,7 +31,7 @@ public:
 
   void SetText( CTString strNew);
   void OnActivate();
-  void Render(SERender *render);
+  void render(const SERender *render);
   PIX  GetCharOffset( CDrawPort *pdp, INDEX iCharNo);
 
   COLOR currentColor();

@@ -30,6 +30,7 @@ CTString sam_strGameName = "serioussammf";
 
 SESplashScreen* scr_splashscreen = NULL;
 SEMenu* pMenu = NULL;
+CMainMenu* pMainMenu = NULL;
 SEMainWindow* pMainWin = NULL;
 SERender* pRender = NULL;
 
@@ -174,7 +175,8 @@ BOOL GameLoop()
       // clear z-buffer
       pRender->fillZBuffer(ZBUF_BACK);
       // remember if we should render menus next tick
-      bMenuRendering = pMenu->run();
+      pMenu->render(pRender);
+      pMainMenu->render(pRender);
     }
     // done with all
     pRender->unlock();
@@ -185,7 +187,6 @@ BOOL GameLoop()
 BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
-  pMenu = new SEMenu();
   pMainWin = new SEMainWindow();
   pRender = new SERender();
 
@@ -308,7 +309,6 @@ BOOL Init(CTString strCmdLine)
   pRender->setVirtX(640);
   pRender->setVirtY(480);
 
-  pMenu->init(pRender);
   // remember time of mode setting
   _tmDisplayModeChanged = _pTimer->GetRealTimeTick();
 /*
@@ -387,8 +387,14 @@ int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
 
-  pMenu->setActive(TRUE);
+  pMenu = new SEMenu();
+  pMainMenu = new CMainMenu();
 
+  pMenu->setActive(TRUE);
+  pMenu->  _ptoLogoCT  = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
+  pMenu->  _ptoLogoODI = pRender->loadTexture(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
+  pMenu->  _ptoLogoEAX = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
+  pMenu->init();
   // initialy, application is running and active, console and menu are off
   _bRunning    = TRUE;
   _bQuitScreen = TRUE;

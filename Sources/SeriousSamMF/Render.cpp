@@ -37,12 +37,12 @@ BOOL SERender::create(HWND _window)
 }
 
 
-void SERender::fill(COLOR col)
+void SERender::fill(COLOR col) const
 {
     drawPort->Fill(col);
 }
 
-void SERender::fillZBuffer(FLOAT zval)
+void SERender::fillZBuffer(FLOAT zval) const
 {
     drawPort->FillZBuffer(zval);
 }
@@ -72,7 +72,7 @@ PIX SERender::height()
     return drawPort->GetHeight();
 }
 
-void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w, PIX _h)
+void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w, PIX _h) const
 {
     FLOAT scaleX = (FLOAT)drawPort->GetWidth() / (FLOAT)virtX;
     FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
@@ -86,23 +86,26 @@ void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w,
     drawPort->PutTexture( texture, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
 }
 
-CTextureObject* SERender::loadTexture(const CTFileName &fntex)
+CTextureObject* SERender::loadTexture(const CTFileName &fntex) const
 {
     CTextureObject* tex = new CTextureObject;
     tex->SetData_t(fntex);
     return tex;
 }
 
-void SERender::setFont(CFontData *font)
+void SERender::setText(CFontData *font, INDEX textmode) const
 {
     FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
 
     drawPort->SetFont(font);
     drawPort->SetTextScaling(scaleY);
     drawPort->SetTextAspect(1.0f);
+    drawPort->SetTextMode(textmode);
+    //drawPort->SetTextCharSpacing();
+    //drawPort->SetTextLineSpacing();
 }
 
-PIXaabbox2D SERender::box2D(FLOAT x, FLOAT y, FLOAT w, FLOAT h)
+PIXaabbox2D SERender::box2D(FLOAT x, FLOAT y, FLOAT w, FLOAT h) const
 {
     PIX pixW = drawPort->GetWidth();
     PIX pixH = drawPort->GetHeight();

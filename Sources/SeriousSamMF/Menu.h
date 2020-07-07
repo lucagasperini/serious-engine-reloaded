@@ -5,10 +5,9 @@
 #include "Render.h"
 #include "MenuGadget.h"
 #include "Button.h"
-
+/*
 class CGameMenu {
 public:
-    SERender *render;
   CListHead gm_lhGadgets;
   CGameMenu *gm_pgmParentMenu;
   BOOL gm_bPopup;
@@ -35,9 +34,44 @@ public:
   virtual BOOL OnChar(MSG msg);
   virtual void Think(void);
 };
+*/
+
+class SEMenu : SEObject
+{
+private:
+    CTextureObject _toPointer;
+    CTextureObject _toLogoMenuA;
+    CTextureObject _toLogoMenuB;
+public:
+// logo textures
+    CTextureObject *_ptoLogoCT  = NULL;
+    CTextureObject *_ptoLogoODI = NULL;
+    CTextureObject *_ptoLogoEAX = NULL;
+    /*
+    CMainMenu* gmMainMenu = NULL;
+
+    CGameMenu* pgmCurrentMenu = NULL;
+    */
+    CListHead gm_lhGadgets;
+
+    BOOL active;
+public:
+    SEMenu();
+    ~SEMenu();
+
+    void setActive(BOOL _active) { active = _active; }
+
+    BOOL getActive() { return active; }
+
+    void LoadAndForceTexture(CTextureObject &to, CTextureObject *&pto, const CTFileName &fnm);
+
+    void init();
+    void render(const SERender* render);
+    void update();
+};
 
 
-class CMainMenu : public CGameMenu {
+class CMainMenu : public SEMenu {
 public:
     //CMGTitle mgMainTitle;
 SEButton mgMainVersionLabel;
@@ -54,47 +88,14 @@ SEButton mgMainQuit;
 FLOAT fontSize;
 FLOAT positionStart;
 
-  void Initialize_t(SERender* _render);
+CMainMenu();
+~CMainMenu();
+
   void StartMenu(void);
-  PIXaabbox2D positionMenuItem(FLOAT fRow);
+  PIXaabbox2D positionMenuItem(const SERender* render, FLOAT fRow);
+  void render(const SERender* render);
 };
 
 
-
-class SEMenu 
-{
-private:
-    CTextureObject _toPointer;
-    CTextureObject _toLogoMenuA;
-    CTextureObject _toLogoMenuB;
-
-    SERender* render;
-
-// logo textures
-    CTextureObject *_ptoLogoCT  = NULL;
-    CTextureObject *_ptoLogoODI = NULL;
-    CTextureObject *_ptoLogoEAX = NULL;
-    
-    CMainMenu gmMainMenu;
-
-    CGameMenu* pgmCurrentMenu = NULL;
-
-    BOOL active;
-public:
-    SEMenu();
-    ~SEMenu();
-
-    void setActive(BOOL _active) { active = _active; }
-
-    BOOL getActive() { return active; }
-
-    void LoadAndForceTexture(CTextureObject &to, CTextureObject *&pto, const CTFileName &fnm);
-
-
-
-
-    void init(SERender* _render);
-    BOOL run();
-};
 
 #endif
