@@ -437,6 +437,11 @@ void MenuUpdateMouseFocus(void)
   }
 }*/
 // ------------------------ CMainMenu implementation
+extern BOOL _bRunning;
+void ExitGame()
+{
+  _bRunning = FALSE;
+}
 
 CMainMenu::CMainMenu()
 {
@@ -546,7 +551,7 @@ CMainMenu::CMainMenu()
   mgMainQuit.mg_pmgDown = &mgMainSingle;
   mgMainQuit.colEnable = SE_COL_ORANGE_LIGHT|255;
   mgMainQuit.colSelected = SE_COL_ORANGE_DARK|255;
-  //mgMainQuit.mg_pActivatedFunction = &ExitConfirm;
+  mgMainQuit.mg_pActivatedFunction = &ExitGame;
 }
 
 CMainMenu::~CMainMenu()
@@ -579,16 +584,16 @@ void CMainMenu::render(const SERender* render)
 }
 
 
-void CMainMenu::update(POINT cursor)
+void CMainMenu::update(const SDL_Event* event, POINT cursor)
 {
-    mgMainSingle.update(cursor);
-    mgMainNetwork.update(cursor);
-    mgMainSplitScreen.update(cursor);
-    mgMainDemo.update(cursor);
-    mgMainMods.update(cursor);
-    mgMainHighScore.update(cursor);
-    mgMainOptions.update(cursor);
-    mgMainQuit.update(cursor);
+    mgMainSingle.update(event, cursor);
+    mgMainNetwork.update(event, cursor);
+    mgMainSplitScreen.update(event, cursor);
+    mgMainDemo.update(event, cursor);
+    mgMainMods.update(event, cursor);
+    mgMainHighScore.update(event, cursor);
+    mgMainOptions.update(event, cursor);
+    mgMainQuit.update(event, cursor);
 }
 
 SEMenu::SEMenu()
@@ -1016,7 +1021,7 @@ void SEMenu::render(const SERender* render)
  return;
 }
 
-void SEMenu::update(POINT cursor)
+void SEMenu::update(const SDL_Event* event, POINT cursor)
 {
 
 }

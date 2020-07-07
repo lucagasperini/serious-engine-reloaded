@@ -34,93 +34,18 @@ void SEButton::SetText( CTString strNew)
 
 
 void SEButton::OnActivate()
-{/*
-  if( mg_pActivatedFunction!=NULL && mg_bEnabled)
-  {
-    PlayMenuSound(_psdPress);
-    IFeel_PlayEffect("Menu_press");
-    _pmgLastActivatedGadget = this;
-    (*mg_pActivatedFunction)();
-  }*/
+{
+    printf("Active");
+    if( mg_pActivatedFunction!=NULL )
+    {/*
+      PlayMenuSound(_psdPress);
+      IFeel_PlayEffect("Menu_press");
+      _pmgLastActivatedGadget = this;*/
+      (*mg_pActivatedFunction)();
+    }
 }
 
 
-COLOR LCDGetColor(COLOR colDefault, const char *strName)
-{
-  if (!strcmp(strName, "thumbnail border")) {
-    colDefault = SE_COL_BLUE_NEUTRAL|255;
-  } else if (!strcmp(strName, "no thumbnail")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "popup box")) {
-    colDefault = SE_COL_BLUE_NEUTRAL|255;
-  } else if (!strcmp(strName, "tool tip")) {
-    colDefault = SE_COL_ORANGE_LIGHT|255;
-  } else if (!strcmp(strName, "unselected")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "selected")) {
-    colDefault = SE_COL_ORANGE_LIGHT|255;
-  } else if (!strcmp(strName, "disabled selected")) {
-    colDefault = SE_COL_ORANGE_DARK_LT |255;
-  } else if (!strcmp(strName, "disabled unselected")) {
-    colDefault = SE_COL_ORANGE_DARK|255;
-  } else if (!strcmp(strName, "label")) {
-    colDefault = C_WHITE|255;
-  } else if (!strcmp(strName, "title")) {
-    colDefault = C_WHITE|255;
-  } else if (!strcmp(strName, "editing")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "hilited")) {
-    colDefault = SE_COL_ORANGE_LIGHT|255;
-  } else if (!strcmp(strName, "hilited rectangle")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "edit fill")) {
-    colDefault = SE_COL_BLUE_DARK_LT|75;
-  } else if (!strcmp(strName, "editing cursor")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "model box")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "hiscore header")) {
-    colDefault = SE_COL_ORANGE_LIGHT|255;
-  } else if (!strcmp(strName, "hiscore data")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "hiscore last set")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "slider box")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "file info")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "display mode")) {
-    colDefault = SE_COL_ORANGE_NEUTRAL|255;
-  } else if (!strcmp(strName, "bcg fill")) {
-    colDefault = SE_COL_BLUE_DARK|255;
-  }
-  return colDefault;
-}
-
-
-extern CFontData _fdBig;
-void SetFontBig(CDrawPort *pdp)
-{
-  pdp->SetFont( &_fdBig);
-  pdp->SetTextScaling( 1.0f * pdp->GetWidth() /640 *pdp->dp_fWideAdjustment);
-  pdp->SetTextAspect(1.0f);
-}
-extern CFontData _fdMedium;
-void SetFontMedium(CDrawPort *pdp)
-{
-  pdp->SetFont( &_fdMedium);
-  pdp->SetTextScaling( 1.0f * pdp->GetWidth() /640 *pdp->dp_fWideAdjustment);
-  pdp->SetTextAspect(0.75f);
-}/*
-void SetFontSmall(CDrawPort *pdp)
-{
-  pdp->SetFont( _pfdConsoleFont);
-  pdp->SetTextScaling( 1.0f);
-  pdp->SetTextAspect(1.0f);
-}
-*/
-
- 
 PIXaabbox2D FloatBoxToPixBox(const CDrawPort *pdp, const FLOATaabbox2D &boxF)
 {
   PIX pixW = pdp->GetWidth();
@@ -147,6 +72,8 @@ COLOR SEButton::currentColor()
         return colEnable;
 }
 
+extern CFontData _fdBig;
+extern CFontData _fdMedium;
 void SEButton::render(const SERender* render)
 {
   if (mg_bfsFontSize==BFS_LARGE) {

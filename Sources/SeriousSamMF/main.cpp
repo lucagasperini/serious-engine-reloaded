@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL2/SDL_keycode.h>
 
 #include <Engine/Base/CTString.h>
 #include <Engine/Base/Stream.h>
@@ -35,7 +36,7 @@ SEMainWindow* pMainWin = NULL;
 SERender* pRender = NULL;
 
 POINT pt;
-
+SDL_Event* event = NULL;
 // display mode settings
 INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
 INDEX iWindowAPI = 0;         // 0==OpenGL
@@ -164,28 +165,77 @@ void StartNewMode( )
 
 static FLOAT bMenuRendering = 0.25f;
 
-BOOL GameLoop()
+BOOL canChangeResolution(PIX w, PIX h)
+{
+    if(pMainWin->getW() != w || pMainWin->getH() != h) {
+        pRender->destroy();
+        pMainWin->setW(w);
+        pMainWin->setH(h);
+        pMainWin->create();
+        pRender->create(pMainWin->getPWindow());
+    }
+    return TRUE;
+}
+
+extern int SE_SDL_InputEventPoll(SDL_Event *event);
+
+void update()
+{
+    // get real cursor position
+    GetCursorPos(&pt);
+    while (SE_SDL_InputEventPoll(event)) {
+        if(event->type == SDL_QUIT) {
+            _bRunning = FALSE;
+        }
+        if(event->type == SDL_KEYDOWN) {
+            INDEX ksym = event->key.keysym.sym;
+            switch(ksym) {
+
+            case SDLK_ESCAPE:
+                _bRunning = FALSE;
+                break;
+            case SDLK_F1:
+                canChangeResolution(640, 480); //VGA 4:3 
+                break;
+            case SDLK_F2:
+                canChangeResolution(800, 600); //SVGA 4:3
+                break;
+            case SDLK_F3:
+                canChangeResolution(640, 360); //16:9
+                break;
+            case SDLK_F4:
+                canChangeResolution(1280, 720); //16:9
+                break;
+            }
+        }
+    }
+}
+
+void GameLoop()
 {
   #ifdef SINGLE_THREADED
     _pTimer->HandleTimerHandlers();
   #endif
-  if( !pMainWin->isIconic() && pRender->lock())
+  if( !pMainWin->isIconic() ) 
   {
-    pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
-    // get real cursor position
-    GetCursorPos(&pt);
-    // do menu
-    if( bMenuRendering) {
-      // clear z-buffer
-      pRender->fillZBuffer(ZBUF_BACK);
-      // remember if we should render menus next tick
-      pMenu->render(pRender);
-      pMainMenu->render(pRender);
-      pMainMenu->update(pt);
+    update();
+    pMainMenu->update(event, pt);
+
+    if(pRender->lock()) {
+      pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
+      // do menu
+      if( bMenuRendering) {
+        // clear z-buffer
+        pRender->fillZBuffer(ZBUF_BACK);
+        // remember if we should render menus next tick
+        pMenu->render(pRender);
+        pMainMenu->render(pRender);
+        
+      }
+      // done with all
+      pRender->unlock();
+      pRender->SwapBuffers();
     }
-    // done with all
-    pRender->unlock();
-    pRender->SwapBuffers();
   }
 }
 
@@ -194,6 +244,7 @@ BOOL Init(CTString strCmdLine)
   scr_splashscreen = new SESplashScreen();
   pMainWin = new SEMainWindow();
   pRender = new SERender();
+  event = new SDL_Event();
 
   if(!SEInterfaceSDL::init()) {
       FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SEInterfaceSDL::getError());
@@ -375,76 +426,7 @@ BOOL Init(CTString strCmdLine)
   return TRUE;
 }
 
-BOOL canChangeResolution(PIX w, PIX h)
-{
-    if(pMainWin->getW() != w || pMainWin->getH() != h) {
-        pRender->destroy();
-        pMainWin->setW(w);
-        pMainWin->setH(h);
-        pMainWin->create();
-        pRender->create(pMainWin->getPWindow());
-    }
-    return TRUE;
-}
-/*
-void updateMouseFocus(void)
-{
-  // get real cursor position
-  POINT pt;
-  GetCursorPos(&pt);
-  
-  extern INDEX sam_bWideScreen;
-  extern CDrawPort *pdp;
-  if( sam_bWideScreen) {
-    const PIX pixHeight = pdp->GetHeight();
-    pt.y -= (LONG) ((pixHeight/0.75f-pixHeight)/2);
-  }
-  _pixCursorPosI += pt.x-_pixCursorExternPosI;
-  _pixCursorPosJ  = _pixCursorExternPosJ;
-  _pixCursorExternPosI = pt.x;
-  _pixCursorExternPosJ = pt.y;
 
-  // if mouse not used last
-  if (!_bMouseUsedLast||_bDefiningKey||_bEditingString) {
-    // do nothing
-    return;
-  }
-
-  CMenuGadget *pmgActive = NULL;
-  // for all gadgets in menu
-  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
-    //CMenuGadget &mg = *itmg;
-    // if focused
-    if( itmg->mg_bFocused) {
-      // remember it
-      pmgActive = &itmg.Current();
-    }
-  }
-
-  // if there is some under cursor
-  if (_pmgUnderCursor!=NULL) {
-    _pmgUnderCursor->OnMouseOver(_pixCursorPosI, _pixCursorPosJ);
-    // if the one under cursor has no neighbours
-    if (_pmgUnderCursor->mg_pmgLeft ==NULL 
-      &&_pmgUnderCursor->mg_pmgRight==NULL 
-      &&_pmgUnderCursor->mg_pmgUp   ==NULL 
-      &&_pmgUnderCursor->mg_pmgDown ==NULL) {
-      // it cannot be focused
-      _pmgUnderCursor = NULL;
-      return;
-    }
-
-    // if the one under cursor is not active and not disappearing
-    if (pmgActive!=_pmgUnderCursor && _pmgUnderCursor->mg_bVisible) {
-      // change focus
-      if (pmgActive!=NULL) {
-        pmgActive->OnKillFocus();
-      }
-      _pmgUnderCursor->OnSetFocus();
-    }
-  }
-}
-*/
 int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
@@ -460,6 +442,11 @@ int SubMain(LPSTR lpCmdLine)
   // initialy, application is running and active, console and menu are off
   _bRunning    = TRUE;
   _bQuitScreen = TRUE;
+
+  while(_bRunning)
+  {
+    GameLoop();
+  }
   /*
  _pGame->gm_csConsoleState  = CS_OFF;
   _pGame->gm_csComputerState = CS_OFF;
@@ -467,269 +454,7 @@ int SubMain(LPSTR lpCmdLine)
 //  bMenuRendering = FALSE;
   // while it is still running
   */
-  while( _bRunning)
-  {
-    // while there are any messages in the message queue
-    MSG msg;
-    
-    while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE)) {
-      // if it is not a mouse message
-      if( !(msg.message>=WM_MOUSEFIRST && msg.message<=WM_MOUSELAST) ) {
-        // if not system key messages
-        if( !((msg.message==WM_KEYDOWN && msg.wParam==VK_F10)
-            ||msg.message==WM_SYSKEYDOWN)) {
-          // dispatch it
-          TranslateMessage(&msg);
-          DispatchMessage(&msg);
-        }
-      }
-/*
-      // toggle full-screen on alt-enter
-      if( msg.message==WM_SYSKEYDOWN && msg.wParam==VK_RETURN && !IsIconic(_hwndMain)) {
-        // !!! FIXME: SDL doesn't need to rebuild the GL context here to toggle fullscreen.
-        STUBBED("SDL doesn't need to rebuild the GL context here...");
-        StartNewMode( (GfxAPIType)sam_iGfxAPI, sam_iDisplayAdapter, sam_iScreenSizeI, sam_iScreenSizeJ,
-                      (enum DisplayDepth)sam_iDisplayDepth, !sam_bFullScreenActive);
-
-        if (_pInput != NULL) // rcg02042003 hack for SDL vs. Win32.
-          _pInput->ClearRelativeMouseMotion();
-      }
-*/
-      // if application should stop
-      if( msg.message==WM_QUIT || msg.message==WM_CLOSE) {
-        // stop running
-        _bRunning = FALSE;
-        _bQuitScreen = FALSE;
-      }
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE) {
-          // stop running
-        _bRunning = FALSE;
-        _bQuitScreen = FALSE;
-      }
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_ADD) { //SVGA 4:3
-          canChangeResolution(800, 600);
-      }      
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_SUBTRACT) { //VGA 4:3 
-          canChangeResolution(640, 480);
-      }
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_MULTIPLY) { //16:9
-          canChangeResolution(1280, 720);
-      }
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_DIVIDE) { //16:9
-          canChangeResolution(640, 360);
-      }
-      /*
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE && 
-        (_gmRunningGameMode==GM_DEMO || _gmRunningGameMode==GM_INTRO)) {
-        _pGame->StopGame();
-        _gmRunningGameMode=GM_NONE;
-      }
-
-      if (_pGame->gm_csConsoleState==CS_TALK && msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE) {
-        if (_pInput != NULL) // rcg02042003 hack for SDL vs. Win32.
-          _pInput->ClearRelativeMouseMotion();
-        _pGame->gm_csConsoleState = CS_OFF;
-        msg.message=WM_NULL;
-      }
-
-      BOOL bMenuForced = (_gmRunningGameMode==GM_NONE && 
-        (_pGame->gm_csConsoleState==CS_OFF || _pGame->gm_csConsoleState==CS_TURNINGOFF));
-      BOOL bMenuToggle = (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE 
-        && (_pGame->gm_csComputerState==CS_OFF || _pGame->gm_csComputerState==CS_ONINBACKGROUND));
-      if( !bMenuActive) {
-        if( bMenuForced || bMenuToggle) {
-          // if console is active
-          if( _pGame->gm_csConsoleState==CS_ON || _pGame->gm_csConsoleState==CS_TURNINGON) {
-            // deactivate it
-            _pGame->gm_csConsoleState = CS_TURNINGOFF;
-            _iAddonExecState = 0;
-          }
-          // delete key down message so menu would not exit because of it
-          msg.message=WM_NULL;
-          // start menu
-          StartMenus();
-        }
-      } else {
-        if (bMenuForced && bMenuToggle && pgmCurrentMenu->gm_pgmParentMenu == NULL) {
-          // delete key down message so menu would not exit because of it
-          msg.message=WM_NULL;
-        }
-      }
-
-      // if neither menu nor console is running
-      if (!bMenuActive && (_pGame->gm_csConsoleState==CS_OFF || _pGame->gm_csConsoleState==CS_TURNINGOFF)) {
-        // if current menu is not root
-        if (!IsMenusInRoot()) {
-          // start current menu
-          StartMenus();
-        }
-      }
-
-      if (sam_bMenuSave) {
-        sam_bMenuSave = FALSE;
-        StartMenus("save");
-      }
-      if (sam_bMenuLoad) {
-        sam_bMenuLoad = FALSE;
-        StartMenus("load");
-      }
-      if (sam_bMenuControls) {
-        sam_bMenuControls = FALSE;
-        StartMenus("controls");
-      }
-      if (sam_bMenuHiScore) {
-        sam_bMenuHiScore = FALSE;
-        StartMenus("hiscore");
-      }
-
-      // interpret console key presses
-      if (_iAddonExecState==0) {
-        if (msg.message==WM_KEYDOWN) {
-          _pGame->ConsoleKeyDown(msg);
-          if (_pGame->gm_csConsoleState!=CS_ON) {
-            _pGame->ComputerKeyDown(msg);
-          }
-        } else if (msg.message==WM_KEYUP) {
-          // special handler for talk (not to invoke return key bind)
-          if( msg.wParam==VK_RETURN && _pGame->gm_csConsoleState==CS_TALK)
-          {
-            if (_pInput != NULL) // rcg02042003 hack for SDL vs. Win32.
-              _pInput->ClearRelativeMouseMotion();
-            _pGame->gm_csConsoleState = CS_OFF;
-          }
-        } else if (msg.message==WM_CHAR) {
-          _pGame->ConsoleChar(msg);
-        }
-        if (msg.message==WM_LBUTTONDOWN
-          ||msg.message==WM_RBUTTONDOWN
-          ||msg.message==WM_LBUTTONDBLCLK
-          ||msg.message==WM_RBUTTONDBLCLK
-          ||msg.message==WM_LBUTTONUP
-          ||msg.message==WM_RBUTTONUP) {
-          if (_pGame->gm_csConsoleState!=CS_ON) {
-            _pGame->ComputerKeyDown(msg);
-          }
-        }
-      }
-      // if menu is active and no input on
-      if( bMenuActive && !_pInput->IsInputEnabled()) {
-        // pass keyboard/mouse messages to menu
-        if(msg.message==WM_KEYDOWN) {
-          MenuOnKeyDown( msg.wParam);
-        } else if (msg.message==WM_LBUTTONDOWN || msg.message==WM_LBUTTONDBLCLK) {
-          MenuOnKeyDown(VK_LBUTTON);
-        } else if (msg.message==WM_RBUTTONDOWN || msg.message==WM_RBUTTONDBLCLK) {
-          MenuOnKeyDown(VK_RBUTTON);
-        } else if (msg.message==WM_MOUSEMOVE) {
-          MenuOnMouseMove(LOWORD(msg.lParam), HIWORD(msg.lParam));
-#ifndef WM_MOUSEWHEEL
- #define WM_MOUSEWHEEL 0x020A
-#endif
-        } else if (msg.message==WM_MOUSEWHEEL) {
-          SWORD swDir = SWORD(UWORD(HIWORD(msg.wParam)));
-          if (swDir>0) {
-            MenuOnKeyDown(11);
-          } else if (swDir<0) {
-            MenuOnKeyDown(10);
-          }
-        } else if (msg.message==WM_CHAR) {
-          MenuOnChar(msg);
-        }
-      }
-
-      // if toggling console
-      BOOL bConsoleKey = sam_bToggleConsole || msg.message==WM_KEYDOWN && 
-            // !!! FIXME: rcg11162001 This sucks.
-            // FIXME: DG: we could use SDL_SCANCODE_GRAVE ?
-        #ifdef PLATFORM_UNIX
-        (msg.wParam == SDLK_BACKQUOTE
-        #else
-        (MapVirtualKey(msg.wParam, 0)==41 // scan code for '~'
-        #endif
-        || msg.wParam==VK_F1 || (msg.wParam==VK_ESCAPE && _iAddonExecState==3));
-      if(bConsoleKey && !_bDefiningKey)
-      {
-        sam_bToggleConsole = FALSE;
-        if( _iAddonExecState==3) _iAddonExecState = 0;
-        // if it is up, or pulling up
-        if( _pGame->gm_csConsoleState==CS_OFF || _pGame->gm_csConsoleState==CS_TURNINGOFF) {
-          // start it moving down and disable menu
-          _pGame->gm_csConsoleState = CS_TURNINGON;
-          // stop all IFeel effects
-          IFeel_StopEffect(NULL);
-          if( bMenuActive) {
-            StopMenus(FALSE);
-          }
-        // if it is down, or dropping down
-        } else if( _pGame->gm_csConsoleState==CS_ON || _pGame->gm_csConsoleState==CS_TURNINGON) {
-          // start it moving up
-          _pGame->gm_csConsoleState = CS_TURNINGOFF;
-        }
-      }
-
-      if (_pShell->GetINDEX("con_bTalk") && _pGame->gm_csConsoleState==CS_OFF) {
-        _pShell->SetINDEX("con_bTalk", FALSE);
-        _pGame->gm_csConsoleState = CS_TALK;
-      }
-
-      // if pause pressed
-      if (msg.message==WM_KEYDOWN && msg.wParam==VK_PAUSE) {
-        // toggle pause
-        _pNetwork->TogglePause();
-      }
-
-#ifdef PLATFORM_WIN32
-      // if command sent from external application
-      if (msg.message==WM_COMMAND) {
-        // if teleport player
-        if (msg.wParam==1001) {
-          // teleport player
-          TeleportPlayer(msg.lParam);
-          // restore
-          PostMessage(NULL, WM_SYSCOMMAND, SC_RESTORE, 0);
-        }
-      }
-#endif
-
-      // if demo is playing
-      if (_gmRunningGameMode==GM_DEMO ||
-          _gmRunningGameMode==GM_INTRO ) {
-        // check if escape is pressed
-        BOOL bEscape = (msg.message==WM_KEYDOWN && msg.wParam==VK_ESCAPE);
-        // check if console-invoke key is pressed
-        BOOL bTilde = (msg.message==WM_KEYDOWN && 
-          (msg.wParam==VK_F1 ||
-            // !!! FIXME: ugly.
-            #ifdef PLATFORM_UNIX
-              msg.wParam == SDLK_BACKQUOTE
-            #else
-              MapVirtualKey(msg.wParam, 0)==41 // scan code for '~'
-            #endif
-          ));
-        // check if any key is pressed
-        BOOL bAnyKey = (
-          (msg.message==WM_KEYDOWN && (msg.wParam==VK_SPACE || msg.wParam==VK_RETURN))|| 
-          msg.message==WM_LBUTTONDOWN||msg.message==WM_RBUTTONDOWN);
-
-        // if escape is pressed
-        if (bEscape) {
-          // stop demo
-          _pGame->StopGame();
-          _bInAutoPlayLoop = FALSE;
-          _gmRunningGameMode = GM_NONE;
-        // if any other key is pressed except console invoking
-        } else if (bAnyKey && !bTilde) {
-          // if not in menu or in console
-          if (!bMenuActive && !bMenuRendering && _pGame->gm_csConsoleState==CS_OFF) {
-            // skip to next demo
-            _pGame->StopGame();
-            _gmRunningGameMode = GM_NONE;
-            StartNextDemo();        
-          }
-        }
-      }
-*/
-    } // loop while there are messages
+  
 /*
     // when all messages are removed, window has surely changed
     _bWindowChanging = FALSE;
@@ -766,7 +491,6 @@ int SubMain(LPSTR lpCmdLine)
     _pGame->gm_bMenuOn = bMenuActive;
 */
     // do the main game loop and render screen
-    GameLoop();
 /*
     // limit current frame rate if neeeded
     LimitFrameRate();
@@ -782,9 +506,6 @@ int SubMain(LPSTR lpCmdLine)
   
   End();
   */
-  return TRUE;
-}
-
 
 int main(int argc, char **argv)
 {

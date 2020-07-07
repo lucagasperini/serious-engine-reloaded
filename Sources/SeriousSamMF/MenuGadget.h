@@ -45,7 +45,7 @@ public:
   virtual COLOR GetCurrentColor(void);
   virtual void  render(const SERender *render);
   virtual BOOL  IsSeparator(void) { return FALSE; };
-  void update(POINT cursor);
+  void update(const SDL_Event* event, POINT cursor);
 };
 
 #endif

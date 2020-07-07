@@ -108,9 +108,9 @@ void CMenuGadget::render(const SERender *render)
 {
 }
 
-void CMenuGadget::update(POINT cursor)
+void CMenuGadget::update(const SDL_Event* event, POINT cursor)
 {
-      if(
+    if(
         mg_boxOnScreen.Min()(1) < cursor.x && 
         mg_boxOnScreen.Min()(2) < cursor.y && 
         mg_boxOnScreen.Max()(1) > cursor.x &&
@@ -119,5 +119,10 @@ void CMenuGadget::update(POINT cursor)
        mg_bFocused = TRUE;
     } else {
       mg_bFocused = FALSE;
+    }
+
+    if(event->type == SDL_MOUSEBUTTONDOWN && event->button.button == SDL_BUTTON_LEFT && mg_bFocused) 
+    {
+      OnActivate();
     }
 }
