@@ -5,6 +5,7 @@
 #include "Colors.h"
 #include <Engine/Graphics/Color.h>
 #include <Engine/Graphics/Font.h>
+#include <Engine/Graphics/Texture.h>
 
 SEButton::SEButton()
 {
@@ -77,9 +78,9 @@ extern CFontData _fdMedium;
 void SEButton::render(const SERender* render)
 {
   if (mg_bfsFontSize==BFS_LARGE) {
-    render->setText(&_fdBig, mg_iTextMode);
+    render->setText(&_fdBig, 0.5f, mg_iTextMode);
   } else if (mg_bfsFontSize==BFS_MEDIUM) {
-    render->setText(&_fdMedium, mg_iTextMode);
+    render->setText(&_fdMedium, 0.0f, mg_iTextMode);
   } else {/*
     ASSERT(mg_bfsFontSize==BFS_SMALL);
     SetFontSmall(pdp);*/

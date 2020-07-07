@@ -39,8 +39,8 @@ SDL_Event* event = NULL;
 // display mode settings
 INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
 INDEX iWindowAPI = 0;         // 0==OpenGL
-INDEX iWindowW = 640;  // current size of the window
-INDEX iWindowH = 480;  // current size of the window
+INDEX iWindowW = 1280;  // current size of the window
+INDEX iWindowH = 720;  // current size of the window
 INDEX iWindowDepth  = 0;  // 0==default, 1==16bit, 2==32bit
 INDEX iWindowAdapter = 0; 
 
@@ -165,10 +165,14 @@ void StartNewMode( )
 BOOL runningMenu;
 BOOL runningGame;
 
-BOOL canChangeResolution(PIX w, PIX h)
+BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
 {
     if(pMainWin->getW() != w || pMainWin->getH() != h) {
         pRender->destroy();
+        if(fullscreen)
+            pMainWin->setMode(SE_WINDOW_MODE_FULLSCREEN);
+        else
+            pMainWin->setMode(SE_WINDOW_MODE_WINDOWED);
         pMainWin->setW(w);
         pMainWin->setH(h);
         pMainWin->create();
@@ -195,16 +199,16 @@ void update()
                 runningGame = FALSE;
                 break;
             case SDLK_F1:
-                canChangeResolution(640, 480); //VGA 4:3 
+                canChangeResolution(640, 480, FALSE); //VGA 4:3 
                 break;
             case SDLK_F2:
-                canChangeResolution(800, 600); //SVGA 4:3
+                canChangeResolution(800, 600, FALSE); //SVGA 4:3
                 break;
             case SDLK_F3:
-                canChangeResolution(640, 360); //16:9
+                canChangeResolution(1280, 720, FALSE); //16:9
                 break;
             case SDLK_F4:
-                canChangeResolution(1280, 720); //16:9
+                canChangeResolution(1920, 1080, TRUE); //16:9
                 break;
             }
         }
@@ -334,8 +338,8 @@ BOOL Init(CTString strCmdLine)
         "Please see ReadMe file for troubleshooting information.\n"));
     }
 
-  pRender->setVirtX(640);
-  pRender->setVirtY(480);
+  pRender->setVirtX(1920);
+  pRender->setVirtY(1080);
 
   // remember time of mode setting
   _tmDisplayModeChanged = _pTimer->GetRealTimeTick();

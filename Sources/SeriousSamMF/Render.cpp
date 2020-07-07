@@ -72,7 +72,7 @@ PIX SERender::height()
     return drawPort->GetHeight();
 }
 
-void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w, PIX _h) const
+void SERender::putTexture(class CTextureObject *texObj, PIX _x, PIX _y, PIX _w, PIX _h) const
 {
     FLOAT scaleX = (FLOAT)drawPort->GetWidth() / (FLOAT)virtX;
     FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
@@ -83,7 +83,25 @@ void SERender::putTexture(class CTextureObject *texture, PIX _x, PIX _y, PIX _w,
     pixW = pixX + ( _w * scaleX );
     pixH = pixY + ( _h * scaleY );
 
-    drawPort->PutTexture( texture, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
+    drawPort->PutTexture( texObj, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
+}
+
+void SERender::putTexture(class CTextureObject *texObj, PIX _x, PIX _y) const
+{
+    CTextureData* texData = (CTextureData*) texObj->GetData();
+    PIX _w = texData->GetPixWidth();
+    PIX _h = texData->GetPixHeight();
+    
+    FLOAT scaleX = (FLOAT)drawPort->GetWidth() / (FLOAT)virtX;
+    FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
+    PIX   pixX, pixY, pixW, pixH;
+
+    pixX = _x * scaleX;
+    pixY = _y * scaleY;
+    pixW = pixX + ( _w * scaleX );
+    pixH = pixY + ( _h * scaleY );
+
+    drawPort->PutTexture( texObj, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
 }
 
 CTextureObject* SERender::loadTexture(const CTFileName &fntex) const
@@ -93,12 +111,12 @@ CTextureObject* SERender::loadTexture(const CTFileName &fntex) const
     return tex;
 }
 
-void SERender::setText(CFontData *font, INDEX textmode) const
+void SERender::setText(CFontData *font, FLOAT addScale, INDEX textmode) const
 {
     FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
 
     drawPort->SetFont(font);
-    drawPort->SetTextScaling(scaleY);
+    drawPort->SetTextScaling(scaleY + addScale);
     drawPort->SetTextAspect(1.0f);
     drawPort->SetTextMode(textmode);
     //drawPort->SetTextCharSpacing();
