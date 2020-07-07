@@ -21,7 +21,6 @@ static char *argv0 = NULL;
 HWND _hwndMain = NULL; /* FIXME: Cant compile without this global variable */
 ENGINE_API extern INDEX snd_iFormat;
 
-BOOL _bRunning = FALSE;
 BOOL _bQuitScreen = FALSE;
 BOOL sam_bFirstStarted = TRUE; /* FIXME: Check if is first start */
 
@@ -163,7 +162,8 @@ void StartNewMode( )
 }
 */
 
-static FLOAT bMenuRendering = 0.25f;
+BOOL runningMenu;
+BOOL runningGame;
 
 BOOL canChangeResolution(PIX w, PIX h)
 {
@@ -185,14 +185,14 @@ void update()
     GetCursorPos(&pt);
     while (SE_SDL_InputEventPoll(event)) {
         if(event->type == SDL_QUIT) {
-            _bRunning = FALSE;
+            runningGame = FALSE;
         }
         if(event->type == SDL_KEYDOWN) {
             INDEX ksym = event->key.keysym.sym;
             switch(ksym) {
 
             case SDLK_ESCAPE:
-                _bRunning = FALSE;
+                runningGame = FALSE;
                 break;
             case SDLK_F1:
                 canChangeResolution(640, 480); //VGA 4:3 
@@ -209,34 +209,6 @@ void update()
             }
         }
     }
-}
-
-void GameLoop()
-{
-  #ifdef SINGLE_THREADED
-    _pTimer->HandleTimerHandlers();
-  #endif
-  if( !pMainWin->isIconic() ) 
-  {
-    update();
-    pMainMenu->update(event, pt);
-
-    if(pRender->lock()) {
-      pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
-      // do menu
-      if( bMenuRendering) {
-        // clear z-buffer
-        pRender->fillZBuffer(ZBUF_BACK);
-        // remember if we should render menus next tick
-        pMenu->render(pRender);
-        pMainMenu->render(pRender);
-        
-      }
-      // done with all
-      pRender->unlock();
-      pRender->SwapBuffers();
-    }
-  }
 }
 
 BOOL Init(CTString strCmdLine)
@@ -440,12 +412,34 @@ int SubMain(LPSTR lpCmdLine)
   pMenu->  _ptoLogoEAX = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
   pMenu->init();
   // initialy, application is running and active, console and menu are off
-  _bRunning    = TRUE;
-  _bQuitScreen = TRUE;
+  runningGame = TRUE;
+  runningMenu = TRUE;
 
-  while(_bRunning)
+  while(runningGame)
   {
-    GameLoop();
+      #ifdef SINGLE_THREADED
+      _pTimer->HandleTimerHandlers();
+      #endif
+      if( !pMainWin->isIconic() ) {
+          update();
+          if(runningMenu) {
+              pMainMenu->update(event, pt);
+          }
+          if(pRender->lock()) {
+              pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
+              // do menu
+              if(runningMenu) {
+                  // clear z-buffer
+                  pRender->fillZBuffer(ZBUF_BACK);
+                  // remember if we should render menus next tick
+                  pMenu->render(pRender);
+                  pMainMenu->render(pRender);
+              }
+              // done with all
+              pRender->unlock();
+              pRender->SwapBuffers();
+          }
+      }
   }
   /*
  _pGame->gm_csConsoleState  = CS_OFF;

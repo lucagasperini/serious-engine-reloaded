@@ -437,10 +437,10 @@ void MenuUpdateMouseFocus(void)
   }
 }*/
 // ------------------------ CMainMenu implementation
-extern BOOL _bRunning;
+extern BOOL runningGame;
 void ExitGame()
 {
-  _bRunning = FALSE;
+  runningGame = FALSE;
 }
 
 CMainMenu::CMainMenu()
