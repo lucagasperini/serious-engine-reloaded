@@ -67,7 +67,7 @@ public:
 
     void init();
     void render(const SERender* render);
-    void update();
+    void update(POINT cursor);
 };
 
 
@@ -94,6 +94,7 @@ CMainMenu();
   void StartMenu(void);
   PIXaabbox2D positionMenuItem(const SERender* render, FLOAT fRow);
   void render(const SERender* render);
+  void update(POINT cursor);
 };
 
 

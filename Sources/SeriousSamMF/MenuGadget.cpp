@@ -107,3 +107,17 @@ COLOR CMenuGadget::GetCurrentColor(void)
 void CMenuGadget::render(const SERender *render)
 {
 }
+
+void CMenuGadget::update(POINT cursor)
+{
+      if(
+        mg_boxOnScreen.Min()(1) < cursor.x && 
+        mg_boxOnScreen.Min()(2) < cursor.y && 
+        mg_boxOnScreen.Max()(1) > cursor.x &&
+        mg_boxOnScreen.Max()(2) > cursor.y
+    ){
+       mg_bFocused = TRUE;
+    } else {
+      mg_bFocused = FALSE;
+    }
+}

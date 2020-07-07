@@ -141,7 +141,10 @@ FLOATaabbox2D PixBoxToFloatBox(const CDrawPort *pdp, const PIXaabbox2D &boxP)
 
 COLOR SEButton::currentColor()
 {
-    return colEnable;
+    if(mg_bFocused)
+        return colSelected;
+    else
+        return colEnable;
 }
 
 void SEButton::render(const SERender* render)
@@ -157,7 +160,7 @@ void SEButton::render(const SERender* render)
 
   const CDrawPort* pdp = render->getDrawPort();
 
-  COLOR col = currentColor();
+  COLOR col = currentColor();/*
   if(mg_bEditing) {
     col = LCDGetColor(C_GREEN|0xFF, "editing");
   }
@@ -168,7 +171,9 @@ void SEButton::render(const SERender* render)
     if( !mg_bFocused) {
       colRectangle = LCDGetColor(C_WHITE|0xFF, "hilited rectangle");
     }
-  }/*
+  }
+  */
+  /*
   if (mg_bMental) {
     FLOAT tmIn   = 0.2f;
     FLOAT tmOut  = 1.0f;
@@ -184,7 +189,7 @@ void SEButton::render(const SERender* render)
     }
     col = (col&~0xFF)|INDEX(0xFF*fFactor);
   }*/
-
+/*
   if( mg_bRectangle) {
     // put border
     const PIX pixLeft   = mg_boxOnScreen.Min()(1);
@@ -206,8 +211,15 @@ void SEButton::render(const SERender* render)
     }
     pdp->Fill( pixLeft, pixUp, pixWidth, pixHeight, LCDGetColor(C_dGREEN|0x40, "edit fill"));
   }
+*/
 
-
+  if( mg_iCenterI==-1) 
+      pdp->PutText(mg_strText, mg_boxOnScreen.Min()(1),mg_boxOnScreen.Min()(2), col);
+  else if( mg_iCenterI==+1) 
+      pdp->PutTextR( mg_strText, mg_boxOnScreen.Max()(1),    mg_boxOnScreen.Min()(2), col);
+  else  
+      pdp->PutTextC( mg_strText, mg_boxOnScreen.Center()(1), mg_boxOnScreen.Min()(2), col);
+/*
   INDEX iCursor = mg_iCursorPos;
 
   // print text
@@ -232,10 +244,9 @@ void SEButton::render(const SERender* render)
         str.TrimRight(iMaxLen);
       }
     }
-         if( mg_iCenterI==-1) pdp->PutText(  str, mg_boxOnScreen.Min()(1),    mg_boxOnScreen.Min()(2), col);
-    else if( mg_iCenterI==+1) pdp->PutTextR( str, mg_boxOnScreen.Max()(1),    mg_boxOnScreen.Min()(2), col);
-    else                      pdp->PutTextC( str, mg_boxOnScreen.Center()(1), mg_boxOnScreen.Min()(2), col);
+   
   }
+  */
 /*
   // put cursor if editing
   if( mg_bEditing && (((ULONG)(_pTimer->GetRealTimeTick()*2))&1)) {

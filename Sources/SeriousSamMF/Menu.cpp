@@ -379,6 +379,63 @@ PIXaabbox2D CMainMenu::positionMenuItem(const SERender* render, FLOAT row)
                       positionStart + (row + 1) * fontSize
   );
 }
+/*
+void MenuUpdateMouseFocus(void)
+{
+  // get real cursor position
+  POINT pt;
+  GetCursorPos(&pt);
+  extern INDEX sam_bWideScreen;
+  extern CDrawPort *pdp;
+  if( sam_bWideScreen) {
+    const PIX pixHeight = pdp->GetHeight();
+    pt.y -= (LONG) ((pixHeight/0.75f-pixHeight)/2);
+  }
+  _pixCursorPosI += pt.x-_pixCursorExternPosI;
+  _pixCursorPosJ  = _pixCursorExternPosJ;
+  _pixCursorExternPosI = pt.x;
+  _pixCursorExternPosJ = pt.y;
+
+  // if mouse not used last
+  if (!_bMouseUsedLast||_bDefiningKey||_bEditingString) {
+    // do nothing
+    return;
+  }
+
+  CMenuGadget *pmgActive = NULL;
+  // for all gadgets in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
+    //CMenuGadget &mg = *itmg;
+    // if focused
+    if( itmg->mg_bFocused) {
+      // remember it
+      pmgActive = &itmg.Current();
+    }
+  }
+
+  // if there is some under cursor
+  if (_pmgUnderCursor!=NULL) {
+    _pmgUnderCursor->OnMouseOver(_pixCursorPosI, _pixCursorPosJ);
+    // if the one under cursor has no neighbours
+    if (_pmgUnderCursor->mg_pmgLeft ==NULL 
+      &&_pmgUnderCursor->mg_pmgRight==NULL 
+      &&_pmgUnderCursor->mg_pmgUp   ==NULL 
+      &&_pmgUnderCursor->mg_pmgDown ==NULL) {
+      // it cannot be focused
+      _pmgUnderCursor = NULL;
+      return;
+    }
+
+    // if the one under cursor is not active and not disappearing
+    if (pmgActive!=_pmgUnderCursor && _pmgUnderCursor->mg_bVisible) {
+      // change focus
+      if (pmgActive!=NULL) {
+        pmgActive->OnKillFocus();
+      }
+      _pmgUnderCursor->OnSetFocus();
+    }
+  }
+}*/
 // ------------------------ CMainMenu implementation
 
 CMainMenu::CMainMenu()
@@ -417,7 +474,8 @@ CMainMenu::CMainMenu()
   mgMainSingle.mg_pmgUp = &mgMainQuit;
   mgMainSingle.mg_pmgDown = &mgMainNetwork;
   mgMainSingle.colEnable = SE_COL_ORANGE_LIGHT|255;
-  mgMainSingle.mg_bRectangle = TRUE;
+  mgMainSingle.colSelected = SE_COL_ORANGE_DARK|255;
+  //mgMainSingle.mg_bRectangle = TRUE;
   //mgMainSingle.mg_pActivatedFunction = &StartSinglePlayerMenu;
 
   mgMainNetwork.mg_strText = TRANS("NETWORK");
@@ -426,7 +484,9 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainNetwork.mg_lnNode);
   mgMainNetwork.mg_pmgUp = &mgMainSingle;
   mgMainNetwork.mg_pmgDown = &mgMainSplitScreen;
-  mgMainNetwork.mg_bRectangle = TRUE;
+  mgMainNetwork.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainNetwork.colSelected = SE_COL_ORANGE_DARK|255;
+  //mgMainNetwork.mg_bRectangle = TRUE;
   //mgMainNetwork.mg_pActivatedFunction = StartNetworkMenu;
 
   mgMainSplitScreen.mg_strText = TRANS("SPLIT SCREEN");
@@ -435,6 +495,8 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainSplitScreen.mg_lnNode);
   mgMainSplitScreen.mg_pmgUp = &mgMainNetwork;
   mgMainSplitScreen.mg_pmgDown = &mgMainDemo;
+  mgMainSplitScreen.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainSplitScreen.colSelected = SE_COL_ORANGE_DARK|255;
   //mgMainSplitScreen.mg_pActivatedFunction = &StartSplitScreenMenu;
 
   mgMainDemo.mg_strText = TRANS("DEMO");
@@ -443,6 +505,8 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainDemo.mg_lnNode);
   mgMainDemo.mg_pmgUp = &mgMainSplitScreen;
   mgMainDemo.mg_pmgDown = &mgMainMods;
+  mgMainDemo.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainDemo.colSelected = SE_COL_ORANGE_DARK|255;
   //mgMainDemo.mg_pActivatedFunction = &StartDemoLoadMenu;
 
   mgMainMods.mg_strText = TRANS("MODS");
@@ -450,13 +514,9 @@ CMainMenu::CMainMenu()
   mgMainMods.mg_strTip = TRANS("run one of installed game modifications");
   gm_lhGadgets.AddTail( mgMainMods.mg_lnNode);
   mgMainMods.mg_pmgUp = &mgMainDemo;
+  mgMainMods.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainMods.colSelected = SE_COL_ORANGE_DARK|255;
   mgMainMods.mg_pmgDown = &mgMainHighScore;
-
-  #if TECHTESTONLY
-    mgMainMods.mg_pActivatedFunction = &DisabledFunction;
-  #else
-    //mgMainMods.mg_pActivatedFunction = &StartModsLoadMenu;
-  #endif
 
   mgMainHighScore.mg_strText = TRANS("HIGH SCORES");
   mgMainHighScore.mg_bfsFontSize = BFS_LARGE;
@@ -464,6 +524,8 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainHighScore.mg_lnNode);
   mgMainHighScore.mg_pmgUp = &mgMainMods;
   mgMainHighScore.mg_pmgDown = &mgMainOptions;
+  mgMainHighScore.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainHighScore.colSelected = SE_COL_ORANGE_DARK|255;
   //mgMainHighScore.mg_pActivatedFunction = &StartHighScoreMenu;
 
   mgMainOptions.mg_strText = TRANS("OPTIONS");
@@ -472,6 +534,8 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainOptions.mg_lnNode);
   mgMainOptions.mg_pmgUp = &mgMainHighScore;
   mgMainOptions.mg_pmgDown = &mgMainQuit;
+  mgMainOptions.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainOptions.colSelected = SE_COL_ORANGE_DARK|255;
   //mgMainOptions.mg_pActivatedFunction = &StartOptionsMenu;
   
   mgMainQuit.mg_strText = TRANS("QUIT");
@@ -480,6 +544,8 @@ CMainMenu::CMainMenu()
   gm_lhGadgets.AddTail( mgMainQuit.mg_lnNode);
   mgMainQuit.mg_pmgUp = &mgMainOptions;
   mgMainQuit.mg_pmgDown = &mgMainSingle;
+  mgMainQuit.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainQuit.colSelected = SE_COL_ORANGE_DARK|255;
   //mgMainQuit.mg_pActivatedFunction = &ExitConfirm;
 }
 
@@ -510,6 +576,19 @@ void CMainMenu::render(const SERender* render)
         itmg->render(render);
     }
 
+}
+
+
+void CMainMenu::update(POINT cursor)
+{
+    mgMainSingle.update(cursor);
+    mgMainNetwork.update(cursor);
+    mgMainSplitScreen.update(cursor);
+    mgMainDemo.update(cursor);
+    mgMainMods.update(cursor);
+    mgMainHighScore.update(cursor);
+    mgMainOptions.update(cursor);
+    mgMainQuit.update(cursor);
 }
 
 SEMenu::SEMenu()
@@ -937,158 +1016,7 @@ void SEMenu::render(const SERender* render)
  return;
 }
 
-void SEMenu::update()
+void SEMenu::update(POINT cursor)
 {
 
 }
-/*
-
-void SEMenu::LCDPrepare(FLOAT fFade)
-{
-  // get current time and alpha value
-  _tmNow_SE = (FLOAT)_pTimer->GetHighPrecisionTimer().GetSeconds();
-  _ulA_SE   = NormFloatToByte(fFade);
-
-  ::_LCDPrepare(fFade);
-}
-void SEMenu::LCDSetDrawport(CDrawPort *pdp)
-{
-  _pdp_SE = pdp;
-  _pixSizeI_SE = _pdp_SE->GetWidth();
-  _pixSizeJ_SE = _pdp_SE->GetHeight();
-  _boxScreen_SE = PIXaabbox2D ( PIX2D(0,0), PIX2D(_pixSizeI_SE, _pixSizeJ_SE));
-    
-  if (pdp->dp_SizeIOverRasterSizeI==1.0f) {
-    _bPopup = FALSE;
-  } else {
-    _bPopup = TRUE;
-  }
-  
-  ::_LCDSetDrawport(pdp);
-}
-void SEMenu::LCDDrawBox(PIX pixUL, PIX pixDR, const PIXaabbox2D &box, COLOR col)
-{
-  col = SE_COL_BLUE_NEUTRAL|255;
-
-  ::_LCDDrawBox(pixUL, pixDR, box, col);
-}
-void SEMenu::LCDScreenBox(COLOR col)
-{
-  col = SE_COL_BLUE_NEUTRAL|255;
-
-  ::_LCDScreenBox(col);
-}
-void SEMenu::LCDScreenBoxOpenLeft(COLOR col)
-{
-  col = SE_COL_BLUE_NEUTRAL|255;
-
-  ::_LCDScreenBoxOpenLeft(col);
-}
-void SEMenu::LCDScreenBoxOpenRight(COLOR col)
-{
-  col = SE_COL_BLUE_NEUTRAL|255;
-
-  ::_LCDScreenBoxOpenRight(col);
-}
-void SEMenu::LCDRenderClouds1(void)
-{
-  _pdp_SE->PutTexture(&_toBackdrop, _boxScreen_SE, C_WHITE|255);
-
-  if (!_bPopup) {
-
-    PIXaabbox2D box;
-        
-    // right character - Sam
-    INDEX iSize = 170;
-    INDEX iYU = 120;
-    INDEX iYM = iYU + iSize;
-    INDEX iYB = iYM + iSize;
-    INDEX iXL = 420;
-    INDEX iXR = (INDEX) (iXL + iSize*_pdp_SE->dp_fWideAdjustment);
-    
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYU*_pdp_SE->GetHeight()/480) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetHeight()/480));
-    _pdp_SE->PutTexture(&_toSamU, box, SE_COL_BLUE_NEUTRAL|255);
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetHeight()/480) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYB*_pdp_SE->GetHeight()/480));
-    _pdp_SE->PutTexture(&_toSamD, box, SE_COL_BLUE_NEUTRAL|255);
-
-    iSize = 120;
-    iYU = 0;
-    iYM = iYU + iSize;
-    iYB = iYM + iSize;
-    iXL = -20;
-    iXR = iXL + iSize;
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYU*_pdp_SE->GetWidth()/640) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetWidth()/640));
-    _pdp_SE->PutTexture(&_toLeftU, box, SE_COL_BLUE_NEUTRAL|200);
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetWidth()/640) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYB*_pdp_SE->GetWidth()/640));
-    _pdp_SE->PutTexture(&_toLeftD, box, SE_COL_BLUE_NEUTRAL|200);
-    iYU = iYB;
-    iYM = iYU + iSize;
-    iYB = iYM + iSize;
-    iXL = -20;
-    iXR = iXL + iSize;
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYU*_pdp_SE->GetWidth()/640) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetWidth()/640));
-    _pdp_SE->PutTexture(&_toLeftU, box, SE_COL_BLUE_NEUTRAL|200);
-    box = PIXaabbox2D( PIX2D( iXL*_pdp_SE->GetWidth()/640, iYM*_pdp_SE->GetWidth()/640) ,
-                       PIX2D( iXR*_pdp_SE->GetWidth()/640, iYB*_pdp_SE->GetWidth()/640));
-    _pdp_SE->PutTexture(&_toLeftD, box, SE_COL_BLUE_NEUTRAL|200);
-  
-  }
-
-  MEXaabbox2D boxBcgClouds1;
-  TiledTextureSE(_boxScreen_SE, 1.2f*_pdp_SE->GetWidth()/640.0f, 
-    MEX2D(sin(_tmNow_SE*0.5f)*35,sin(_tmNow_SE*0.7f+1)*21),   boxBcgClouds1);
-  _pdp_SE->PutTexture(&_toBcgClouds, _boxScreen_SE, boxBcgClouds1, C_BLACK|_ulA_SE>>2);
-  TiledTextureSE(_boxScreen_SE, 0.7f*_pdp_SE->GetWidth()/640.0f, 
-    MEX2D(sin(_tmNow_SE*0.6f+1)*32,sin(_tmNow_SE*0.8f)*25),   boxBcgClouds1);
-  _pdp_SE->PutTexture(&_toBcgClouds, _boxScreen_SE, boxBcgClouds1, C_BLACK|_ulA_SE>>2);
-}
-void SEMenu::LCDRenderCloudsForComp(void)
-{
-  MEXaabbox2D boxBcgClouds1;
-  TiledTextureSE(_boxScreen_SE, 1.856f*_pdp_SE->GetWidth()/640.0f, 
-    MEX2D(sin(_tmNow_SE*0.5f)*35,sin(_tmNow_SE*0.7f)*21),   boxBcgClouds1);
-  _pdp_SE->PutTexture(&_toBcgClouds, _boxScreen_SE, boxBcgClouds1, SE_COL_BLUE_NEUTRAL|_ulA_SE>>2);
-  TiledTextureSE(_boxScreen_SE, 1.323f*_pdp_SE->GetWidth()/640.0f, 
-    MEX2D(sin(_tmNow_SE*0.6f)*31,sin(_tmNow_SE*0.8f)*25),   boxBcgClouds1);
-  _pdp_SE->PutTexture(&_toBcgClouds, _boxScreen_SE, boxBcgClouds1, SE_COL_BLUE_NEUTRAL|_ulA_SE>>2);
-}
-void SEMenu::LCDRenderClouds2(void)
-{
-  NOTHING;
-}
-void SEMenu::LCDRenderGrid(void)
-{
-  NOTHING;
-}
-void SEMenu::LCDRenderCompGrid(void)
-{
-   MEXaabbox2D boxBcgGrid;
-   TiledTextureSE(_boxScreen_SE, 0.5f*_pdp_SE->GetWidth()/(_pdp_SE->dp_SizeIOverRasterSizeI*640.0f), MEX2D(0,0), boxBcgGrid);
-   _pdp_SE->PutTexture(&_toBcgGrid, _boxScreen_SE, boxBcgGrid, SE_COL_BLUE_NEUTRAL|_ulA_SE>>1); 
-}
-void SEMenu::LCDDrawPointer(PIX pixI, PIX pixJ)
-{
-  CDisplayMode dmCurrent;
-  _pGfx->GetCurrentDisplayMode(dmCurrent);
-  if (dmCurrent.IsFullScreen()) {
-    while (ShowCursor(FALSE) >= 0);
-  } else {
-    if (!_pInput->IsInputEnabled()) {
-      while (ShowCursor(TRUE) < 0);
-    }
-    return;
-  }
-  PIX pixSizeI = _toPointer.GetWidth();
-  PIX pixSizeJ = _toPointer.GetHeight();
-  pixI-=1;
-  pixJ-=1;
-  _pdp_SE->PutTexture( &_toPointer, PIXaabbox2D( PIX2D(pixI, pixJ), PIX2D(pixI+pixSizeI, pixJ+pixSizeJ)),
-                    LCDFadedColor(C_WHITE|255));
-
-  //::_LCDDrawPointer(pixI, pixJ);
-}*/

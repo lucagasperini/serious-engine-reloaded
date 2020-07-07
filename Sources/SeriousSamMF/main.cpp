@@ -34,6 +34,8 @@ CMainMenu* pMainMenu = NULL;
 SEMainWindow* pMainWin = NULL;
 SERender* pRender = NULL;
 
+POINT pt;
+
 // display mode settings
 INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
 INDEX iWindowAPI = 0;         // 0==OpenGL
@@ -170,6 +172,8 @@ BOOL GameLoop()
   if( !pMainWin->isIconic() && pRender->lock())
   {
     pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
+    // get real cursor position
+    GetCursorPos(&pt);
     // do menu
     if( bMenuRendering) {
       // clear z-buffer
@@ -177,6 +181,7 @@ BOOL GameLoop()
       // remember if we should render menus next tick
       pMenu->render(pRender);
       pMainMenu->render(pRender);
+      pMainMenu->update(pt);
     }
     // done with all
     pRender->unlock();
@@ -381,8 +386,65 @@ BOOL canChangeResolution(PIX w, PIX h)
     }
     return TRUE;
 }
+/*
+void updateMouseFocus(void)
+{
+  // get real cursor position
+  POINT pt;
+  GetCursorPos(&pt);
+  
+  extern INDEX sam_bWideScreen;
+  extern CDrawPort *pdp;
+  if( sam_bWideScreen) {
+    const PIX pixHeight = pdp->GetHeight();
+    pt.y -= (LONG) ((pixHeight/0.75f-pixHeight)/2);
+  }
+  _pixCursorPosI += pt.x-_pixCursorExternPosI;
+  _pixCursorPosJ  = _pixCursorExternPosJ;
+  _pixCursorExternPosI = pt.x;
+  _pixCursorExternPosJ = pt.y;
 
+  // if mouse not used last
+  if (!_bMouseUsedLast||_bDefiningKey||_bEditingString) {
+    // do nothing
+    return;
+  }
 
+  CMenuGadget *pmgActive = NULL;
+  // for all gadgets in menu
+  FOREACHINLIST( CMenuGadget, mg_lnNode, pgmCurrentMenu->gm_lhGadgets, itmg) {
+    //CMenuGadget &mg = *itmg;
+    // if focused
+    if( itmg->mg_bFocused) {
+      // remember it
+      pmgActive = &itmg.Current();
+    }
+  }
+
+  // if there is some under cursor
+  if (_pmgUnderCursor!=NULL) {
+    _pmgUnderCursor->OnMouseOver(_pixCursorPosI, _pixCursorPosJ);
+    // if the one under cursor has no neighbours
+    if (_pmgUnderCursor->mg_pmgLeft ==NULL 
+      &&_pmgUnderCursor->mg_pmgRight==NULL 
+      &&_pmgUnderCursor->mg_pmgUp   ==NULL 
+      &&_pmgUnderCursor->mg_pmgDown ==NULL) {
+      // it cannot be focused
+      _pmgUnderCursor = NULL;
+      return;
+    }
+
+    // if the one under cursor is not active and not disappearing
+    if (pmgActive!=_pmgUnderCursor && _pmgUnderCursor->mg_bVisible) {
+      // change focus
+      if (pmgActive!=NULL) {
+        pmgActive->OnKillFocus();
+      }
+      _pmgUnderCursor->OnSetFocus();
+    }
+  }
+}
+*/
 int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
@@ -407,7 +469,6 @@ int SubMain(LPSTR lpCmdLine)
   */
   while( _bRunning)
   {
-      
     // while there are any messages in the message queue
     MSG msg;
     
