@@ -4,9 +4,11 @@
 #include <Engine/Graphics/Texture.h>
 #include "Render.h"
 #include "MenuGadget.h"
+#include "Button.h"
 
 class CGameMenu {
 public:
+    SERender *render;
   CListHead gm_lhGadgets;
   CGameMenu *gm_pgmParentMenu;
   BOOL gm_bPopup;
@@ -34,23 +36,29 @@ public:
   virtual void Think(void);
 };
 
+
 class CMainMenu : public CGameMenu {
 public:
     //CMGTitle mgMainTitle;
-CMGButton mgMainVersionLabel;
-CMGButton mgMainModLabel;
-CMGButton mgMainSingle;
-CMGButton mgMainNetwork;
-CMGButton mgMainSplitScreen;
-CMGButton mgMainDemo;
-CMGButton mgMainMods;
-CMGButton mgMainHighScore;
-CMGButton mgMainOptions;
-CMGButton mgMainQuit;
+SEButton mgMainVersionLabel;
+SEButton mgMainModLabel;
+SEButton mgMainSingle;
+SEButton mgMainNetwork;
+SEButton mgMainSplitScreen;
+SEButton mgMainDemo;
+SEButton mgMainMods;
+SEButton mgMainHighScore;
+SEButton mgMainOptions;
+SEButton mgMainQuit;
 
-  void Initialize_t(void);
+FLOAT fontSize;
+FLOAT positionStart;
+
+  void Initialize_t(SERender* _render);
   void StartMenu(void);
+  PIXaabbox2D positionMenuItem(FLOAT fRow);
 };
+
 
 
 class SEMenu 
@@ -67,10 +75,9 @@ private:
     CTextureObject *_ptoLogoODI = NULL;
     CTextureObject *_ptoLogoEAX = NULL;
     
-// ptr to current menu
-CGameMenu *pgmCurrentMenu = NULL;
-    // -------- Main menu
-CMainMenu gmMainMenu;
+    CMainMenu gmMainMenu;
+
+    CGameMenu* pgmCurrentMenu = NULL;
 
     BOOL active;
 public:

@@ -5,6 +5,7 @@
 #include <Engine/Base/Types.h>
 #include <Engine/Math/AABBox.h>
 #include <Engine/Base/SDL/SDLEvents.h>
+#include "Render.h"
 
 enum ButtonFontSize {
   BFS_SMALL = 0,
@@ -16,7 +17,7 @@ enum ButtonFontSize {
 class CMenuGadget {
 public:
   CListNode mg_lnNode;
-  FLOATaabbox2D mg_boxOnScreen;
+  PIXaabbox2D mg_boxOnScreen;
   BOOL mg_bVisible;
   BOOL mg_bEnabled;
   BOOL mg_bLabel;
@@ -42,30 +43,8 @@ public:
   virtual void OnMouseOver(PIX pixI, PIX pixJ);
 
   virtual COLOR GetCurrentColor(void);
-  virtual void  Render( CDrawPort *pdp);
+  virtual void  Render( SERender *render);
   virtual BOOL  IsSeparator(void) { return FALSE; };
-};
-
-class CMGButton : public CMenuGadget {
-public:
-  CTString mg_strLabel;   // for those that have labels separately from main text
-  CTString mg_strText;
-  INDEX mg_iCenterI;
-  ButtonFontSize mg_bfsFontSize;
-  BOOL  mg_bEditing;
-  BOOL  mg_bHighlighted;
-  BOOL  mg_bRectangle;
-  BOOL  mg_bMental;
-  INDEX mg_iTextMode;
-  INDEX mg_iCursorPos;
-
-  INDEX mg_iIndex;
-  void (*mg_pActivatedFunction)(void);
-  CMGButton(void);
-  void SetText( CTString strNew);
-  void OnActivate(void);
-  void Render( CDrawPort *pdp);
-  PIX  GetCharOffset( CDrawPort *pdp, INDEX iCharNo);
 };
 
 #endif

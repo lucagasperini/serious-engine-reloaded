@@ -6,6 +6,7 @@
 #include <Engine/Base/ListIterator.inl>
 #include <Engine/Graphics/Font.h>
 
+#include "Colors.h"
 
 CFontData _fdBig;
 CFontData _fdMedium;
@@ -369,16 +370,28 @@ FLOATaabbox2D BoxBigRow(FLOAT fRow)
     FLOAT2D(0.1f, _fBigStartJ+fRow*_fBigSizeJ),
     FLOAT2D(0.9f, _fBigStartJ+(fRow+1)*_fBigSizeJ));
 }
-// ------------------------ CMainMenu implementation
-void CMainMenu::Initialize_t(void)
+
+PIXaabbox2D CMainMenu::positionMenuItem(FLOAT row)
 {
+  return render->box2D(0.0f, 
+                      positionStart + row * fontSize, 
+                      1.0f, 
+                      positionStart + (row + 1) * fontSize
+  );
+}
+// ------------------------ CMainMenu implementation
+void CMainMenu::Initialize_t(SERender *_render)
+{
+  render = _render;
   // intialize main menu
 /*
   mgMainTitle.mg_strText = "SERIOUS SAM - BETA";  // nothing to see here, kazuya
   mgMainTitle.mg_boxOnScreen = BoxTitle();
   gm_lhGadgets.AddTail( mgMainTitle.mg_lnNode);
   */
-
+ positionStart = 0.25f;
+ fontSize = 0.07f;
+/*
   CTString sam_strVersion = "VERSIONE DA AGGIUNGERE";
   mgMainVersionLabel.mg_strText = sam_strVersion;
   mgMainVersionLabel.mg_boxOnScreen = BoxVersion();
@@ -396,28 +409,31 @@ void CMainMenu::Initialize_t(void)
   mgMainModLabel.mg_bEnabled = FALSE;
   mgMainModLabel.mg_bLabel = TRUE;
   gm_lhGadgets.AddTail( mgMainModLabel.mg_lnNode);
-
+*/
   mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
   mgMainSingle.mg_bfsFontSize = BFS_LARGE;
-  mgMainSingle.mg_boxOnScreen = BoxBigRow(0.0f);
+  mgMainSingle.mg_boxOnScreen = positionMenuItem(0.0f);
   mgMainSingle.mg_strTip = TRANS("single player game menus");
   gm_lhGadgets.AddTail( mgMainSingle.mg_lnNode);
   mgMainSingle.mg_pmgUp = &mgMainQuit;
   mgMainSingle.mg_pmgDown = &mgMainNetwork;
+  mgMainSingle.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainSingle.mg_bRectangle = TRUE;
   //mgMainSingle.mg_pActivatedFunction = &StartSinglePlayerMenu;
 
   mgMainNetwork.mg_strText = TRANS("NETWORK");
   mgMainNetwork.mg_bfsFontSize = BFS_LARGE;
-  mgMainNetwork.mg_boxOnScreen = BoxBigRow(1.0f);
+  mgMainNetwork.mg_boxOnScreen = positionMenuItem(1.0f);
   mgMainNetwork.mg_strTip = TRANS("LAN/iNet multiplayer menus");
   gm_lhGadgets.AddTail( mgMainNetwork.mg_lnNode);
   mgMainNetwork.mg_pmgUp = &mgMainSingle;
   mgMainNetwork.mg_pmgDown = &mgMainSplitScreen;
+  mgMainNetwork.mg_bRectangle = TRUE;
   //mgMainNetwork.mg_pActivatedFunction = StartNetworkMenu;
 
   mgMainSplitScreen.mg_strText = TRANS("SPLIT SCREEN");
   mgMainSplitScreen.mg_bfsFontSize = BFS_LARGE;
-  mgMainSplitScreen.mg_boxOnScreen = BoxBigRow(2.0f);
+  mgMainSplitScreen.mg_boxOnScreen = positionMenuItem(2.0f);
   mgMainSplitScreen.mg_strTip = TRANS("play with multiple players on one computer");
   gm_lhGadgets.AddTail( mgMainSplitScreen.mg_lnNode);
   mgMainSplitScreen.mg_pmgUp = &mgMainNetwork;
@@ -426,7 +442,7 @@ void CMainMenu::Initialize_t(void)
 
   mgMainDemo.mg_strText = TRANS("DEMO");
   mgMainDemo.mg_bfsFontSize = BFS_LARGE;
-  mgMainDemo.mg_boxOnScreen = BoxBigRow(3.0f);
+  mgMainDemo.mg_boxOnScreen = positionMenuItem(3.0f);
   mgMainDemo.mg_strTip = TRANS("play a game demo");
   gm_lhGadgets.AddTail( mgMainDemo.mg_lnNode);
   mgMainDemo.mg_pmgUp = &mgMainSplitScreen;
@@ -435,7 +451,7 @@ void CMainMenu::Initialize_t(void)
 
   mgMainMods.mg_strText = TRANS("MODS");
   mgMainMods.mg_bfsFontSize = BFS_LARGE;
-  mgMainMods.mg_boxOnScreen = BoxBigRow(4.0f);
+  mgMainMods.mg_boxOnScreen = positionMenuItem(4.0f);
   mgMainMods.mg_strTip = TRANS("run one of installed game modifications");
   gm_lhGadgets.AddTail( mgMainMods.mg_lnNode);
   mgMainMods.mg_pmgUp = &mgMainDemo;
@@ -449,7 +465,7 @@ void CMainMenu::Initialize_t(void)
 
   mgMainHighScore.mg_strText = TRANS("HIGH SCORES");
   mgMainHighScore.mg_bfsFontSize = BFS_LARGE;
-  mgMainHighScore.mg_boxOnScreen = BoxBigRow(5.0f);
+  mgMainHighScore.mg_boxOnScreen = positionMenuItem(5.0f);
   mgMainHighScore.mg_strTip = TRANS("view list of top ten best scores");
   gm_lhGadgets.AddTail( mgMainHighScore.mg_lnNode);
   mgMainHighScore.mg_pmgUp = &mgMainMods;
@@ -458,7 +474,7 @@ void CMainMenu::Initialize_t(void)
 
   mgMainOptions.mg_strText = TRANS("OPTIONS");
   mgMainOptions.mg_bfsFontSize = BFS_LARGE;
-  mgMainOptions.mg_boxOnScreen = BoxBigRow(6.0f);
+  mgMainOptions.mg_boxOnScreen = positionMenuItem(6.0f);
   mgMainOptions.mg_strTip = TRANS("adjust video, audio and input options");
   gm_lhGadgets.AddTail( mgMainOptions.mg_lnNode);
   mgMainOptions.mg_pmgUp = &mgMainHighScore;
@@ -467,7 +483,7 @@ void CMainMenu::Initialize_t(void)
   
   mgMainQuit.mg_strText = TRANS("QUIT");
   mgMainQuit.mg_bfsFontSize = BFS_LARGE;
-  mgMainQuit.mg_boxOnScreen = BoxBigRow(7.0f);
+  mgMainQuit.mg_boxOnScreen = positionMenuItem(7.0f);
   mgMainQuit.mg_strTip = TRANS("exit game immediately");
   gm_lhGadgets.AddTail( mgMainQuit.mg_lnNode);
   mgMainQuit.mg_pmgUp = &mgMainOptions;
@@ -567,7 +583,7 @@ void SEMenu::init(SERender *_render)
     gmConfirmMenu.gm_pmgSelectedByDefault = &mgConfirmYes;
     gmConfirmMenu.gm_pgmParentMenu = NULL;
 */
-    gmMainMenu.Initialize_t();
+    gmMainMenu.Initialize_t(render);
     gmMainMenu.gm_strName="Main";
     gmMainMenu.gm_pmgSelectedByDefault = &gmMainMenu.mgMainSingle;
     gmMainMenu.gm_pgmParentMenu = NULL;
@@ -848,7 +864,7 @@ BOOL SEMenu::run()
     // if gadget is visible
     if( itmg->mg_bVisible) {
       //bStillInMenus = TRUE;
-      itmg->Render(dp);/*
+      itmg->Render(render);/*
       if (FloatBoxToPixBox(&dpMenu, itmg->mg_boxOnScreen)>=PIX2D(_pixCursorPosI, _pixCursorPosJ)) {
         _pmgUnderCursor = itmg;
       }*/

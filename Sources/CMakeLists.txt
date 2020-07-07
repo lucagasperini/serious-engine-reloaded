@@ -940,6 +940,7 @@ add_executable(${SSAMFM}
     SeriousSamMF/InterfaceSDL.cpp
     SeriousSamMF/Render.cpp
     SeriousSamMF/MenuGadget.cpp
+    SeriousSamMF/Button.cpp
 )
 
 target_link_libraries(${SSAMFM} ${SENGINELIB})

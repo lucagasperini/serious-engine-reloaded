@@ -92,3 +92,20 @@ CTextureObject* SERender::loadTexture(const CTFileName &fntex)
     tex->SetData_t(fntex);
     return tex;
 }
+
+void SERender::setFont(CFontData *font)
+{
+    FLOAT scaleY = (FLOAT)drawPort->GetHeight() / (FLOAT)virtY;
+
+    drawPort->SetFont(font);
+    drawPort->SetTextScaling(scaleY);
+    drawPort->SetTextAspect(1.0f);
+}
+
+PIXaabbox2D SERender::box2D(FLOAT x, FLOAT y, FLOAT w, FLOAT h)
+{
+    PIX pixW = drawPort->GetWidth();
+    PIX pixH = drawPort->GetHeight();
+
+    return PIXaabbox2D(PIX2D( x * pixW, y * pixH ), PIX2D( w * pixW, h * pixH));
+}

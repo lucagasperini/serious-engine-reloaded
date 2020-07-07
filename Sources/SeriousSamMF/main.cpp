@@ -230,12 +230,12 @@ BOOL Init(CTString strCmdLine)
 
   _pGame->LCDInit();
 */
-  if( sam_bFirstStarted) {
+  /*if( sam_bFirstStarted) {
     InfoMessage("%s", TRANS(
       "SeriousSam is starting for the first time.\n"
       "If you experience any problems, please consult\n"
       "ReadMe file for troubleshooting information."));
-  }
+  }*/
 
   // initialize sound library
   snd_iFormat = Clamp( snd_iFormat, (INDEX)CSoundLibrary::SF_NONE, (INDEX)CSoundLibrary::SF_44100_16);

@@ -36,6 +36,10 @@ public:
     void putTexture(class CTextureObject *pTO, PIX _x, PIX _y, PIX _w, PIX _h);
     CTextureObject* loadTexture(const CTFileName &fnm);
 
+    void setFont(CFontData *font);
+
+    PIXaabbox2D box2D(FLOAT x, FLOAT y, FLOAT w, FLOAT h);
+
     BOOL lock();
     void unlock();
 };
