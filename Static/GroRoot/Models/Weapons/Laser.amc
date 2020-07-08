@@ -1,0 +1,42 @@
+    {
+
+      Attachment: 9
+      {
+        Model:   TFNM Models\Weapons\Laser\LaserItem.mdl
+        Texture: TFNM Models\Weapons\Laser\Body.tex
+	
+        Attachment: 0
+        {
+          Model:   TFNM Models\Weapons\Laser\Body.mdl
+          Texture: TFNM Models\Weapons\Laser\Body.tex
+        }
+
+        Attachment: 1
+        {
+          Model:   TFNM Models\Weapons\Laser\Barrel.mdl
+          Texture: TFNM Models\Weapons\Laser\Barrel.tex
+        }
+
+        Attachment: 2
+        {
+          Model:   TFNM Models\Weapons\Laser\Barrel.mdl
+          Texture: TFNM Models\Weapons\Laser\Barrel.tex
+        }
+
+        Attachment: 3
+        {
+          Model:   TFNM Models\Weapons\Laser\Barrel.mdl
+          Texture: TFNM Models\Weapons\Laser\Barrel.tex
+        }
+
+        Attachment: 4
+        {
+          Model:   TFNM Models\Weapons\Laser\Barrel.mdl
+          Texture: TFNM Models\Weapons\Laser\Barrel.tex
+        }
+
+
+      }
+
+
+    }

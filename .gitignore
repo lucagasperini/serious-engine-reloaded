@@ -35,6 +35,9 @@ Bin/*
 # Controls Directory
 Controls/*
 
+# CroTeam Zip Files
+*.gro
+
 # Unexclude empty
 !empty
 

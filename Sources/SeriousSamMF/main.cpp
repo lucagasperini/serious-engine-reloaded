@@ -411,9 +411,13 @@ int SubMain(LPSTR lpCmdLine)
   pMainMenu = new CMainMenu();
 
   pMenu->setActive(TRUE);
+
+  //pRender->tga2tex(CTFILENAME("logo.tga"));
+
   pMenu->  _ptoLogoCT  = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
   pMenu->  _ptoLogoODI = pRender->loadTexture(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
   pMenu->  _ptoLogoEAX = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
+  pMenu-> tga = pRender->loadTexture(CTFILENAME("Textures\\Logo\\logo.tex"));
   pMenu->init();
   // initialy, application is running and active, console and menu are off
   runningGame = TRUE;

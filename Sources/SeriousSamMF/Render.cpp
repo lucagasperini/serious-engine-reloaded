@@ -2,6 +2,7 @@
 #include "Colors.h"
 
 #include <Engine/Engine.h>
+#include <Engine/Graphics/ImageInfo.h>
 
 
 SERender::SERender()
@@ -102,6 +103,30 @@ void SERender::putTexture(class CTextureObject *texObj, PIX _x, PIX _y) const
     pixH = pixY + ( _h * scaleY );
 
     drawPort->PutTexture( texObj, PIXaabbox2D( PIX2D(pixX, pixY), PIX2D(pixW, pixH)));
+}
+
+BOOL SERender::tga2tex(const CTFileName &fntex) const
+{/*
+    CTextureData* data = new CTextureData();
+    CImageInfo* image = new CImageInfo();
+    image->LoadAnyGfxFormat_t(fntex);
+    data->Create_t(image,1024,1,FALSE);
+    CTextureObject* tex = new CTextureObject;
+    tex->SetData((CAnimData*)data);
+*/
+    CImageInfo iiImageInfo;
+   iiImageInfo.LoadAnyGfxFormat_t( fntex);
+    // both dimension must be potentions of 2
+    if( (iiImageInfo.ii_Width  == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Width))) &&
+        (iiImageInfo.ii_Height == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Height))) )
+    {
+      CTFileName fnTexture = fntex.FileDir()+fntex.FileName()+".tex";
+      // creates new texture with one frame
+      CTextureData tdPicture;
+      tdPicture.Create_t( &iiImageInfo, iiImageInfo.ii_Width, 1, FALSE);
+      tdPicture.Save_t( fnTexture);
+    }
+    return TRUE;
 }
 
 CTextureObject* SERender::loadTexture(const CTFileName &fntex) const

@@ -1,0 +1,47 @@
+    {
+
+      Attachment: 11
+      {
+        Model:   TFNM Models\Weapons\RocketLauncher\RocketLauncherItem.mdl
+        Texture: TFNM Models\Weapons\RocketLauncher\Body.tex
+	
+        Attachment: 0
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\Body.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\Body.tex
+        }
+
+        Attachment: 1
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\RotatingPart.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\RotatingPart.tex
+        }
+
+        Attachment: 2
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.tex
+        }
+        Attachment: 3
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.tex
+        }
+
+        Attachment: 4
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.tex
+        }
+       
+	 Attachment: 5
+        {
+          Model:   TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.mdl
+          Texture: TFNM Models\Weapons\RocketLauncher\Projectile\Rocket.tex
+        }
+
+
+      }
+
+
+    }

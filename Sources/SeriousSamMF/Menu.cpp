@@ -868,12 +868,13 @@ void SEMenu::render(const SERender* render)
     /*
     if( pgmCurrentMenu==&gmMainMenu)
     {*/
-    render->putTexture(_ptoLogoODI, render->getVirtX() - 100 - 16, render->getVirtY() - 16 - 100, 100, 100);
-    render->putTexture(_ptoLogoCT, 16, render->getVirtY() - 16 - 100, 100, 100);
+    render->putTexture(_ptoLogoODI, render->getVirtX() - 200 - 16, render->getVirtY() - 16 - 200, 200, 200);
+    render->putTexture(_ptoLogoCT, 16, render->getVirtY() - 16 - 200, 200, 200);
 
-    PIX pixCenter = (PIX) (render->getVirtX()/2);
-    render->putTexture(&_toLogoMenuA, pixCenter-256, 10, 256, 64);
-    render->putTexture(&_toLogoMenuB, pixCenter, 10, 256, 64);
+    PIX pixCenter = (PIX) (render->getVirtX()/4);
+    render->putTexture(tga, pixCenter, 10, 1024, 256);
+    //render->putTexture(&_toLogoMenuA, pixCenter-512, 10, 512, 128);
+    //render->putTexture(&_toLogoMenuB, pixCenter, 10, 512, 128);
 
     /*} else if (pgmCurrentMenu==&gmAudioOptionsMenu) {
       if( _ptoLogoEAX!=NULL) {

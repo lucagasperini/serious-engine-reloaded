@@ -102,32 +102,28 @@ static __forceinline CTStream &operator<<(CTStream &strm, const PCXHeader &t) {
 }
 #endif // 0
 
+#define TARGA_HEADER_SIZE 18
+
 // TARGA header structure
 struct TGAHeader
 {
   UBYTE IdLength;
   UBYTE ColorMapType;
   UBYTE ImageType;
-  UBYTE ColorMapSpec[5];
+  UWORD ColorMapOrigin;
+  UWORD ColorMapLength;
+  UBYTE ColorMapDepth;
   UWORD Xorigin;
   UWORD Yorigin;
   UWORD	Width;
   UWORD Height;
   UBYTE BitsPerPixel;
   UBYTE Descriptor;
-};
+} __attribute__((packed));
 
 static __forceinline CTStream &operator>>(CTStream &strm, TGAHeader &t) {
-  strm>>t.IdLength;
-  strm>>t.ColorMapType;
-  strm>>t.ImageType;
-  strm>>t.ColorMapSpec[5];
-  strm>>t.Xorigin;
-  strm>>t.Yorigin;
-  strm>>t.Width;
-  strm>>t.Height;
-  strm>>t.BitsPerPixel;
-  strm>>t.Descriptor;
+
+  strm.Read_t((void*)&t,TARGA_HEADER_SIZE);
   return(strm);
 }
 

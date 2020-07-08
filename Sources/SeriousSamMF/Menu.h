@@ -47,6 +47,7 @@ public:
     CTextureObject *_ptoLogoCT  = NULL;
     CTextureObject *_ptoLogoODI = NULL;
     CTextureObject *_ptoLogoEAX = NULL;
+    CTextureObject* tga = NULL;
     /*
     CMainMenu* gmMainMenu = NULL;
 

@@ -36,6 +36,7 @@ public:
     void putTexture(class CTextureObject *pTO, PIX _x, PIX _y) const;
     void putTexture(class CTextureObject *pTO, PIX _x, PIX _y, PIX _w, PIX _h) const;
     CTextureObject* loadTexture(const CTFileName &fnm) const;
+    BOOL tga2tex(const CTFileName &fnm) const;
 
     void setText(CFontData *font, FLOAT addScale = 0.0f, INDEX textmode = 1) const;
 

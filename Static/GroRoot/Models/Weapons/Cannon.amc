@@ -1,0 +1,18 @@
+    {
+
+      Attachment: 7
+      {
+        Model:   TFNM Models\Weapons\Cannon\Cannon.mdl
+        Texture: TFNM Models\Weapons\Cannon\Body.tex
+	
+        Attachment: 0
+        {
+          Model:   TFNM Models\Weapons\Cannon\Body.mdl
+          Texture: TFNM Models\Weapons\Cannon\Body.tex
+        }
+
+
+      }
+
+
+    }

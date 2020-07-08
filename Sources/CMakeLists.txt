@@ -959,17 +959,27 @@ if(LINUX)
     endif()
 endif()
 
+add_executable(targatest Utils/targatest.cpp)
+target_link_libraries(targatest ${SENGINELIB})
+set_target_properties(targatest PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+target_link_libraries(targatest "m")
+target_link_libraries(targatest "dl")
+target_link_libraries(targatest "pthread")
+target_link_libraries(targatest ${SDL2_LIBRARY})
+target_link_libraries(targatest ${ZLIB_LIBRARIES})
+add_executable(targa Utils/targa.cpp)
+
 
 # !!! FIXME: this is an option because you have to recompile the entire engine twice.
 # !!! FIXME:  If we can put the engine in a static library and not lose symbols,
 # !!! FIXME:  that's a better plan and we can remove the toggle here.
-option(BUILD_DEDICATED_SERVER "Compile the dedicated server, too" FALSE)
-if(BUILD_DEDICATED_SERVER)
-    add_executable(SeriousSamDedicated ${ENGINE_SRCS} DedicatedServer/DedicatedServer.cpp)
-    add_dependencies(SeriousSamDedicated ParseEntities)
-    # Make symbols in the main executable available to dynamic objects
-    set_target_properties(SeriousSamDedicated PROPERTIES ENABLE_EXPORTS ON)
-endif()
+
+set(SSAMDEDICATED "SSamDedicated")
+add_executable(${SSAMDEDICATED} DedicatedServer/DedicatedServer.cpp)
+target_link_libraries(${SSAMDEDICATED} ${SENGINELIB})
+add_dependencies(${SSAMDEDICATED} ParseEntities)
+# Make symbols in the main executable available to dynamic objects
+set_target_properties(${SSAMDEDICATED} PROPERTIES ENABLE_EXPORTS ON)
 
 if(MACOSX)
     target_link_libraries(${SSAM} ${ZLIB_LIBRARIES})
@@ -981,15 +991,13 @@ if(MACOSX)
       target_link_libraries(${SSAM} "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
     endif()
     
-    if(BUILD_DEDICATED_SERVER)
-		target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
-		if(USE_SYSTEM_SDL2)
-			target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
-		else()
-			target_link_libraries(SeriousSamDedicated "${COCOA_FRAMEWORK}")
-			target_link_libraries(SeriousSamDedicated "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
-		endif()
-    endif()
+	target_link_libraries(${SSAMDEDICATED} ${ZLIB_LIBRARIES})
+	if(USE_SYSTEM_SDL2)
+		target_link_libraries(${SSAMDEDICATED} ${SDL2_LIBRARY})
+	else()
+		target_link_libraries(${SSAMDEDICATED} "${COCOA_FRAMEWORK}")
+		target_link_libraries(${SSAMDEDICATED} "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
+	endif()
 endif()
 
 if(LINUX)
@@ -1002,14 +1010,12 @@ if(LINUX)
     if(PANDORA)
     	target_link_libraries(${SSAM} "rt")
     endif()
-    if(BUILD_DEDICATED_SERVER)
-        set_target_properties(SeriousSamDedicated PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-        target_link_libraries(SeriousSamDedicated "m")
-        target_link_libraries(SeriousSamDedicated "dl")
-        target_link_libraries(SeriousSamDedicated "pthread")
-	target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
-        target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
-    endif()
+        set_target_properties(${SSAMDEDICATED} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+        target_link_libraries(${SSAMDEDICATED} "m")
+        target_link_libraries(${SSAMDEDICATED} "dl")
+        target_link_libraries(${SSAMDEDICATED} "pthread")
+	    target_link_libraries(${SSAMDEDICATED} ${SDL2_LIBRARY})
+        target_link_libraries(${SSAMDEDICATED} ${ZLIB_LIBRARIES})
 endif()
 
 if(FREEBSD)
@@ -1018,17 +1024,11 @@ if(FREEBSD)
     target_link_libraries(${SSAM} "pthread")
     target_link_libraries(${SSAM} ${SDL2_LIBRARY})
     target_link_libraries(${SSAM} ${ZLIB_LIBRARIES})
-    if(BUILD_DEDICATED_SERVER)
-        set_target_properties(SeriousSamDedicated PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-        target_link_libraries(SeriousSamDedicated "m")
-        target_link_libraries(SeriousSamDedicated "pthread")
-        target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
-        target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
-    endif()
-endif()
-
-if(TFE)
- set_target_properties(${SSAM} PROPERTIES OUTPUT_NAME "ssam-tfe")
+    set_target_properties(${SSAMDEDICATED} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+    target_link_libraries(${SSAMDEDICATED} "m")
+    target_link_libraries(${SSAMDEDICATED} "pthread")
+    target_link_libraries(${SSAMDEDICATED} ${SDL2_LIBRARY})
+    target_link_libraries(${SSAMDEDICATED} ${ZLIB_LIBRARIES})
 endif()
 
 # RAKE! Install Section.
@@ -1037,21 +1037,17 @@ if(DEBUG) # RAKE! Will this work with TFE?
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin/Debug"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    if(BUILD_DEDICATED_SERVER)
-        install(TARGETS SeriousSamDedicated
-                RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/Bin
-                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    endif()
+    install(TARGETS ${SSAMDEDICATED}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/Bin
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 else()
     install(TARGETS ${SSAM} ${SHADERSLIB} ${GAMEMPLIB} ${ENTITIESMPLIB}
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    if(BUILD_DEDICATED_SERVER)
-        install(TARGETS SeriousSamDedicated
-                RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
-                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    endif()
+    install(TARGETS ${SSAMDEDICATED}
+            RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/Bin"
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
 # RAKE! If CMAKE_INSTALL_PREFIX was set during config then its not a local install

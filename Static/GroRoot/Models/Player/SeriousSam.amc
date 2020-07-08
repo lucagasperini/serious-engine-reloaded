@@ -1,0 +1,31 @@
+Name: Serious Sam
+{
+  Model:   TFNM Models\Player\SeriousSam\Player.mdl
+  Texture: TFNM Models\Player\SeriousSam\Player.tex
+  Animation: 1
+  
+  Attachment: 0
+  {
+    Model:   TFNM Models\Player\SeriousSam\Body.mdl
+    Texture: TFNM Models\Player\SeriousSam\Body.tex
+    Animation: 23
+
+    Attachment: 0
+    {
+      Model:   TFNM Models\Player\SeriousSam\Head.mdl
+      Texture: TFNM Models\Player\SeriousSam\Head.tex
+
+      Attachment: 0
+      {
+        Model:   TFNM Models\Player\SeriousSam\Glasses.mdl
+        Texture: TFNM Models\Player\SeriousSam\Glasses.tex
+      }
+    }
+    PreviewOnly 
+     {
+
+      Include: TFNM Models\Weapons\Knife.amc
+     }
+
+  }
+}

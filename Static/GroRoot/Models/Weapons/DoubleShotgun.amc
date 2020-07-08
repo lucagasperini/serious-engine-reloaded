@@ -1,0 +1,29 @@
+    {
+
+      Attachment: 4
+      {
+        Model:   TFNM Models\Weapons\DoubleShotgun\DoubleShotgunItem.mdl
+        Texture: TFNM Models\Weapons\DoubleShotgun\Ammo.tex
+	
+        Attachment: 0
+        {
+          Model:   TFNM Models\Weapons\DoubleShotgun\Dshotgunhandle.mdl
+          Texture: TFNM Models\Weapons\DoubleShotgun\Handle.tex
+        }
+
+        Attachment: 1
+        {
+          Model:   TFNM Models\Weapons\DoubleShotgun\Dshotgunbarrels.mdl
+          Texture: TFNM Models\Weapons\DoubleShotgun\Barrels.tex
+        }
+
+        Attachment: 2
+        {
+          Model:   TFNM Models\Weapons\DoubleShotgun\Switch.mdl
+          Texture: TFNM Models\Weapons\DoubleShotgun\Switch.tex
+        }
+
+      }
+
+
+    }
