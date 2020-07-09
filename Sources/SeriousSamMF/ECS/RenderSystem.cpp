@@ -3,6 +3,8 @@
 
 extern ECSManager* manager;
 extern CDrawPort* main_dp;
+extern CFontData* main_fb_font;
+extern COLOR main_fb_color;
 
 void RenderSystem::init()
 {
@@ -28,6 +30,8 @@ void RenderSystem::update()
             continue;
         if(dbg_draw_border)
             render_border(position);
+        if(dbg_draw_id)
+            render_id(entity, position);
 
         SETextureComponent* texture = dynamic_cast<SETextureComponent *>((SEEntity*)entity);
         if (texture) 
@@ -91,5 +95,14 @@ void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent
 
 void RenderSystem::render_border(SEPositionComponent* _position)
 {
-     main_dp->DrawBorder(_position->x, _position->y, _position->w, _position->h, C_BLACK|0xff);
+     main_dp->DrawBorder(_position->x, _position->y, _position->w, _position->h, main_fb_color);
+}
+
+void RenderSystem::render_id(SEEntity* _entity, SEPositionComponent* _position)
+{
+    PIXaabbox2D box(PIX2D(_position->x, _position->y), PIX2D(_position->x + _position->w, _position->y + _position->h));
+    main_dp->SetFont(main_fb_font);
+    char* buffer = new char[32];
+    snprintf(buffer, 32, "%i", _entity->id);
+    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), main_fb_color);
 }

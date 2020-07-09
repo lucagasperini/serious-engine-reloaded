@@ -15,8 +15,10 @@ struct SEComponent
 struct SEPositionComponent : SEComponent
 {
     public:
-    ULONG w, h;
-    ULONG x, y;
+    ULONG x = 0;
+    ULONG y = 0;
+    ULONG w = 0;
+    ULONG h = 0;
 };
 
 struct SETextureComponent : SEComponent
@@ -29,20 +31,20 @@ struct SETextureComponent : SEComponent
 struct SETextComponent : SEComponent
 {
     public:
-    INDEX fontsize;
-    INDEX align;
+    INDEX fontsize = 0;
+    INDEX align = 0;
     CFontData fontdata;
-    INDEX textmode;
-    COLOR color;
+    INDEX textmode = 0;
+    COLOR color = 0xff;
     CTString str;
 };
 
 struct SEButtonComponent : SEComponent
 {
     public:
-    void (*function)();
-    BOOL focus;
-    COLOR color2;
+    void (*function)() = NULL;
+    BOOL focus = FALSE;
+    COLOR color2 = 0xff;
 };
 
 struct SEAlignComponent : SEComponent

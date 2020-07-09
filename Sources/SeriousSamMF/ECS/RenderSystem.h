@@ -7,6 +7,7 @@ class RenderSystem : SESystem
 {
     public:
     BOOL dbg_draw_border = FALSE;
+    BOOL dbg_draw_id = FALSE;
     void init() override;
     void init_texture(SETextureComponent* _texture);
 
@@ -15,6 +16,7 @@ class RenderSystem : SESystem
     void render_text(SEPositionComponent* _position, SETextComponent* _text);
     void render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button);
     void render_border(SEPositionComponent* _position);
+    void render_id(SEEntity* _entity, SEPositionComponent* _position);
 };
 
 #endif

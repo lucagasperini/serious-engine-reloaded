@@ -46,6 +46,9 @@ PositionSystem* position_system = NULL;
 RenderSystem* render_system = NULL;
 InputSystem* input_system = NULL;
 
+CFontData* main_fb_font;
+COLOR main_fb_color = C_BLACK|0xff;
+
 POINT cursor;
 SDL_Event* event = NULL;
 // display mode settings
@@ -227,6 +230,12 @@ void update()
                 break;
             case SDLK_F4:
                 canChangeResolution(1920, 1080, TRUE); //16:9
+                break;
+            case SDLK_F5:
+                render_system->dbg_draw_border=!render_system->dbg_draw_border;
+                break;
+            case SDLK_F6:
+                render_system->dbg_draw_id=!render_system->dbg_draw_id;
                 break;
             }
         }
@@ -442,7 +451,8 @@ int SubMain(LPSTR lpCmdLine)
   CFontData _fdBig;
   CFontData _fdMedium;
   CFontData _fdSmall;
-  _fdSmall.Load_t(  CTFILENAME( "Fonts\\Display3-narrow.fnt"));
+  main_fb_font = new CFontData;
+  main_fb_font->Load_t(  CTFILENAME( "Fonts\\Display3-narrow.fnt"));
   _fdMedium.Load_t( CTFILENAME( "Fonts\\Display3-normal.fnt"));
   _fdBig.Load_t(    CTFILENAME( "Fonts\\Display3-caps.fnt"));
 
