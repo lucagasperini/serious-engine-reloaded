@@ -14,6 +14,9 @@
 #include "ECS/Entity.h"
 #include "ECS/Component.h"
 #include "ECS/System.h"
+#include "ECS/Manager.h"
+
+#include <inttypes.h>
 
 #define SSMF_WINDOW_RECOVERY_W 640
 #define SSMF_WINDOW_RECOVERY_H 480
@@ -34,10 +37,11 @@ SESplashScreen* scr_splashscreen = NULL;
 SEMainWindow* pMainWin = NULL;
 CDrawPort* main_dp = NULL;
 CViewPort* main_vp = NULL;
-CDynamicContainer<SEEntity>* pEntities = NULL;
-CDynamicContainer<SESystem>* systems = NULL;
-ScalePositionSystem* scale_position_system = NULL;
-AlignPositionSystem* align_position_system = NULL;
+ECSManager* manager = NULL;
+
+PositionSystem* position_system = NULL;
+RenderSystem* render_system = NULL;
+InputSystem* input_system = NULL;
 
 POINT cursor;
 SDL_Event* event = NULL;
@@ -187,8 +191,7 @@ BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
         pMainWin->create();
         main_dp = pMainWin->getDrawPort();
         main_vp = pMainWin->getViewPort();
-        scale_position_system->init();
-        align_position_system->init();
+        position_system->init();
     }
     return TRUE;
 }
@@ -430,8 +433,8 @@ int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
 
-  pEntities = new CDynamicContainer<SEEntity>;
-  systems = new CDynamicContainer<SESystem>;
+  int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+  manager = new ECSManager();
 
   CFontData _fdBig;
   CFontData _fdMedium;
@@ -444,43 +447,38 @@ int SubMain(LPSTR lpCmdLine)
   runningGame = TRUE;
   runningMenu = TRUE;
 
-  scale_position_system = new ScalePositionSystem;
-  systems->Add((SESystem*)scale_position_system);
-  align_position_system = new AlignPositionSystem;
-  systems->Add((SESystem*)align_position_system);
+  position_system = new PositionSystem;
+  manager->addSystem((SESystem*)position_system);
+  render_system = new RenderSystem;
+  manager->addSystem((SESystem*)render_system);
+  input_system = new InputSystem;
+  manager->addSystem((SESystem*)input_system);
 
-  MenuImage* logosam = new MenuImage(); 
-  logosam->id = 1;
+  MenuImage* logosam = new MenuImage();
   logosam->x = 480;
   logosam->y = 10;
   logosam->w = 1024;
   logosam->h = 256;
   logosam->fntex = CTFILENAME("Textures\\Logo\\logo.tex");
-  pEntities->Add((SEEntity*)logosam);
+  manager->addEntity((SEEntity*)logosam);
 
-  MenuImage* logoct = new MenuImage(); 
-  logoct->id = 2;
+  MenuImage* logoct = new MenuImage();
   logoct->x = 16;
   logoct->y = 864;
   logoct->w = 200;
   logoct->h = 200;
   logoct->fntex = CTFILENAME("Textures\\Logo\\LogoCT.tex");
-  pEntities->Add((SEEntity*)logoct);
+  manager->addEntity((SEEntity*)logoct);
 
   MenuImage* logogg = new MenuImage(); 
-  logogg->id = 3;
   logogg->x = 1704;
   logogg->y = 864;
   logogg->w = 200;
   logogg->h = 200;
   logogg->fntex = CTFILENAME("Textures\\Logo\\GodGamesLogo.tex");
-  pEntities->Add((SEEntity*)logogg);
-
-  TextureRenderSystem* texture_render = new TextureRenderSystem;
-  systems->Add((SESystem*)texture_render);
+  manager->addEntity((SEEntity*)logogg);
 
   MenuButton* menu_button_sp = new MenuButton;
-  menu_button_sp->id = 4;
   menu_button_sp->y = 300;
   menu_button_sp->w = 300;
   menu_button_sp->h = 50;
@@ -492,10 +490,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_sp->str = TRANS("SINGLE PLAYER");
   menu_button_sp->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_sp->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_sp);
+  manager->addEntity((SEEntity*)menu_button_sp);
 
   MenuButton* menu_button_net = new MenuButton;
-  menu_button_net->id = 5;
   menu_button_net->y = 375;
   menu_button_net->w = 300;
   menu_button_net->h = 50;
@@ -507,10 +504,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_net->str = TRANS("NETWORK");
   menu_button_net->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_net->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_net);
+  manager->addEntity((SEEntity*)menu_button_net);
 
   MenuButton* menu_button_split = new MenuButton;
-  menu_button_split->id = 6;
   menu_button_split->y = 450;
   menu_button_split->w = 300;
   menu_button_split->h = 50;
@@ -522,10 +518,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_split->str = TRANS("SPLIT SCREEN");
   menu_button_split->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_split->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_split);
+  manager->addEntity((SEEntity*)menu_button_split);
 
   MenuButton* menu_button_demo = new MenuButton;
-  menu_button_demo->id = 7;
   menu_button_demo->y = 525;
   menu_button_demo->w = 300;
   menu_button_demo->h = 50;
@@ -537,10 +532,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_demo->str = TRANS("DEMO");
   menu_button_demo->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_demo->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_demo);
+  manager->addEntity((SEEntity*)menu_button_demo);
 
   MenuButton* menu_button_mod = new MenuButton;
-  menu_button_mod->id = 8;
   menu_button_mod->y = 600;
   menu_button_mod->w = 300;
   menu_button_mod->h = 50;
@@ -552,10 +546,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_mod->str = TRANS("MODS");
   menu_button_mod->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_mod->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_mod);
+  manager->addEntity((SEEntity*)menu_button_mod);
 
   MenuButton* menu_button_hs = new MenuButton;
-  menu_button_hs->id = 9;
   menu_button_hs->y = 675;
   menu_button_hs->w = 300;
   menu_button_hs->h = 50;
@@ -567,10 +560,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_hs->str = TRANS("HIGH SCORES");
   menu_button_hs->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_hs->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_hs);
+  manager->addEntity((SEEntity*)menu_button_hs);
 
   MenuButton* menu_button_opt = new MenuButton;
-  menu_button_opt->id = 10;
   menu_button_opt->y = 750;
   menu_button_opt->w = 300;
   menu_button_opt->h = 50;
@@ -582,10 +574,9 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_opt->str = TRANS("OPTIONS");
   menu_button_opt->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_opt->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_opt);
+  manager->addEntity((SEEntity*)menu_button_opt);
 
   MenuButton* menu_button_quit = new MenuButton;
-  menu_button_quit->id = 11;
   menu_button_quit->y = 825;
   menu_button_quit->w = 300;
   menu_button_quit->h = 50;
@@ -598,7 +589,7 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_quit->function = quitgame;
   menu_button_quit->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_quit->color2 = SE_COL_ORANGE_DARK|255;
-  pEntities->Add((SEEntity*)menu_button_quit);
+  manager->addEntity((SEEntity*)menu_button_quit);
 /*
     mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
   mgMainSingle.mg_bfsFontSize = BFS_LARGE;
@@ -609,18 +600,21 @@ int SubMain(LPSTR lpCmdLine)
   mgMainSingle.colEnable = SE_COL_ORANGE_LIGHT|255;
   mgMainSingle.colSelected = SE_COL_ORANGE_DARK|255;
 */
-  ButtonRenderSystem* button_render = new ButtonRenderSystem;
-  systems->Add((SESystem*)button_render);
 
-  BorderRenderSystem* border_render = new BorderRenderSystem;
-  systems->Add((SESystem*)border_render);
+  int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
-  FOREACHINDYNAMICCONTAINER(*systems,SESystem,system) {
+  FOREACHINDYNAMICCONTAINER(*manager->systems,SESystem,system) {
     system->init();
   }
-
+  int64_t t2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+  fprintf(stderr,"Loading time t1: %ld\n", t1-t0);
+  fprintf(stderr,"Loading time t2: %ld\n", t2-t1);
+  int64_t tloop1;
+  int64_t tloop2;
+  int64_t ticks = 0;
   while(runningGame)
   {
+      tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
       #ifdef SINGLE_THREADED
       _pTimer->HandleTimerHandlers();
       #endif
@@ -630,13 +624,15 @@ int SubMain(LPSTR lpCmdLine)
               // clear z-buffer
               main_dp->FillZBuffer(ZBUF_BACK);
               main_dp->Fill(SE_COL_ORANGE_NEUTRAL|0xff);
-              FOREACHINDYNAMICCONTAINER(*systems,SESystem,system) {
+              FOREACHINDYNAMICCONTAINER(*manager->systems,SESystem,system) {
                   system->update();
               }
               main_dp->Unlock();
               main_vp->SwapBuffers();
           }
       }
+      tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+      fprintf(stderr,"Execute time tick(%ld): %ld\n", ticks++, tloop2-tloop1);
   }
   /*
  _pGame->gm_csConsoleState  = CS_OFF;

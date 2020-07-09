@@ -939,6 +939,7 @@ add_executable(${SSAMFM}
     SeriousSamMF/ECS/Entity.cpp
     SeriousSamMF/ECS/Component.cpp
     SeriousSamMF/ECS/System.cpp
+    SeriousSamMF/ECS/Manager.cpp
 )
 
 target_link_libraries(${SSAMFM} ${SENGINELIB})

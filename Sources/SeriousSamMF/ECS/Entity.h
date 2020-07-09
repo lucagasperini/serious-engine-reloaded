@@ -12,7 +12,6 @@ struct SEEntity
 struct MenuImage : SEEntity, SETextureComponent, SEPositionComponent{};
 
 struct MenuButton : SEEntity, 
-                    SEFontComponent, 
                     SETextComponent, 
                     SEPositionComponent, 
                     SEAlignComponent, 

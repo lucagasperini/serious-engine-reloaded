@@ -26,7 +26,7 @@ struct SETextureComponent : SEComponent
     CTFileName fntex;
 };
 
-struct SEFontComponent : SEComponent
+struct SETextComponent : SEComponent
 {
     public:
     INDEX fontsize;
@@ -34,19 +34,15 @@ struct SEFontComponent : SEComponent
     CFontData fontdata;
     INDEX textmode;
     COLOR color;
-    COLOR color2;
+    CTString str;
 };
 
 struct SEButtonComponent : SEComponent
 {
     public:
     void (*function)();
-};
-
-struct SETextComponent : SEComponent
-{
-    public:
-    CTString str;
+    BOOL focus;
+    COLOR color2;
 };
 
 struct SEAlignComponent : SEComponent
