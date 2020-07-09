@@ -27,6 +27,10 @@ SEMainWindow::~SEMainWindow()
 // close the main application window
 void SEMainWindow::destroy()
 {
+    if( vp != NULL) {
+        _pGfx->DestroyWindowCanvas(vp);
+        vp = NULL;
+    }
     // if window exists
     if( pWindow!=NULL) {
         // destroy it
@@ -48,6 +52,15 @@ BOOL SEMainWindow::create()
     if( pWindow == NULL) FatalError(TRANS("Cannot open main window!"));
     
     SE_UpdateWindowHandle(pWindow);
+
+    _pGfx->CreateWindowCanvas( pWindow, &vp, &dp);
+    
+    // initial screen fill and swap, just to get context running
+    if( dp!=NULL && dp->Lock()) {
+      dp->Fill(SE_COL_ORANGE_NEUTRAL|255);
+      dp->Unlock();
+      vp->SwapBuffers();
+    }
 
     return TRUE;
 }

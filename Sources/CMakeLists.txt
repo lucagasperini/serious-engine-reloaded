@@ -934,14 +934,11 @@ set(SSAMFM "ssamfm")
 add_executable(${SSAMFM}
     SeriousSamMF/main.cpp
     SeriousSamMF/SplashScreen.cpp
-    SeriousSamMF/Game.cpp
-    SeriousSamMF/Menu.cpp
     SeriousSamMF/MainWindow.cpp
     SeriousSamMF/InterfaceSDL.cpp
-    SeriousSamMF/Render.cpp
-    SeriousSamMF/MenuGadget.cpp
-    SeriousSamMF/Button.cpp
-    SeriousSamMF/Object.cpp
+    SeriousSamMF/ECS/Entity.cpp
+    SeriousSamMF/ECS/Component.cpp
+    SeriousSamMF/ECS/System.cpp
 )
 
 target_link_libraries(${SSAMFM} ${SENGINELIB})

@@ -8,10 +8,12 @@
 #include <Engine/Base/SDL/SDLEvents.h>
 
 #include "SplashScreen.h"
-#include "Menu.h"
 #include "MainWindow.h"
 #include "InterfaceSDL.h"
 #include "Colors.h"
+#include "ECS/Entity.h"
+#include "ECS/Component.h"
+#include "ECS/System.h"
 
 #define SSMF_WINDOW_RECOVERY_W 640
 #define SSMF_WINDOW_RECOVERY_H 480
@@ -29,12 +31,15 @@ PIX  _pixDesktopWidth = 0;    // desktop width when started (for some tests)
 CTString sam_strGameName = "serioussammf";
 
 SESplashScreen* scr_splashscreen = NULL;
-SEMenu* pMenu = NULL;
-CMainMenu* pMainMenu = NULL;
 SEMainWindow* pMainWin = NULL;
-SERender* pRender = NULL;
+CDrawPort* main_dp = NULL;
+CViewPort* main_vp = NULL;
+CDynamicContainer<SEEntity>* pEntities = NULL;
+CDynamicContainer<SESystem>* systems = NULL;
+ScalePositionSystem* scale_position_system = NULL;
+AlignPositionSystem* align_position_system = NULL;
 
-POINT pt;
+POINT cursor;
 SDL_Event* event = NULL;
 // display mode settings
 INDEX iWindowMode = SE_WINDOW_MODE_WINDOWED;
@@ -64,6 +69,14 @@ const INDEX aDefaultModes[][3] =
 #endif // SE1_D3D
 };
 const INDEX ctDefaultModes = ARRAYCOUNT(aDefaultModes);
+
+BOOL runningMenu;
+BOOL runningGame;
+
+void quitgame()
+{
+    runningGame = FALSE;
+}
 
 /*
 void InitGLSettings()
@@ -162,13 +175,9 @@ void StartNewMode( )
 }
 */
 
-BOOL runningMenu;
-BOOL runningGame;
-
 BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
 {
     if(pMainWin->getW() != w || pMainWin->getH() != h) {
-        pRender->destroy();
         if(fullscreen)
             pMainWin->setMode(SE_WINDOW_MODE_FULLSCREEN);
         else
@@ -176,7 +185,10 @@ BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
         pMainWin->setW(w);
         pMainWin->setH(h);
         pMainWin->create();
-        pRender->create(pMainWin->getPWindow());
+        main_dp = pMainWin->getDrawPort();
+        main_vp = pMainWin->getViewPort();
+        scale_position_system->init();
+        align_position_system->init();
     }
     return TRUE;
 }
@@ -186,17 +198,17 @@ extern int SE_SDL_InputEventPoll(SDL_Event *event);
 void update()
 {
     // get real cursor position
-    GetCursorPos(&pt);
+    GetCursorPos(&cursor);
     while (SE_SDL_InputEventPoll(event)) {
         if(event->type == SDL_QUIT) {
-            runningGame = FALSE;
+            quitgame();
         }
         if(event->type == SDL_KEYDOWN) {
             INDEX ksym = event->key.keysym.sym;
             switch(ksym) {
 
             case SDLK_ESCAPE:
-                runningGame = FALSE;
+                quitgame();
                 break;
             case SDLK_F1:
                 canChangeResolution(640, 480, FALSE); //VGA 4:3 
@@ -219,7 +231,6 @@ BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
   pMainWin = new SEMainWindow();
-  pRender = new SERender();
   event = new SDL_Event();
 
   if(!SEInterfaceSDL::init()) {
@@ -314,7 +325,8 @@ BOOL Init(CTString strCmdLine)
   pMainWin->setDepth(DisplayDepth::DD_DEFAULT);
   pMainWin->setAdapter(iWindowAdapter);
   BOOL winResult = pMainWin->create();
-  pRender->create(pMainWin->getPWindow());
+  main_dp = pMainWin->getDrawPort();
+  main_vp = pMainWin->getViewPort();
 
   if(! winResult) {
     pMainWin->setW(SSMF_WINDOW_RECOVERY_W);
@@ -337,9 +349,6 @@ BOOL Init(CTString strCmdLine)
         "in documentation and set your desktop to 16 bit (65536 colors).\n"
         "Please see ReadMe file for troubleshooting information.\n"));
     }
-
-  pRender->setVirtX(1920);
-  pRender->setVirtY(1080);
 
   // remember time of mode setting
   _tmDisplayModeChanged = _pTimer->GetRealTimeTick();
@@ -402,26 +411,213 @@ BOOL Init(CTString strCmdLine)
   return TRUE;
 }
 
+/*
+CImageInfo iiImageInfo;
+   iiImageInfo.LoadAnyGfxFormat_t( fntex);
+    // both dimension must be potentions of 2
+    if( (iiImageInfo.ii_Width  == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Width))) &&
+        (iiImageInfo.ii_Height == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Height))) )
+    {
+      CTFileName fnTexture = fntex.FileDir()+fntex.FileName()+".tex";
+      // creates new texture with one frame
+      CTextureData tdPicture;
+      tdPicture.Create_t( &iiImageInfo, iiImageInfo.ii_Width, 1, FALSE);
+      tdPicture.Save_t( fnTexture);
+    }
+*/
 
 int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
 
-  pMenu = new SEMenu();
-  pMainMenu = new CMainMenu();
+  pEntities = new CDynamicContainer<SEEntity>;
+  systems = new CDynamicContainer<SESystem>;
 
-  pMenu->setActive(TRUE);
+  CFontData _fdBig;
+  CFontData _fdMedium;
+  CFontData _fdSmall;
+  _fdSmall.Load_t(  CTFILENAME( "Fonts\\Display3-narrow.fnt"));
+  _fdMedium.Load_t( CTFILENAME( "Fonts\\Display3-normal.fnt"));
+  _fdBig.Load_t(    CTFILENAME( "Fonts\\Display3-caps.fnt"));
 
-  //pRender->tga2tex(CTFILENAME("logo.tga"));
-
-  pMenu->  _ptoLogoCT  = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-  pMenu->  _ptoLogoODI = pRender->loadTexture(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-  pMenu->  _ptoLogoEAX = pRender->loadTexture(CTFILENAME("Textures\\Logo\\LogoEAX.tex"));
-  pMenu-> tga = pRender->loadTexture(CTFILENAME("Textures\\Logo\\logo.tex"));
-  pMenu->init();
   // initialy, application is running and active, console and menu are off
   runningGame = TRUE;
   runningMenu = TRUE;
+
+  scale_position_system = new ScalePositionSystem;
+  systems->Add((SESystem*)scale_position_system);
+  align_position_system = new AlignPositionSystem;
+  systems->Add((SESystem*)align_position_system);
+
+  MenuImage* logosam = new MenuImage(); 
+  logosam->id = 1;
+  logosam->x = 480;
+  logosam->y = 10;
+  logosam->w = 1024;
+  logosam->h = 256;
+  logosam->fntex = CTFILENAME("Textures\\Logo\\logo.tex");
+  pEntities->Add((SEEntity*)logosam);
+
+  MenuImage* logoct = new MenuImage(); 
+  logoct->id = 2;
+  logoct->x = 16;
+  logoct->y = 864;
+  logoct->w = 200;
+  logoct->h = 200;
+  logoct->fntex = CTFILENAME("Textures\\Logo\\LogoCT.tex");
+  pEntities->Add((SEEntity*)logoct);
+
+  MenuImage* logogg = new MenuImage(); 
+  logogg->id = 3;
+  logogg->x = 1704;
+  logogg->y = 864;
+  logogg->w = 200;
+  logogg->h = 200;
+  logogg->fntex = CTFILENAME("Textures\\Logo\\GodGamesLogo.tex");
+  pEntities->Add((SEEntity*)logogg);
+
+  TextureRenderSystem* texture_render = new TextureRenderSystem;
+  systems->Add((SESystem*)texture_render);
+
+  MenuButton* menu_button_sp = new MenuButton;
+  menu_button_sp->id = 4;
+  menu_button_sp->y = 300;
+  menu_button_sp->w = 300;
+  menu_button_sp->h = 50;
+  menu_button_sp->align = 0;
+  menu_button_sp->align_x = 0;
+  menu_button_sp->fontdata = _fdBig;
+  menu_button_sp->fontsize = 2;
+  menu_button_sp->textmode = 0;
+  menu_button_sp->str = TRANS("SINGLE PLAYER");
+  menu_button_sp->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_sp->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_sp);
+
+  MenuButton* menu_button_net = new MenuButton;
+  menu_button_net->id = 5;
+  menu_button_net->y = 375;
+  menu_button_net->w = 300;
+  menu_button_net->h = 50;
+  menu_button_net->align = 0;
+  menu_button_net->align_x = 0;
+  menu_button_net->fontdata = _fdBig;
+  menu_button_net->fontsize = 2;
+  menu_button_net->textmode = 0;
+  menu_button_net->str = TRANS("NETWORK");
+  menu_button_net->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_net->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_net);
+
+  MenuButton* menu_button_split = new MenuButton;
+  menu_button_split->id = 6;
+  menu_button_split->y = 450;
+  menu_button_split->w = 300;
+  menu_button_split->h = 50;
+  menu_button_split->align = 0;
+  menu_button_split->align_x = 0;
+  menu_button_split->fontdata = _fdBig;
+  menu_button_split->fontsize = 2;
+  menu_button_split->textmode = 0;
+  menu_button_split->str = TRANS("SPLIT SCREEN");
+  menu_button_split->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_split->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_split);
+
+  MenuButton* menu_button_demo = new MenuButton;
+  menu_button_demo->id = 7;
+  menu_button_demo->y = 525;
+  menu_button_demo->w = 300;
+  menu_button_demo->h = 50;
+  menu_button_demo->align = 0;
+  menu_button_demo->align_x = 0;
+  menu_button_demo->fontdata = _fdBig;
+  menu_button_demo->fontsize = 2;
+  menu_button_demo->textmode = 0;
+  menu_button_demo->str = TRANS("DEMO");
+  menu_button_demo->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_demo->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_demo);
+
+  MenuButton* menu_button_mod = new MenuButton;
+  menu_button_mod->id = 8;
+  menu_button_mod->y = 600;
+  menu_button_mod->w = 300;
+  menu_button_mod->h = 50;
+  menu_button_mod->align = 0;
+  menu_button_mod->align_x = 0;
+  menu_button_mod->fontdata = _fdBig;
+  menu_button_mod->fontsize = 2;
+  menu_button_mod->textmode = 0;
+  menu_button_mod->str = TRANS("MODS");
+  menu_button_mod->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_mod->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_mod);
+
+  MenuButton* menu_button_hs = new MenuButton;
+  menu_button_hs->id = 9;
+  menu_button_hs->y = 675;
+  menu_button_hs->w = 300;
+  menu_button_hs->h = 50;
+  menu_button_hs->align = 0;
+  menu_button_hs->align_x = 0;
+  menu_button_hs->fontdata = _fdBig;
+  menu_button_hs->fontsize = 2;
+  menu_button_hs->textmode = 0;
+  menu_button_hs->str = TRANS("HIGH SCORES");
+  menu_button_hs->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_hs->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_hs);
+
+  MenuButton* menu_button_opt = new MenuButton;
+  menu_button_opt->id = 10;
+  menu_button_opt->y = 750;
+  menu_button_opt->w = 300;
+  menu_button_opt->h = 50;
+  menu_button_opt->align = 0;
+  menu_button_opt->align_x = 0;
+  menu_button_opt->fontdata = _fdBig;
+  menu_button_opt->fontsize = 2;
+  menu_button_opt->textmode = 0;
+  menu_button_opt->str = TRANS("OPTIONS");
+  menu_button_opt->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_opt->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_opt);
+
+  MenuButton* menu_button_quit = new MenuButton;
+  menu_button_quit->id = 11;
+  menu_button_quit->y = 825;
+  menu_button_quit->w = 300;
+  menu_button_quit->h = 50;
+  menu_button_quit->align = 0;
+  menu_button_quit->align_x = 0;
+  menu_button_quit->fontdata = _fdBig;
+  menu_button_quit->fontsize = 2;
+  menu_button_quit->textmode = 0;
+  menu_button_quit->str = TRANS("QUIT");
+  menu_button_quit->function = quitgame;
+  menu_button_quit->color = SE_COL_ORANGE_LIGHT|255;
+  menu_button_quit->color2 = SE_COL_ORANGE_DARK|255;
+  pEntities->Add((SEEntity*)menu_button_quit);
+/*
+    mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
+  mgMainSingle.mg_bfsFontSize = BFS_LARGE;
+  mgMainSingle.mg_strTip = TRANS("single player game menus");
+  gm_lhGadgets.AddTail( mgMainSingle.mg_lnNode);
+  mgMainSingle.mg_pmgUp = &mgMainQuit;
+  mgMainSingle.mg_pmgDown = &mgMainNetwork;
+  mgMainSingle.colEnable = SE_COL_ORANGE_LIGHT|255;
+  mgMainSingle.colSelected = SE_COL_ORANGE_DARK|255;
+*/
+  ButtonRenderSystem* button_render = new ButtonRenderSystem;
+  systems->Add((SESystem*)button_render);
+
+  BorderRenderSystem* border_render = new BorderRenderSystem;
+  systems->Add((SESystem*)border_render);
+
+  FOREACHINDYNAMICCONTAINER(*systems,SESystem,system) {
+    system->init();
+  }
 
   while(runningGame)
   {
@@ -430,22 +626,15 @@ int SubMain(LPSTR lpCmdLine)
       #endif
       if( !pMainWin->isIconic() ) {
           update();
-          if(runningMenu) {
-              pMainMenu->update(event, pt);
-          }
-          if(pRender->lock()) {
-              pRender->fill(SE_COL_ORANGE_NEUTRAL|255);
-              // do menu
-              if(runningMenu) {
-                  // clear z-buffer
-                  pRender->fillZBuffer(ZBUF_BACK);
-                  // remember if we should render menus next tick
-                  pMenu->render(pRender);
-                  pMainMenu->render(pRender);
+          if(main_dp->Lock()) {
+              // clear z-buffer
+              main_dp->FillZBuffer(ZBUF_BACK);
+              main_dp->Fill(SE_COL_ORANGE_NEUTRAL|0xff);
+              FOREACHINDYNAMICCONTAINER(*systems,SESystem,system) {
+                  system->update();
               }
-              // done with all
-              pRender->unlock();
-              pRender->SwapBuffers();
+              main_dp->Unlock();
+              main_vp->SwapBuffers();
           }
       }
   }

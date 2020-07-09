@@ -2,6 +2,8 @@
 #define SSMF_MAINWINDOW_H
 
 #include <Engine/Base/CTString.h>
+#include <Engine/Graphics/ViewPort.h> /* CViewPort */
+#include <Engine/Graphics/DrawPort.h> /* CDrawPort */
 
 class SEMainWindow {
 private:
@@ -18,35 +20,40 @@ private:
     INDEX adapter;
 
     DisplayDepth depth;
+
+    CDrawPort* dp;
+    CViewPort* vp;
 public:
     SEMainWindow();
     ~SEMainWindow();
 
-    void setTitle(const CTString &_title) { title = _title; }
-    void setPWindow(const HWND _pWindow) { pWindow = _pWindow; }
-    void setX(PIX _x) { x = _x; }
-    void setY(PIX _y) { y = _y; }
-    void setW(PIX _w) { w = _w; }
-    void setH(PIX _h) { h = _h; }
-    void setAPI(GfxAPIType _api) { api = _api; }
-    void setMode(INDEX _mode) { mode = _mode; }
-    void setResizable(BOOL _resizable) { resizable = _resizable; }
-    void setStatus(INDEX _status) { status = _status; }
-    void setAdapter(INDEX _adapter) { adapter = _adapter; }
-    void setDepth(DisplayDepth _depth) { depth = _depth; }
+    inline void setTitle(const CTString &_title) { title = _title; }
+    inline void setX(PIX _x) { x = _x; }
+    inline void setY(PIX _y) { y = _y; }
+    inline void setW(PIX _w) { w = _w; }
+    inline void setH(PIX _h) { h = _h; }
+    inline void setAPI(GfxAPIType _api) { api = _api; }
+    inline void setMode(INDEX _mode) { mode = _mode; }
+    inline void setResizable(BOOL _resizable) { resizable = _resizable; }
+    inline void setStatus(INDEX _status) { status = _status; }
+    inline void setAdapter(INDEX _adapter) { adapter = _adapter; }
+    inline void setDepth(DisplayDepth _depth) { depth = _depth; }
+    inline void setDrawPort(const CDrawPort &_dp) { dp = new CDrawPort(_dp); }
+    inline void setViewPort(const CViewPort &_vp) { vp = new CViewPort(_vp); }
 
-    CTString getTitle() { return title; }
-    HWND getPWindow() { return pWindow; }
-    PIX getX() { return x; }
-    PIX getY() { return y; }
-    PIX getW() { return w; }
-    PIX getH() { return h; }
-    INDEX getAPI() { return api; }
-    INDEX getMode() { return mode; }
-    INDEX getResizable() { return resizable; }
-    INDEX getStatus() { return status; }
-    INDEX getAdapter() { return adapter; }
-    DisplayDepth getDepth() { return depth; }
+    inline CTString getTitle() const { return title; }
+    inline PIX getX() const { return x; }
+    inline PIX getY() const { return y; }
+    inline PIX getW() const { return w; }
+    inline PIX getH() const { return h; }
+    inline INDEX getAPI() const { return api; }
+    inline INDEX getMode() const { return mode; }
+    inline INDEX getResizable() const { return resizable; }
+    inline INDEX getStatus() const { return status; }
+    inline INDEX getAdapter() const { return adapter; }
+    inline DisplayDepth getDepth() const { return depth; }
+    inline CDrawPort* getDrawPort() const { return dp; } 
+    inline CViewPort* getViewPort() const { return vp; } 
 
     BOOL isIconic();
     BOOL create();
