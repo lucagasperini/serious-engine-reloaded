@@ -15,6 +15,9 @@
 #include "ECS/Component.h"
 #include "ECS/System.h"
 #include "ECS/Manager.h"
+#include "ECS/RenderSystem.h"
+#include "ECS/PositionSystem.h"
+#include "ECS/InputSystem.h"
 
 #include <inttypes.h>
 
@@ -590,16 +593,6 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_quit->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_quit->color2 = SE_COL_ORANGE_DARK|255;
   manager->addEntity((SEEntity*)menu_button_quit);
-/*
-    mgMainSingle.mg_strText = TRANS("SINGLE PLAYER");
-  mgMainSingle.mg_bfsFontSize = BFS_LARGE;
-  mgMainSingle.mg_strTip = TRANS("single player game menus");
-  gm_lhGadgets.AddTail( mgMainSingle.mg_lnNode);
-  mgMainSingle.mg_pmgUp = &mgMainQuit;
-  mgMainSingle.mg_pmgDown = &mgMainNetwork;
-  mgMainSingle.colEnable = SE_COL_ORANGE_LIGHT|255;
-  mgMainSingle.colSelected = SE_COL_ORANGE_DARK|255;
-*/
 
   int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
@@ -615,9 +608,6 @@ int SubMain(LPSTR lpCmdLine)
   while(runningGame)
   {
       tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-      #ifdef SINGLE_THREADED
-      _pTimer->HandleTimerHandlers();
-      #endif
       if( !pMainWin->isIconic() ) {
           update();
           if(main_dp->Lock()) {
