@@ -65,6 +65,7 @@ INDEX iWindowAdapter = 0;
 static INDEX _iDisplayModeChangeFlag = 0;
 static TIME _tmDisplayModeChanged = 100.0f; // when display mode was last changed
 
+CPlayerEntity *pen = NULL;
 
 // list of possible display modes for recovery 
 const INDEX aDefaultModes[][3] =
@@ -82,6 +83,7 @@ const INDEX ctDefaultModes = ARRAYCOUNT(aDefaultModes);
 
 BOOL runningMenu;
 BOOL runningGame;
+BOOL runningLevel;
 
 void quitgame()
 {
@@ -144,7 +146,6 @@ void StartNewMode( )
 
   // try to set the mode
   BOOL bSuccess = TryToSetDisplayMode();
-/*
   // if failed
   if( !bSuccess)
   {
@@ -203,11 +204,24 @@ BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
 }
 
 extern int SE_SDL_InputEventPoll(SDL_Event *event);
-
+FLOAT sensibility = 0.5;
+POINT* old_point = NULL;
 void update()
 {
     // get real cursor position
     GetCursorPos(&cursor);
+    if(runningLevel) {
+      if(old_point == NULL) {
+        old_point = new POINT(cursor);
+      } else {
+        POINT delta;
+        delta.x = (old_point->x - cursor.x) * sensibility;
+        delta.y = (old_point->y - cursor.y) * sensibility;
+        pen->en_plPlacement.Rotate_Airplane(ANGLE3D(delta.x, delta.y, 0.0f));
+        old_point->x = cursor.x;
+        old_point->y = cursor.y;
+      }
+    }
     while (SE_SDL_InputEventPoll(event)) {
         if(event->type == SDL_QUIT) {
             quitgame();
@@ -236,6 +250,30 @@ void update()
                 break;
             case SDLK_F6:
                 render_system->dbg_draw_id=!render_system->dbg_draw_id;
+                break;
+            case SDLK_F7:
+                render_system->dbg_draw_position=!render_system->dbg_draw_position;
+                break;
+            case SDLK_F8:
+                pen->en_plPlacement = CPlacement3D(FLOAT3D(10,40,0),ANGLE3D(90,0,10));
+                break;
+            case SDLK_RIGHT:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(10.0f,0.0f,0.0f));
+                break;
+            case SDLK_LEFT:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(-10.0f,0.0f,0.0f));
+                break;
+            case SDLK_UP:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,10.0f,0.0f));
+                break;
+            case SDLK_DOWN:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,-10.0f,0.0f));
+                break;
+            case SDLK_SPACE:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,0.0f,10.0f));
+                break;
+            case SDLK_c:
+                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,0.0f,-10.0f));
                 break;
             }
         }
@@ -440,6 +478,678 @@ CImageInfo iiImageInfo;
       tdPicture.Save_t( fnTexture);
     }
 */
+class CSessionProperties {
+public:
+  enum GameMode {
+    GM_FLYOVER = -1,
+    GM_COOPERATIVE = 0,
+    GM_SCOREMATCH,
+    GM_FRAGMATCH,
+  };
+  enum GameDifficulty {
+    GD_TOURIST = -1,
+    GD_EASY = 0,
+    GD_NORMAL,
+    GD_HARD,
+    GD_EXTREME,
+  };
+
+  INDEX sp_ctMaxPlayers;    // maximum number of players in game
+  BOOL sp_bWaitAllPlayers;  // wait for all players to connect
+  BOOL sp_bQuickTest;       // set when game is tested from wed
+  BOOL sp_bCooperative;     // players are not intended to kill each other
+  BOOL sp_bSinglePlayer;    // single player mode has some special rules
+  BOOL sp_bUseFrags;        // set if frags matter instead of score
+
+  enum GameMode sp_gmGameMode;    // general game rules
+
+  enum GameDifficulty sp_gdGameDifficulty;
+  ULONG sp_ulSpawnFlags;
+  BOOL sp_bMental;            // set if mental mode engaged
+
+  INDEX sp_iScoreLimit;       // stop game after a player/team reaches given score
+  INDEX sp_iFragLimit;        // stop game after a player/team reaches given score
+  INDEX sp_iTimeLimit;        // stop game after given number of minutes elapses
+
+  BOOL sp_bTeamPlay;          // players are divided in teams
+  BOOL sp_bFriendlyFire;      // can harm player of same team
+  BOOL sp_bWeaponsStay;       // weapon items do not dissapear when picked-up
+  BOOL sp_bAmmoStays;         // ammo items do not dissapear when picked-up
+  BOOL sp_bHealthArmorStays;  // health/armor items do exist
+  BOOL sp_bPlayEntireGame;    // don't finish after one level in coop
+  BOOL sp_bAllowHealth;       // health items do exist
+  BOOL sp_bAllowArmor;        // armor items do exist
+  BOOL sp_bInfiniteAmmo;      // ammo is not consumed when firing
+  BOOL sp_bRespawnInPlace;    // players respawn on the place where they were killed, not on markers (coop only)
+
+  FLOAT sp_fEnemyMovementSpeed; // enemy speed multiplier
+  FLOAT sp_fEnemyAttackSpeed;   // enemy speed multiplier
+  FLOAT sp_fDamageStrength;     // multiplier when damaged
+  FLOAT sp_fAmmoQuantity;       // multiplier when picking up ammo
+  FLOAT sp_fManaTransferFactor; // multiplier for the killed player mana that is to be added to killer's mana
+  INDEX sp_iInitialMana;        // life price (mana that each player'll have upon respawning)
+  FLOAT sp_fExtraEnemyStrength;            // fixed adder for extra enemy power 
+  FLOAT sp_fExtraEnemyStrengthPerPlayer;   // adder for extra enemy power per each player playing
+
+  INDEX sp_ctCredits;           // number of credits for this game
+  INDEX sp_ctCreditsLeft;       // number of credits left on this level
+  FLOAT sp_tmSpawnInvulnerability;   // how many seconds players are invunerable after respawning
+
+  INDEX sp_iBlood;         // blood/gibs type (0=none, 1=green, 2=red, 3=hippie)
+  BOOL  sp_bGibs;          // enable/disable gibbing
+
+  BOOL  sp_bEndOfGame;     // marked when dm game is finished (any of the limits reached)
+
+  ULONG sp_ulLevelsMask;    // mask of visited levels so far
+
+  BOOL  sp_bUseExtraEnemies;  // spawn extra multiplayer enemies
+};
+
+class CUniversalSessionProperties {
+public:
+  union {
+    CSessionProperties usp_sp;
+    UBYTE usp_aubDummy[NET_MAXSESSIONPROPERTIES];
+  };
+
+  // must have exact the size as allocated block in engine
+  CUniversalSessionProperties() { 
+    ASSERT(sizeof(CSessionProperties)<=NET_MAXSESSIONPROPERTIES); 
+    ASSERT(sizeof(CUniversalSessionProperties)==NET_MAXSESSIONPROPERTIES); 
+    memset(usp_aubDummy, '\0', sizeof (usp_aubDummy));
+  }
+  operator CSessionProperties&(void) { return usp_sp; }
+};
+
+void SetDifficultyParameters(CSessionProperties &sp)
+{
+  INDEX iDifficulty = 1;
+  sp.sp_gdGameDifficulty = (CSessionProperties::GameDifficulty) Clamp(INDEX(iDifficulty), -1, 3);
+
+  sp.sp_ulSpawnFlags = SPF_EASY;//SPF_TOURIST; !!!!
+  sp.sp_fEnemyMovementSpeed = 1.0f;
+  sp.sp_fEnemyAttackSpeed   = 1.0f;
+  sp.sp_fDamageStrength     = 1.0f;
+  sp.sp_fAmmoQuantity       = 1.0f;
+}
+
+INDEX gam_iStartMode = 0;
+INDEX gam_iBlood = 0;
+INDEX gam_bGibs = FALSE;
+// set properties for a single player session
+void SetSinglePlayerSession(CSessionProperties &sp)
+{
+  // clear
+  memset(&sp, 0, sizeof(sp));
+
+  SetDifficultyParameters(sp);
+  sp.sp_gmGameMode = (CSessionProperties::GameMode) Clamp(INDEX(gam_iStartMode), -1, 2); //
+  sp.sp_ulSpawnFlags&=~SPF_COOPERATIVE;
+
+  sp.sp_bEndOfGame = FALSE;
+
+  sp.sp_ctMaxPlayers = 1;
+  sp.sp_bWaitAllPlayers = FALSE;
+  sp.sp_bQuickTest = FALSE;
+  sp.sp_bCooperative = TRUE;
+  sp.sp_bSinglePlayer = TRUE;
+  sp.sp_bUseFrags = FALSE;
+
+  sp.sp_iScoreLimit = 0;
+  sp.sp_iFragLimit  = 0; 
+  sp.sp_iTimeLimit  = 0; 
+
+  sp.sp_ctCredits     = 0;
+  sp.sp_ctCreditsLeft = 0;
+  sp.sp_tmSpawnInvulnerability = 0;
+
+  sp.sp_bTeamPlay = FALSE;
+  sp.sp_bFriendlyFire = FALSE;
+  sp.sp_bWeaponsStay = FALSE;
+  sp.sp_bPlayEntireGame = TRUE;
+
+  sp.sp_bAmmoStays        = FALSE;
+  sp.sp_bHealthArmorStays = FALSE;
+  sp.sp_bAllowHealth = TRUE;
+  sp.sp_bAllowArmor = TRUE;
+  sp.sp_bInfiniteAmmo = FALSE;
+  sp.sp_bRespawnInPlace = FALSE;
+  sp.sp_fExtraEnemyStrength          = 0;
+  sp.sp_fExtraEnemyStrengthPerPlayer = 0;
+
+  sp.sp_iBlood = Clamp( gam_iBlood, 0, 3);
+  sp.sp_bGibs  = gam_bGibs;
+}
+
+void startGame()
+{
+  CTString strSessionName = "sessione";
+  CTFileName fnmWorld = CTFILENAME("Levels\\TestGame.wld");
+
+  CUniversalSessionProperties sp;
+  SetSinglePlayerSession(sp);
+  _pNetwork->StartPeerToPeer_t( strSessionName, fnmWorld, 
+        0, 1, FALSE, &sp);
+
+  pen = new CPlayerEntity();
+  pen->en_pwoWorld = &_pNetwork->ga_World;
+  pen->en_plPlacement = CPlacement3D(FLOAT3D(370,40,0),ANGLE3D(-80,20,0));
+
+  runningLevel = TRUE;
+}
+
+BOOL _bCameraOn=TRUE;
+BOOL cam_bRecord = TRUE;
+BOOL _bInitialized = FALSE; 
+BOOL cam_bResetToPlayer = TRUE;
+INDEX cam_bZoomDefault = TRUE;
+class CCameraPos {
+public:
+  TIME cp_tmTick;
+  FLOAT cp_fSpeed;
+  FLOAT3D cp_vPos;
+  ANGLE3D cp_aRot;
+  ANGLE cp_aFOV;
+};
+
+//BOOL _bCameraOn=FALSE;
+CTFileStream _strScript;
+//BOOL _bInitialized;
+FLOAT _fStartTime;
+CCameraPos _cp0;
+CCameraPos _cp1;
+CCameraPos _cp;
+
+// camera control
+//INDEX cam_bRecord           = FALSE;
+static INDEX cam_bMoveForward      = FALSE;
+static INDEX cam_bMoveBackward     = FALSE;
+static INDEX cam_bMoveLeft         = FALSE;
+static INDEX cam_bMoveRight        = FALSE;
+static INDEX cam_bMoveUp           = FALSE;
+static INDEX cam_bMoveDown         = FALSE;
+static INDEX cam_bTurnBankingLeft  = FALSE;
+static INDEX cam_bTurnBankingRight = FALSE;
+static INDEX cam_bZoomIn           = FALSE;
+static INDEX cam_bZoomOut          = FALSE;
+//static INDEX cam_bZoomDefault      = FALSE;
+//static INDEX cam_bResetToPlayer    = FALSE;
+static INDEX cam_bSnapshot         = FALSE;
+static INDEX cam_fSpeed            = 1;
+
+
+void ReadPos(CCameraPos &cp)
+{
+  try {
+    CTString strLine;
+    _strScript.GetLine_t(strLine);
+    strLine.ScanF("%g: %g: %g %g %g:%g %g %g:%g", 
+      &cp.cp_tmTick,
+      &cp.cp_fSpeed,
+      &cp.cp_vPos(1), &cp.cp_vPos(2), &cp.cp_vPos(3),
+      &cp.cp_aRot(1), &cp.cp_aRot(2), &cp.cp_aRot(3),
+      &cp.cp_aFOV);
+
+  } catch (char *strError) {
+    CPrintF("Camera: %s\n", strError);
+  }
+}
+void WritePos(CCameraPos &cp)
+{
+  try {
+    CTString strLine;
+    strLine.PrintF("%g: %g: %g %g %g:%g %g %g:%g", 
+      _pTimer->GetLerpedCurrentTick()-_fStartTime,
+      1.0f,
+      cp.cp_vPos(1), cp.cp_vPos(2), cp.cp_vPos(3),
+      cp.cp_aRot(1), cp.cp_aRot(2), cp.cp_aRot(3),
+      cp.cp_aFOV);
+    _strScript.PutLine_t(strLine);
+
+  } catch (char *strError) {
+    CPrintF("Camera: %s\n", strError);
+  }
+}
+void SetSpeed(FLOAT fSpeed)
+{
+  CTString str;
+  str.PrintF("dem_fRealTimeFactor = %g;", fSpeed);
+  _pShell->Execute(str);
+}
+
+
+void CAM_Render(CEntity *pen, CDrawPort *pdp)
+{
+  if( cam_bRecord) {
+    if (!_bInitialized) {
+      _bInitialized = TRUE;
+      SetSpeed(1.0f);
+      _fStartTime = _pTimer->CurrentTick();
+    }
+    FLOATmatrix3D m;
+    MakeRotationMatrixFast(m, _cp.cp_aRot);
+    FLOAT3D vX, vY, vZ;
+    vX(1) = m(1,1); vX(2) = m(2,1); vX(3) = m(3,1);
+    vY(1) = m(1,2); vY(2) = m(2,2); vY(3) = m(3,2);
+    vZ(1) = m(1,3); vZ(2) = m(2,3); vZ(3) = m(3,3);
+
+    _cp.cp_aRot(1)-=_pInput->GetAxisValue(MOUSE_X_AXIS)*0.5f;
+    _cp.cp_aRot(2)-=_pInput->GetAxisValue(MOUSE_Y_AXIS)*0.5f;
+    
+    if( cam_bMoveForward)      { _cp.cp_vPos -= vZ *cam_fSpeed; };
+    if( cam_bMoveBackward)     { _cp.cp_vPos += vZ *cam_fSpeed; };
+    if( cam_bMoveLeft)         { _cp.cp_vPos -= vX *cam_fSpeed; };
+    if( cam_bMoveRight)        { _cp.cp_vPos += vX *cam_fSpeed; };
+    if( cam_bMoveUp)           { _cp.cp_vPos += vY *cam_fSpeed; };
+    if( cam_bMoveDown)         { _cp.cp_vPos -= vY *cam_fSpeed; };
+    if( cam_bTurnBankingLeft)  { _cp.cp_aRot(3) += 10.0f; };
+    if( cam_bTurnBankingRight) { _cp.cp_aRot(3) -= 10.0f; };
+    if( cam_bZoomIn)           { _cp.cp_aFOV -= 1.0f; };
+    if( cam_bZoomOut)          { _cp.cp_aFOV += 1.0f; };
+    if( cam_bZoomDefault)      { _cp.cp_aFOV  = 90.0f; };
+    Clamp( _cp.cp_aFOV, 10.0f, 150.0f);
+
+    if( cam_bResetToPlayer) {
+      _cp.cp_vPos = pen->GetPlacement().pl_PositionVector;
+      _cp.cp_aRot = pen->GetPlacement().pl_OrientationAngle;
+    }
+
+    if( cam_bSnapshot) {
+      cam_bSnapshot = FALSE;
+      WritePos(_cp);
+    }
+
+  } else {
+    if (!_bInitialized) {
+      _bInitialized = TRUE;
+      ReadPos(_cp0);
+      ReadPos(_cp1);
+      SetSpeed(_cp0.cp_fSpeed);
+      _fStartTime = _pTimer->CurrentTick();
+    }
+    TIME tmNow = _pTimer->GetLerpedCurrentTick()-_fStartTime;
+    if (tmNow>_cp1.cp_tmTick) {
+      _cp0 = _cp1;
+      ReadPos(_cp1);
+      SetSpeed(_cp0.cp_fSpeed);
+    }
+    FLOAT fRatio = (tmNow-_cp0.cp_tmTick)/(_cp1.cp_tmTick-_cp0.cp_tmTick);
+
+    _cp.cp_vPos = Lerp(_cp0.cp_vPos, _cp1.cp_vPos, fRatio);
+    _cp.cp_aRot = Lerp(_cp0.cp_aRot, _cp1.cp_aRot, fRatio);
+    _cp.cp_aFOV = Lerp(_cp0.cp_aFOV, _cp1.cp_aFOV, fRatio);
+  }
+
+  CPlacement3D plCamera;
+  plCamera.pl_PositionVector = _cp.cp_vPos;
+  plCamera.pl_OrientationAngle = _cp.cp_aRot;
+
+  // init projection parameters
+  CPerspectiveProjection3D prPerspectiveProjection;
+  prPerspectiveProjection.FOVL() = _cp.cp_aFOV;
+  prPerspectiveProjection.ScreenBBoxL() = FLOATaabbox2D(
+    FLOAT2D(0.0f, 0.0f), FLOAT2D((float)pdp->GetWidth(), (float)pdp->GetHeight())
+  );
+  prPerspectiveProjection.AspectRatioL() = 1.0f;
+  prPerspectiveProjection.FrontClipDistanceL() = 0.3f;
+
+  CAnyProjection3D prProjection;
+  prProjection = prPerspectiveProjection;
+
+  // set up viewer position
+  prProjection->ViewerPlacementL() = plCamera;
+  // render the view
+  RenderView(*pen->en_pwoWorld, *(CEntity*)NULL, prProjection, *pdp);
+}
+
+BOOL CAM_IsOn(void)
+{
+  return _bCameraOn;
+}
+
+
+BOOL _bPlayerViewRendered = TRUE;
+
+void GameRedrawView( CDrawPort *pdpDrawPort, ULONG ulFlags)
+{
+  /*
+  // if thumbnail saving has been required
+  if( _fnmThumb!="")
+  { // reset the need for saving thumbnail
+    CTFileName fnm = _fnmThumb;
+    _fnmThumb = CTString("");
+    // render one game view to a small cloned drawport
+    //PIX pixSizeJ = pdpDrawPort->GetHeight();
+    PIXaabbox2D boxThumb( PIX2D(0,0), PIX2D(128,128));
+    CDrawPort dpThumb( pdpDrawPort, boxThumb);
+    _bPlayerViewRendered = FALSE;
+    GameRedrawView( &dpThumb, 0);
+    if (_bPlayerViewRendered) {
+      // grab screenshot
+      CImageInfo iiThumb;
+      CTextureData tdThumb;
+      dpThumb.GrabScreen( iiThumb);
+      // try to save thumbnail
+      try {
+        CTFileStream strmThumb;
+        tdThumb.Create_t( &iiThumb, 128, MAX_MEX_LOG2, FALSE);
+        strmThumb.Create_t(fnm);
+        tdThumb.Write_t( &strmThumb);
+        strmThumb.Close();
+      } catch( char *strError) {
+        // report an error to console, if failed
+        CPrintF( "%s\n", strError);
+      }
+    } else {
+      _fnmThumb = fnm;
+    }
+  }*/
+
+  if( ulFlags) {
+    // pretouch memory if required (only if in game mode, not screengrabbing or profiling!)
+    SE_PretouchIfNeeded();
+  }
+
+  // if game is started and computer isn't on
+  //BOOL bClientJoined = FALSE;
+  if( runningLevel )
+  {
+/*
+    INDEX ctObservers = Clamp(gam_iObserverConfig, 0, 4);
+    INDEX iObserverOffset = ClampDn(gam_iObserverOffset, 0);
+    if (gm_CurrentSplitScreenCfg==SSC_OBSERVER) {
+      ctObservers = ClampDn(ctObservers, 1);
+    }
+    if (gm_CurrentSplitScreenCfg!=SSC_OBSERVER) {
+      if (!gam_bEnableAdvancedObserving || !GetSP()->sp_bCooperative) {
+        ctObservers = 0;
+      }
+    }
+    MakeSplitDrawports(gm_CurrentSplitScreenCfg, ctObservers, pdpDrawPort);
+
+    // get number of local players
+    INDEX ctLocals = 0;
+    {for (INDEX i=0; i<4; i++) {
+      if (gm_lpLocalPlayers[i].lp_pplsPlayerSource!=NULL) {
+        ctLocals++;
+      }
+    }}
+*/
+    CEntity *apenViewers[7];
+    apenViewers[0] = NULL;
+    apenViewers[1] = NULL;
+    apenViewers[2] = NULL;
+    apenViewers[3] = NULL;
+    apenViewers[4] = NULL;
+    apenViewers[5] = NULL;
+    apenViewers[6] = NULL;
+    INDEX ctViewers = 0;
+/*
+    // check if input is enabled
+    BOOL bDoPrescan = _pInput->IsInputEnabled() &&
+      !_pNetwork->IsPaused() && !_pNetwork->GetLocalPause() &&
+      _pShell->GetINDEX("inp_bAllowPrescan");
+    // prescan input
+    if (bDoPrescan) {
+      _pInput->GetInput(TRUE);
+    }
+    // timer must not occur during prescanning
+    { 
+#if defined(PLATFORM_UNIX) && !defined(SINGLE_THREADED)
+      #warning "This seems to cause Race Condition, so disabled"
+#else
+      CTSingleLock csTimer(&_pTimer->tm_csHooks, TRUE);
+#endif
+    // for each local player
+    for( INDEX i=0; i<4; i++) {
+      // if local player
+      CPlayerSource *ppls = gm_lpLocalPlayers[i].lp_pplsPlayerSource;
+      if( ppls!=NULL) {
+        // get local player entity
+        apenViewers[ctViewers++] = _pNetwork->GetLocalPlayerEntity(ppls);
+        // precreate action for it for this tick
+        if (bDoPrescan) {
+          // copy its local controls to current controls
+          memcpy(
+            ctl_pvPlayerControls,
+            gm_lpLocalPlayers[i].lp_ubPlayerControlsState,
+            ctl_slPlayerControlsSize);
+
+          // do prescanning
+          CPlayerAction paPreAction;
+          INDEX iCurrentPlayer = gm_lpLocalPlayers[i].lp_iPlayer;
+          CControls &ctrls = gm_actrlControls[ iCurrentPlayer];
+          ctrls.CreateAction(gm_apcPlayers[iCurrentPlayer], paPreAction, TRUE);
+
+          // copy the local controls back
+          memcpy(
+            gm_lpLocalPlayers[i].lp_ubPlayerControlsState,
+            ctl_pvPlayerControls,
+            ctl_slPlayerControlsSize);
+        }
+      }
+    }}
+
+    // fill in all players that are not local
+    INDEX ctNonlocals = 0;
+    CEntity *apenNonlocals[16];
+    memset(apenNonlocals, 0, sizeof(apenNonlocals));
+    {for (INDEX i=0; i<16; i++) {
+      CEntity *pen = CEntity::GetPlayerEntity(i);
+      if (pen!=NULL && !_pNetwork->IsPlayerLocal(pen)) {
+        apenNonlocals[ctNonlocals++] = pen;
+      }
+    }}
+
+    // if there are any non-local players
+    if (ctNonlocals>0) {
+      // for each observer
+      {for (INDEX i=0; i<ctObservers; i++) {
+        // get the given player with given offset that is not local
+        INDEX iPlayer = (i+iObserverOffset)%ctNonlocals;
+        apenViewers[ctViewers++] = apenNonlocals[iPlayer];
+      }}
+    }
+*/
+
+    apenViewers[ctViewers++] = pen;
+    // for each view
+    BOOL bHadViewers = FALSE;
+    {for (INDEX i=0; i<ctViewers; i++) {
+      CDrawPort *pdp = main_dp;
+      if (pdp!=NULL && pdp->Lock()) {
+
+        // if there is a viewer
+        if (apenViewers[i]!=NULL) {
+          bHadViewers = TRUE;
+          // if predicted
+          if (apenViewers[i]->IsPredicted()) {
+            // use predictor instead
+            apenViewers[i] = apenViewers[i]->GetPredictor();
+          }
+
+          if (!CAM_IsOn()) {
+            _bPlayerViewRendered = TRUE;
+            // render it
+            apenViewers[i]->RenderGameView(pdp, (void*)((size_t)ulFlags));
+          } else {
+            CAM_Render(apenViewers[i], pdp);
+          }
+        } else {
+          pdp->Fill( C_BLACK|CT_OPAQUE);
+        }
+        pdp->Unlock();
+      }
+    }}
+    if (!bHadViewers) {
+      pdpDrawPort->Lock();
+      pdpDrawPort->Fill( C_BLACK|CT_OPAQUE);
+      pdpDrawPort->Unlock();
+    }
+/*
+    // create drawport for messages (left on DH)
+    CDrawPort dpMsg(pdpDrawPort, TRUE);
+    if ((ulFlags&GRV_SHOWEXTRAS) && dpMsg.Lock())
+    {
+      // print pause indicators
+      CTString strIndicator;
+      if (_pNetwork->IsDisconnected()) {
+        strIndicator.PrintF(TRANSV("Disconnected: %s\nPress F9 to reconnect"), (const char *)_pNetwork->WhyDisconnected());
+      } else if (_pNetwork->IsWaitingForPlayers()) {
+        strIndicator = TRANS("Waiting for all players to connect");
+      } else if (_pNetwork->IsWaitingForServer()) {
+        strIndicator = TRANS("Waiting for server to continue");
+      } else if (!_pNetwork->IsConnectionStable()) {
+        strIndicator = TRANS("Trying to stabilize connection...");
+      } else if (_pNetwork->IsGameFinished()) {
+        strIndicator = TRANS("Game finished");
+      } else if (_pNetwork->IsPaused() || _pNetwork->GetLocalPause()) {
+        strIndicator = TRANS("Paused");
+      } else if (_tvMenuQuickSave.tv_llValue!=0 && 
+        (_pTimer->GetHighPrecisionTimer()-_tvMenuQuickSave).GetSeconds()<3) {
+        strIndicator = TRANS("Use F6 for QuickSave during game!");
+      } else if (_pNetwork->ga_sesSessionState.ses_strMOTD!="") {
+        CTString strMotd = _pNetwork->ga_sesSessionState.ses_strMOTD;
+        static CTString strLastMotd = "";
+        static CTimerValue tvLastMotd((__int64) 0);
+        if (strLastMotd!=strMotd) {
+          tvLastMotd = _pTimer->GetHighPrecisionTimer();
+          strLastMotd = strMotd;
+        }
+        if (tvLastMotd.tv_llValue!=((__int64) 0) && (_pTimer->GetHighPrecisionTimer()-tvLastMotd).GetSeconds()<3) {
+          strIndicator = strMotd;
+        }
+      }
+
+      if (strIndicator!="") {
+        // setup font
+        dpMsg.SetFont( _pfdDisplayFont);
+        dpMsg.SetTextAspect( 1.0f);
+        dpMsg.PutTextCXY( strIndicator, 
+        dpMsg.GetWidth()*0.5f, 
+        dpMsg.GetHeight()*0.4f, SE_COL_BLUEGREEN_LT|192);
+      }
+      // print recording indicator
+      if (_pNetwork->IsRecordingDemo()) {
+        // setup font
+        dpMsg.SetFont( _pfdDisplayFont);
+        dpMsg.SetTextScaling( 1.0f);
+        dpMsg.SetTextAspect( 1.0f);
+        dpMsg.PutText( TRANS("Recording"), 
+        dpMsg.GetWidth()*0.1f, 
+        dpMsg.GetHeight()*0.1f, C_CYAN|192);
+      }
+
+      // print some statistics
+      PrintStats( &dpMsg);
+  
+      // print last few lines from console to top of screen
+      if (_pGame->gm_csConsoleState==CS_OFF) ConsolePrintLastLines( &dpMsg);
+
+      // print demo OSD
+      if( dem_bOSD) {
+        CTString strMessage;
+        // print the message
+        strMessage.PrintF("%.2fs", _pNetwork->ga_fDemoTimer);
+        dpMsg.SetFont( _pfdDisplayFont);
+        dpMsg.SetTextAspect( 1.0f);
+        dpMsg.PutText( strMessage, 20, 20);
+      }
+      dpMsg.Unlock();
+    }
+*//*
+    // keep frames' time if required
+    if( gm_bProfileDemo)
+    {
+      CTimerValue tvThisFrame = _pTimer->GetHighPrecisionTimer();
+      // if demo has been finished
+      if( _pNetwork->IsDemoPlayFinished()) {
+        // end profile
+        gm_bProfileDemo = FALSE;
+        CPrintF( DemoReportAnalyzedProfile());
+        CPrintF( "-\n");
+      } else {
+        // determine frame time delta
+        TIME tmDelta = (tvThisFrame - _tvLastFrame).GetSeconds();
+        _tvLastFrame =  tvThisFrame;
+        _atmFrameTimes.Push() = tmDelta;  // add new frame time stamp
+        INDEX *piTriangles = _actTriangles.Push(4); // and polygons count
+        piTriangles[0] = _pGfx->gl_ctWorldTriangles;
+        piTriangles[1] = _pGfx->gl_ctModelTriangles;
+        piTriangles[2] = _pGfx->gl_ctParticleTriangles;
+        piTriangles[3] = _pGfx->gl_ctTotalTriangles;
+      }
+    }
+    
+    // execute cvar after demoplay
+    if( _pNetwork->IsDemoPlayFinished() && dem_strPostExec!="") _pShell->Execute(dem_strPostExec);
+    */
+  }
+  // if no game is active
+  else
+  {/*
+    // clear background
+    if( pdpDrawPort->Lock()) {
+ 	    pdpDrawPort->Fill( SE_COL_BLUE_DARK|CT_OPAQUE);
+      pdpDrawPort->FillZBuffer( ZBUF_BACK);
+      pdpDrawPort->Unlock();
+    }*/
+  }
+/*
+  // check for new chat message
+  static INDEX ctChatMessages=0;
+  INDEX ctNewChatMessages = _pShell->GetINDEX("net_ctChatMessages");
+  if (ctNewChatMessages!=ctChatMessages) {
+    ctChatMessages=ctNewChatMessages;
+    PlayScriptSound(MAX_SCRIPTSOUNDS-1, CTFILENAME("Sounds\\Menu\\Chat.wav"), 4.0f*gam_fChatSoundVolume, 1.0f, FALSE);
+  }
+*/
+  // update sounds and forbid probing
+  _pSound->UpdateSounds();
+  _pGfx->gl_bAllowProbing = FALSE;
+/*
+  if( bSaveScreenShot || dem_iAnimFrame>=0)
+  {
+    // make the screen shot directory if it doesn't already exist
+    bSaveScreenShot = FALSE;
+    CTFileName fnmExpanded;
+    ExpandFilePath(EFP_WRITE, CTString("ScreenShots"), fnmExpanded);
+
+    // rcg01052002 This is done in Stream.cpp, now. --ryan.
+    //_mkdir(fnmExpanded);
+
+    // create a name for screenshot
+    CTFileName fnmScreenShot;
+    if( dem_iAnimFrame<0) {
+      fnmScreenShot = MakeScreenShotName();
+    } else {
+      // create number for the file
+      CTString strNumber;
+      strNumber.PrintF("%05d", (INDEX)dem_iAnimFrame);
+      fnmScreenShot = CTString("ScreenShots\\Anim_")+strNumber+".tga";
+      dem_iAnimFrame+=1;
+    }
+    // grab screen creating image info
+    CImageInfo iiImageInfo;
+    if( pdpDrawPort->Lock()) {
+      pdpDrawPort->GrabScreen( iiImageInfo, 1);
+      pdpDrawPort->Unlock();
+    }
+    // try to
+    try {
+      // save screen shot as TGA
+      iiImageInfo.SaveTGA_t( fnmScreenShot);
+      if( dem_iAnimFrame<0) CPrintF( TRANS("screen shot: %s\n"), (const char *) (CTString&)fnmScreenShot);
+    }
+    // if failed
+    catch (char *strError) {
+      // report error
+      CPrintF( TRANS("Cannot save screenshot:\n%s\n"), strError);
+    }
+  }
+  */
+}
+
 
 int SubMain(LPSTR lpCmdLine)
 {
@@ -501,6 +1211,7 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_sp->fontsize = 2;
   menu_button_sp->textmode = 0;
   menu_button_sp->str = TRANS("SINGLE PLAYER");
+  menu_button_sp->function = startGame;
   menu_button_sp->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_sp->color2 = SE_COL_ORANGE_DARK|255;
   manager->addEntity((SEEntity*)menu_button_sp);
@@ -615,7 +1326,7 @@ int SubMain(LPSTR lpCmdLine)
   int64_t tloop1;
   int64_t tloop2;
   int64_t ticks = 0;
-  while(runningGame)
+  while(runningGame) // start of game loop
   {
       tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
       if( !pMainWin->isIconic() ) {
@@ -624,6 +1335,7 @@ int SubMain(LPSTR lpCmdLine)
               // clear z-buffer
               main_dp->FillZBuffer(ZBUF_BACK);
               main_dp->Fill(SE_COL_ORANGE_NEUTRAL|0xff);
+              GameRedrawView(main_dp,1);
               FOREACHINDYNAMICCONTAINER(*manager->systems,SESystem,system) {
                   system->update();
               }
@@ -633,7 +1345,8 @@ int SubMain(LPSTR lpCmdLine)
       }
       tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
       fprintf(stderr,"Execute time tick(%ld): %ld\n", ticks++, tloop2-tloop1);
-  }
+  }// end of game loop
+  return TRUE;
   /*
  _pGame->gm_csConsoleState  = CS_OFF;
   _pGame->gm_csComputerState = CS_OFF;
@@ -683,16 +1396,7 @@ int SubMain(LPSTR lpCmdLine)
     LimitFrameRate();
     */
 
-  } // end of main application loop
-/*
-  _pInput->DisableInput();
-  _pGame->StopGame();
-  
-  // invoke quit screen if needed
-  if( _bQuitScreen && _fnmModToLoad=="") QuitScreenLoop();
-  
-  End();
-  */
+}
 
 int main(int argc, char **argv)
 {

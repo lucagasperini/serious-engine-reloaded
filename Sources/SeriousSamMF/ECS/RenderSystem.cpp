@@ -6,6 +6,24 @@ extern CDrawPort* main_dp;
 extern CFontData* main_fb_font;
 extern COLOR main_fb_color;
 
+extern CPlayerEntity *pen;
+
+void RenderSystem::render_position()
+{
+    PIXaabbox2D box(PIX2D(0, 0), PIX2D(200, 100));
+    main_dp->SetFont(main_fb_font);
+    char* buffer = new char[128];
+    float px = pen->en_plPlacement.pl_PositionVector(1);
+    float py = pen->en_plPlacement.pl_PositionVector(2); 
+    float pz = pen->en_plPlacement.pl_PositionVector(3);
+    float ax = pen->en_plPlacement.pl_OrientationAngle(1);
+    float ay = pen->en_plPlacement.pl_OrientationAngle(2);
+    float az = pen->en_plPlacement.pl_OrientationAngle(3);
+
+    snprintf(buffer, 128, "X: %f\nY: %f\nZ: %f\nAX: %f \nAY: %f \nAZ: %f", px, py, pz, ax, ay, az);
+    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), main_fb_color);
+}
+
 void RenderSystem::init()
 {
     FOREACHINDYNAMICCONTAINER(*manager->entities, SEEntity, entity)
@@ -32,6 +50,8 @@ void RenderSystem::update()
             render_border(position);
         if(dbg_draw_id)
             render_id(entity, position);
+        if(dbg_draw_position)
+            render_position();
 
         SETextureComponent* texture = dynamic_cast<SETextureComponent *>((SEEntity*)entity);
         if (texture) 
