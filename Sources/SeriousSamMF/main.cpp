@@ -11,6 +11,7 @@
 #include "MainWindow.h"
 #include "InterfaceSDL.h"
 #include "Colors.h"
+#include "Controls.h"
 #include "ECS/Entity.h"
 #include "ECS/Component.h"
 #include "ECS/System.h"
@@ -18,6 +19,7 @@
 #include "ECS/RenderSystem.h"
 #include "ECS/PositionSystem.h"
 #include "ECS/InputSystem.h"
+#include "ECS/ControlSystem.h"
 
 #include <inttypes.h>
 
@@ -37,7 +39,7 @@ PIX  _pixDesktopWidth = 0;    // desktop width when started (for some tests)
 CTString sam_strGameName = "serioussammf";
 
 SESplashScreen* scr_splashscreen = NULL;
-SEMainWindow* pMainWin = NULL;
+SEMainWindow* main_win = NULL;
 CDrawPort* main_dp = NULL;
 CViewPort* main_vp = NULL;
 ECSManager* manager = NULL;
@@ -45,6 +47,7 @@ ECSManager* manager = NULL;
 PositionSystem* position_system = NULL;
 RenderSystem* render_system = NULL;
 InputSystem* input_system = NULL;
+ControlSystem* control_system = NULL;
 
 CFontData* main_fb_font;
 COLOR main_fb_color = C_BLACK|0xff;
@@ -81,113 +84,19 @@ const INDEX aDefaultModes[][3] =
 };
 const INDEX ctDefaultModes = ARRAYCOUNT(aDefaultModes);
 
-BOOL runningMenu;
-BOOL runningGame;
+BOOL main_menu_started;
+BOOL main_game_started;
 BOOL runningLevel;
 
-void quitgame()
-{
-    runningGame = FALSE;
-}
 
-BOOL canChangeResolution(PIX w, PIX h, BOOL fullscreen)
-{
-    if(pMainWin->getW() != w || pMainWin->getH() != h) {
-        if(fullscreen)
-            pMainWin->setMode(SE_WINDOW_MODE_FULLSCREEN);
-        else
-            pMainWin->setMode(SE_WINDOW_MODE_WINDOWED);
-        pMainWin->setW(w);
-        pMainWin->setH(h);
-        pMainWin->create();
-        main_dp = pMainWin->getDrawPort();
-        main_vp = pMainWin->getViewPort();
-        position_system->init();
-    }
-    return TRUE;
-}
 
-extern int SE_SDL_InputEventPoll(SDL_Event *event);
-FLOAT sensibility = 0.25;
-POINT* old_point = NULL;
-void update()
-{
-    // get real cursor position
-    GetCursorPos(&cursor);
-    if(runningLevel) {
-      if(old_point == NULL) {
-        old_point = new POINT(cursor);
-      } else {
-        POINT delta;
-        delta.x = (old_point->x - cursor.x) * sensibility;
-        delta.y = (old_point->y - cursor.y) * sensibility;
-        pen->en_plPlacement.Rotate_Airplane(ANGLE3D(delta.x, delta.y, 0.0f));
-        old_point->x = cursor.x;
-        old_point->y = cursor.y;
-      }
-    }
-    while (SE_SDL_InputEventPoll(event)) {
-        if(event->type == SDL_QUIT) {
-            quitgame();
-        }
-        if(event->type == SDL_KEYDOWN) {
-            INDEX ksym = event->key.keysym.sym;
-            switch(ksym) {
 
-            case SDLK_ESCAPE:
-                quitgame();
-                break;
-            case SDLK_F1:
-                canChangeResolution(640, 480, FALSE); //VGA 4:3 
-                break;
-            case SDLK_F2:
-                canChangeResolution(800, 600, FALSE); //SVGA 4:3
-                break;
-            case SDLK_F3:
-                canChangeResolution(1280, 720, FALSE); //16:9
-                break;
-            case SDLK_F4:
-                canChangeResolution(1920, 1080, TRUE); //16:9
-                break;
-            case SDLK_F5:
-                render_system->dbg_draw_border=!render_system->dbg_draw_border;
-                break;
-            case SDLK_F6:
-                render_system->dbg_draw_id=!render_system->dbg_draw_id;
-                break;
-            case SDLK_F7:
-                render_system->dbg_draw_position=!render_system->dbg_draw_position;
-                break;
-            case SDLK_F8:
-                pen->en_plPlacement = CPlacement3D(FLOAT3D(10,40,0),ANGLE3D(90,0,10));
-                break;
-            case SDLK_RIGHT:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(2.0f,0.0f,0.0f));
-                break;
-            case SDLK_LEFT:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(-2.0f,0.0f,0.0f));
-                break;
-            case SDLK_UP:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,2.0f,0.0f));
-                break;
-            case SDLK_DOWN:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,-2.0f,0.0f));
-                break;
-            case SDLK_SPACE:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,0.0f,2.0f));
-                break;
-            case SDLK_c:
-                pen->en_plPlacement.Translate_AbsoluteSystem(FLOAT3D(0.0f,0.0f,-2.0f));
-                break;
-            }
-        }
-    }
-}
+
 
 BOOL Init(CTString strCmdLine)
 {
   scr_splashscreen = new SESplashScreen();
-  pMainWin = new SEMainWindow();
+  main_win = new SEMainWindow();
   event = new SDL_Event();
 
   if(!SEInterfaceSDL::init()) {
@@ -215,24 +124,24 @@ BOOL Init(CTString strCmdLine)
   _pSound->SetFormat( (enum CSoundLibrary::SoundFormat)snd_iFormat);
 
   // apply application mode
-  pMainWin->setTitle(sam_strGameName);
-  pMainWin->setW(iWindowW);
-  pMainWin->setH(iWindowH);
-  pMainWin->setDepth(DisplayDepth::DD_DEFAULT);
-  pMainWin->setAdapter(iWindowAdapter);
-  BOOL winResult = pMainWin->create();
-  main_dp = pMainWin->getDrawPort();
-  main_vp = pMainWin->getViewPort();
+  main_win->setTitle(sam_strGameName);
+  main_win->setW(iWindowW);
+  main_win->setH(iWindowH);
+  main_win->setDepth(DisplayDepth::DD_DEFAULT);
+  main_win->setAdapter(iWindowAdapter);
+  BOOL winResult = main_win->create();
+  main_dp = main_win->getDrawPort();
+  main_vp = main_win->getViewPort();
 
   if(! winResult) {
-    pMainWin->setW(SSMF_WINDOW_RECOVERY_W);
-    pMainWin->setH(SSMF_WINDOW_RECOVERY_H);
+    main_win->setW(SSMF_WINDOW_RECOVERY_W);
+    main_win->setH(SSMF_WINDOW_RECOVERY_H);
     for(int i = 0; i < ctDefaultModes; i++) {
-      pMainWin->setDepth((DisplayDepth) aDefaultModes[i][0]);
-      pMainWin->setAPI( (GfxAPIType)  aDefaultModes[i][1]);
-      pMainWin->setAdapter(aDefaultModes[i][2]);
+      main_win->setDepth((DisplayDepth) aDefaultModes[i][0]);
+      main_win->setAPI( (GfxAPIType)  aDefaultModes[i][1]);
+      main_win->setAdapter(aDefaultModes[i][2]);
       CPrintF(TRANSV("\nTrying recovery mode %d...\n"), i);
-      winResult = pMainWin->create();
+      winResult = main_win->create();
       if( winResult ) break;
     }
   }
@@ -500,7 +409,6 @@ void GameRedrawView( CDrawPort *pdpDrawPort, ULONG ulFlags)
   _pGfx->gl_bAllowProbing = FALSE;
 }
 
-
 int SubMain(LPSTR lpCmdLine)
 {
   if( !Init(lpCmdLine)) return FALSE;
@@ -517,8 +425,8 @@ int SubMain(LPSTR lpCmdLine)
   _fdBig.Load_t(    CTFILENAME( "Fonts\\Display3-caps.fnt"));
 
   // initialy, application is running and active, console and menu are off
-  runningGame = TRUE;
-  runningMenu = TRUE;
+  main_game_started = TRUE;
+  main_menu_started = TRUE;
 
   position_system = new PositionSystem;
   manager->addSystem((SESystem*)position_system);
@@ -526,6 +434,10 @@ int SubMain(LPSTR lpCmdLine)
   manager->addSystem((SESystem*)render_system);
   input_system = new InputSystem;
   manager->addSystem((SESystem*)input_system);
+  control_system = new ControlSystem;
+  manager->addSystem((SESystem*)control_system);
+
+  load_game_controls();
 
   MenuImage* logosam = new MenuImage();
   logosam->x = 480;
@@ -561,7 +473,7 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_sp->fontsize = 2;
   menu_button_sp->textmode = 0;
   menu_button_sp->str = TRANS("SINGLE PLAYER");
-  menu_button_sp->function = startGame;
+  menu_button_sp->sea_action = startGame;
   menu_button_sp->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_sp->color2 = SE_COL_ORANGE_DARK|255;
   manager->addEntity((SEEntity*)menu_button_sp);
@@ -660,7 +572,7 @@ int SubMain(LPSTR lpCmdLine)
   menu_button_quit->fontsize = 2;
   menu_button_quit->textmode = 0;
   menu_button_quit->str = TRANS("QUIT");
-  menu_button_quit->function = quitgame;
+  menu_button_quit->sea_action = quitgame;
   menu_button_quit->color = SE_COL_ORANGE_LIGHT|255;
   menu_button_quit->color2 = SE_COL_ORANGE_DARK|255;
   manager->addEntity((SEEntity*)menu_button_quit);
@@ -676,11 +588,10 @@ int SubMain(LPSTR lpCmdLine)
   int64_t tloop1;
   int64_t tloop2;
   int64_t ticks = 0;
-  while(runningGame) // start of game loop
+  while(main_game_started) // start of game loop
   {
       tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-      if( !pMainWin->isIconic() ) {
-          update();
+      if( !main_win->isIconic() ) {
           if(main_dp->Lock()) {
               // clear z-buffer
               main_dp->FillZBuffer(ZBUF_BACK);

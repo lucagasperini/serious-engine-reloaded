@@ -6,9 +6,10 @@
 class InputSystem : SESystem
 {
     public:
+    FLOAT sensibility = 0.25;
+    POINT* old_cursor = NULL;
 
     void update() override;
-    void input_button(SEPositionComponent* _position, SEButtonComponent* _button);
 };
 
 #endif

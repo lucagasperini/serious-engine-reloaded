@@ -58,9 +58,10 @@ void RenderSystem::update()
             render_texture(position, texture);
 
         SETextComponent* text = dynamic_cast<SETextComponent *>((SEEntity*)entity);
+        SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent *>((SEEntity*)entity);
         SEButtonComponent* button = dynamic_cast<SEButtonComponent *>((SEEntity*)entity);
         if (text && button) 
-            render_button(position, text, button);
+            render_button(position, text, button, mousefocus);
         else if (text) 
             render_text(position, text);
         else
@@ -91,7 +92,7 @@ void RenderSystem::render_text(SEPositionComponent* _position, SETextComponent* 
         main_dp->PutTextC(_text->str, box.Center()(1), box.Min()(2), _text->color);
 }
 
-void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button)
+void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button, SEMouseFocusComponent* _mousefocus)
 {
     main_dp->SetFont(&_text->fontdata);
     main_dp->SetTextScaling(1.0f);
@@ -100,7 +101,7 @@ void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent
     PIXaabbox2D box(PIX2D(_position->x, _position->y), PIX2D(_position->x + _position->w, _position->y + _position->h));
 
     COLOR col;
-    if(_button->focus)
+    if(_mousefocus->semf_focus)
         col = _button->color2;
     else
         col = _text->color;

@@ -936,6 +936,7 @@ add_executable(${SSAMFM}
     SeriousSamMF/SplashScreen.cpp
     SeriousSamMF/MainWindow.cpp
     SeriousSamMF/InterfaceSDL.cpp
+    SeriousSamMF/Controls.h
     SeriousSamMF/ECS/Entity.cpp
     SeriousSamMF/ECS/Component.cpp
     SeriousSamMF/ECS/System.cpp
@@ -943,6 +944,7 @@ add_executable(${SSAMFM}
     SeriousSamMF/ECS/RenderSystem.cpp
     SeriousSamMF/ECS/InputSystem.cpp
     SeriousSamMF/ECS/PositionSystem.cpp
+    SeriousSamMF/ECS/ControlSystem.cpp
 )
 
 target_link_libraries(${SSAMFM} ${SENGINELIB})

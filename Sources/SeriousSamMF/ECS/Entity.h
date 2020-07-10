@@ -9,12 +9,20 @@ struct SEEntity
     virtual ~SEEntity() {}
 };
 
-struct MenuImage : SEEntity, SETextureComponent, SEPositionComponent{};
+struct MenuImage : SEEntity,
+                   SETextureComponent,
+                   SEPositionComponent{};
 
 struct MenuButton : SEEntity, 
                     SETextComponent, 
                     SEPositionComponent, 
                     SEAlignComponent, 
-                    SEButtonComponent{};
+                    SEButtonComponent,
+                    SEMouseClickComponent,
+                    SEMouseFocusComponent,
+                    SEActionComponent{};
+struct GameControl : SEEntity,
+                      SEKeyboardComponent,
+                      SEActionComponent{};
 
 #endif

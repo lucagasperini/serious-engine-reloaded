@@ -80,5 +80,6 @@ void PositionSystem::init_align(SEPositionComponent* _position, SEAlignComponent
 
 void PositionSystem::update()
 {
-    //DO SOMETHING
+    if(old_width != main_dp->GetWidth() || old_height != main_dp->GetHeight())
+        init();
 }

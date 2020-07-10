@@ -14,7 +14,6 @@ struct SEComponent
 
 struct SEPositionComponent : SEComponent
 {
-    public:
     ULONG x = 0;
     ULONG y = 0;
     ULONG w = 0;
@@ -23,14 +22,12 @@ struct SEPositionComponent : SEComponent
 
 struct SETextureComponent : SEComponent
 {
-    public:
     CTextureObject tex;
     CTFileName fntex;
 };
 
 struct SETextComponent : SEComponent
 {
-    public:
     INDEX fontsize = 0;
     INDEX align = 0;
     CFontData fontdata;
@@ -39,17 +36,34 @@ struct SETextComponent : SEComponent
     CTString str;
 };
 
+struct SEKeyboardComponent : SEComponent
+{
+    ULONG sekc_key = 0;
+    ULONG sekc_listen_key = 0;
+};
+
+struct SEMouseClickComponent : SEComponent
+{
+    ULONG semc_button = 0;
+};
+
+struct SEMouseFocusComponent : SEComponent
+{
+    BOOL semf_focus = FALSE;
+};
+
 struct SEButtonComponent : SEComponent
 {
-    public:
-    void (*function)() = NULL;
-    BOOL focus = FALSE;
     COLOR color2 = 0xff;
+};
+
+struct SEActionComponent : SEComponent
+{
+    void (*sea_action)() = NULL;
 };
 
 struct SEAlignComponent : SEComponent
 {
-    public:
     /*
     -2 => Left
     -1 => Center Left
