@@ -2,8 +2,8 @@
 #include "Manager.h"
 
 extern ECSManager* manager;
-extern CPlayerEntity* pen;
 extern CDrawPort* main_dp;
+extern FLOAT3D world_start_position;
 
 void ControlSystem::init(SEEntity* entity)
 {
@@ -45,7 +45,7 @@ void ControlSystem::control_camera(SECameraComponent* _camera, SEMouseDeltaCompo
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_CAMERA_RESET:
-        _camera->cam_pos = FLOAT3D(370, 40, 0);
+        _camera->cam_pos = world_start_position;
         break;
     case SE_KEYBIND_CAMERA_RIGHT:
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,

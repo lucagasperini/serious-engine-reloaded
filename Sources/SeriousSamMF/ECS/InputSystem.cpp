@@ -1,6 +1,5 @@
 #include "InputSystem.h"
 
-extern BOOL runningLevel;
 extern BOOL main_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event* event);
 

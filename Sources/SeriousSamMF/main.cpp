@@ -22,6 +22,8 @@ static char* argv0 = NULL;
 HWND _hwndMain = NULL; /* FIXME: Cant compile without this global variable */
 ENGINE_API extern INDEX snd_iFormat;
 
+FLOAT3D world_start_position = FLOAT3D(9, 6, 32);
+ANGLE3D world_start_rotation = ANGLE3D(0, 20, 0);
 CTFileName world_file = CTFILENAME("Levels\\TestGame.wld");
 CWorld* world_data = NULL;
 CTString main_gamename = "serioussammf";
@@ -211,8 +213,8 @@ int submain(char* cmdline)
 
     Camera* camera = new Camera();
     camera->cam_fov = 90.0f;
-    camera->cam_pos = FLOAT3D(370, 40, 0);
-    camera->cam_rot = ANGLE3D(-80, 20, 0);
+    camera->cam_pos = world_start_position;
+    camera->cam_rot = world_start_rotation;
     camera->cam_speed = 1.0f;
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F9;
