@@ -88,6 +88,7 @@ extern void resolution_change(ULONG w, ULONG h);
 extern BOOL dbg_draw_border;
 extern BOOL dbg_draw_id;
 extern BOOL dbg_draw_position;
+extern BOOL dbg_draw_fps;
 
 void ControlSystem::control_game(SEKeybindComponent* _keybind)
 {
@@ -115,6 +116,9 @@ void ControlSystem::control_game(SEKeybindComponent* _keybind)
         break;
     case SE_KEYBIND_DEBUG_POSITION:
         dbg_draw_position = !dbg_draw_position;
+        break;
+    case SE_KEYBIND_DEBUG_FPS:
+        dbg_draw_fps = !dbg_draw_fps;
         break;
     }
 }

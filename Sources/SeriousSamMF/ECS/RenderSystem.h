@@ -15,6 +15,7 @@ public:
     void render_border(SEPositionComponent* _position);
     void render_id(SEEntity* _entity, SEPositionComponent* _position);
     void render_position(SECameraComponent* _camera);
+    void render_fps();
     void render_world(SECameraComponent* _camera);
 };
 

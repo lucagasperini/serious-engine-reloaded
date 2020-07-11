@@ -2,10 +2,13 @@
 
 extern CDrawPort* main_dp;
 extern CFontData* main_font_small;
+extern CFontData* main_font_medium;
 extern COLOR fallback_color;
 extern BOOL dbg_draw_border;
 extern BOOL dbg_draw_id;
 extern BOOL dbg_draw_position;
+extern BOOL dbg_draw_fps;
+extern ULONG dbg_count_fps;
 extern CWorld* world_data;
 
 void RenderSystem::render_position(SECameraComponent* _camera)
@@ -21,6 +24,15 @@ void RenderSystem::render_position(SECameraComponent* _camera)
     float az = _camera->cam_rot(3);
 
     snprintf(buffer, 128, "X: %f\nY: %f\nZ: %f\nAX: %f \nAY: %f \nAZ: %f", px, py, pz, ax, ay, az);
+    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
+}
+
+void RenderSystem::render_fps()
+{
+    PIXaabbox2D box(PIX2D(0, 100), PIX2D(100, 100));
+    main_dp->SetFont(main_font_medium);
+    char* buffer = new char[16];
+    snprintf(buffer, 16, "FPS: %u", dbg_count_fps);
     main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
 }
 
@@ -49,6 +61,8 @@ void RenderSystem::update(SEEntity* entity)
         render_id(entity, position);
     if (dbg_draw_position && camera)
         render_position(camera);
+    if (dbg_draw_fps)
+        render_fps();
 
     SETextureComponent* texture = dynamic_cast<SETextureComponent*>((SEEntity*)entity);
     if (position && texture)

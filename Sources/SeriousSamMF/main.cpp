@@ -43,6 +43,8 @@ COLOR fallback_color = C_BLACK | 0xff;
 BOOL dbg_draw_border = FALSE;
 BOOL dbg_draw_id = FALSE;
 BOOL dbg_draw_position = FALSE;
+BOOL dbg_draw_fps = FALSE;
+ULONG dbg_count_fps = 0;
 
 ULONG game_vresolution_width = 1920;
 ULONG game_vresolution_height = 1080;
@@ -209,6 +211,7 @@ int submain(char* cmdline)
     game_control->kb_keybind[SE_KEYBIND_DEBUG_BORDER] = SDLK_F6;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_ENTITYID] = SDLK_F7;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_POSITION] = SDLK_F8;
+    game_control->kb_keybind[SE_KEYBIND_DEBUG_FPS] = SDLK_F9;
     manager->addEntity((SEEntity*)game_control);
 
     Camera* camera = new Camera();
@@ -217,7 +220,7 @@ int submain(char* cmdline)
     camera->cam_rot = world_start_rotation;
     camera->cam_speed = 1.0f;
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
-    camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F9;
+    camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F10;
     camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;
     camera->kb_keybind[SE_KEYBIND_CAMERA_LEFT] = SDLK_LEFT;
     camera->kb_keybind[SE_KEYBIND_CAMERA_FORWARD] = SDLK_UP;
@@ -396,6 +399,7 @@ int submain(char* cmdline)
         }
         tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
         fprintf(stderr, "Execute time tick(%ld): %ld\n", ticks++, tloop2 - tloop1);
+        dbg_count_fps = 1000 / (tloop2 - tloop1);
     } // end of game loop
     return TRUE;
 }
