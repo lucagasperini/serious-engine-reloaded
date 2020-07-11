@@ -1,19 +1,18 @@
 #ifndef SSMF_MANAGER_H
 #define SSMF_MANAGER_H
 
-#include <Engine/Engine.h>
-#include "Entity.h"
-#include "RenderSystem.h"
-#include "PositionSystem.h"
-#include "InputSystem.h"
 #include "ControlSystem.h"
+#include "Entity.h"
+#include "InputSystem.h"
+#include "PositionSystem.h"
+#include "RenderSystem.h"
+#include <Engine/Engine.h>
 
-
-class ECSManager
-{
-    private:
+class ECSManager {
+private:
     static ULONG entity_counter;
-    public:
+
+public:
     PositionSystem* position_system = NULL;
     RenderSystem* render_system = NULL;
     InputSystem* input_system = NULL;

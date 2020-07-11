@@ -3,8 +3,7 @@
 
 #include "Entity.h"
 
-class ControlSystem
-{
+class ControlSystem {
 public:
     void init(SEEntity* entity);
     void update(SEEntity* entity);
@@ -14,7 +13,5 @@ public:
     void control_camera(SECameraComponent* _camera, SEMouseDeltaComponent* _mousedelta, SEKeybindComponent* _keybind);
     void control_game(SEKeybindComponent* _keybind);
 };
-
-
 
 #endif

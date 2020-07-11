@@ -4,9 +4,9 @@
 
 SESplashScreen::SESplashScreen()
 {
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
-    SDL_Texture *texture = NULL;
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+    SDL_Texture* texture = NULL;
 }
 
 SESplashScreen::~SESplashScreen()
@@ -16,39 +16,51 @@ SESplashScreen::~SESplashScreen()
 
 void SESplashScreen::hide()
 {
-  if (window) { SDL_DestroyWindow(window); window = NULL; }
-  if (renderer) { SDL_DestroyRenderer(renderer); renderer = NULL; }
-  if (texture) { SDL_DestroyTexture(texture); texture = NULL; }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = NULL;
+    }
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = NULL;
+    }
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = NULL;
+    }
 }
 
 int SESplashScreen::show()
 {
-  SDL_Surface *bmp = SDL_LoadBMP(str_bitmap_file);
-  
-  if (!bmp) return FALSE;
+    SDL_Surface* bmp = SDL_LoadBMP(str_bitmap_file);
 
-  // RAKE!: commented out as its post SDL2.0.4 |SDL_WINDOW_SKIP_TASKBAR);
-  window = SDL_CreateWindow(str_wintitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, bmp->w, bmp->h, SDL_WINDOW_BORDERLESS); 
-  
-  if(!window) return FALSE;
+    if (!bmp)
+        return FALSE;
 
-  renderer = SDL_CreateRenderer(window, -1, 0);
+    // RAKE!: commented out as its post SDL2.0.4 |SDL_WINDOW_SKIP_TASKBAR);
+    window = SDL_CreateWindow(str_wintitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, bmp->w, bmp->h, SDL_WINDOW_BORDERLESS);
 
-  if (!renderer) return FALSE;
+    if (!window)
+        return FALSE;
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-  SDL_RenderClear(renderer);
-  SDL_RenderPresent(renderer);
+    renderer = SDL_CreateRenderer(window, -1, 0);
 
-  texture = SDL_CreateTextureFromSurface(renderer, bmp);
+    if (!renderer)
+        return FALSE;
 
-  if (!texture) {
-    hide();
-    return FALSE;
-  }
-  
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-  SDL_RenderPresent(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
 
-  return TRUE;
+    texture = SDL_CreateTextureFromSurface(renderer, bmp);
+
+    if (!texture) {
+        hide();
+        return FALSE;
+    }
+
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+
+    return TRUE;
 }

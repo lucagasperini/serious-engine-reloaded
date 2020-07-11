@@ -3,9 +3,8 @@
 
 #include "Entity.h"
 
-class PositionSystem
-{
-    public:
+class PositionSystem {
+public:
     void init(SEEntity* entity);
     void postinit();
     void init_scale(SEPositionComponent* _position);

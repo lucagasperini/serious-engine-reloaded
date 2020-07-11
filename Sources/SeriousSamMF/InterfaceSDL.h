@@ -34,8 +34,7 @@
 
 /* NOTE: If you want use different interface, you can create a virtual class like SEInterface and inherit here! */
 /* BTW why use another interface when SDL is multi platform? */
-class SEInterfaceSDL 
-{
+class SEInterfaceSDL {
 private:
 public:
     SEInterfaceSDL();
@@ -46,7 +45,7 @@ public:
     static CTString getError() { return SDL_GetError(); }
 
     static PIX posWinCentered() { return SDL_WINDOWPOS_CENTERED; }
-    static HWND createWindow(const CTString &title, PIX x, PIX y, PIX w, PIX h, GfxAPIType api, INDEX mode, BOOL resizable, INDEX status);
+    static HWND createWindow(const CTString& title, PIX x, PIX y, PIX w, PIX h, GfxAPIType api, INDEX mode, BOOL resizable, INDEX status);
     static void quit();
 
     static ULONG desktopWidth();

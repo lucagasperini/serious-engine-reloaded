@@ -13,7 +13,6 @@ ECSManager::ECSManager()
 
 ECSManager::~ECSManager()
 {
-
 }
 
 void ECSManager::addEntity(SEEntity* _entity)

@@ -3,9 +3,8 @@
 
 #include "Entity.h"
 
-class RenderSystem
-{
-    public:
+class RenderSystem {
+public:
     void init(SEEntity* entity);
     void init_texture(SETextureComponent* _texture);
 

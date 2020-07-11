@@ -3,32 +3,35 @@
 
 #include "Component.h"
 
-struct SEEntity
-{
+struct SEEntity {
     ULONG id;
     virtual ~SEEntity() {}
 };
 
 struct MenuImage : SEEntity,
                    SETextureComponent,
-                   SEPositionComponent{};
+                   SEPositionComponent {
+};
 
-struct MenuButton : SEEntity, 
-                    SETextComponent, 
-                    SEPositionComponent, 
-                    SEAlignComponent, 
+struct MenuButton : SEEntity,
+                    SETextComponent,
+                    SEPositionComponent,
+                    SEAlignComponent,
                     SEButtonComponent,
                     SEMouseClickComponent,
                     SEMouseFocusComponent,
-                    SEActionComponent{};
+                    SEActionComponent {
+};
 struct GameControl : SEEntity,
-                      SEKeyboardComponent,
-                      SEKeybindComponent{};
+                     SEKeyboardComponent,
+                     SEKeybindComponent {
+};
 
 struct Camera : SEEntity,
-                      SEKeybindComponent,
-                      SEMouseDeltaComponent,
-                      SECameraComponent,
-                      SEActionComponent{};
+                SEKeybindComponent,
+                SEMouseDeltaComponent,
+                SECameraComponent,
+                SEActionComponent {
+};
 
 #endif

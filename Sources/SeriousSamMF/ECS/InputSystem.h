@@ -1,12 +1,11 @@
 #ifndef SSMF_INPUTSYSTEM_H
 #define SSMF_INPUTSYSTEM_H
 
-#include <Engine/Base/Types.h>
 #include "Entity.h"
+#include <Engine/Base/Types.h>
 
-class InputSystem
-{
-    public:
+class InputSystem {
+public:
     FLOAT sensibility = 0.25;
     POINT* old_cursor = NULL;
     ULONG key;

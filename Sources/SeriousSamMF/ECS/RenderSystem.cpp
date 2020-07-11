@@ -14,7 +14,7 @@ void RenderSystem::render_position(SECameraComponent* _camera)
     main_dp->SetFont(main_font_small);
     char* buffer = new char[128];
     float px = _camera->cam_pos(1);
-    float py = _camera->cam_pos(2); 
+    float py = _camera->cam_pos(2);
     float pz = _camera->cam_pos(3);
     float ax = _camera->cam_rot(1);
     float ay = _camera->cam_rot(2);
@@ -26,23 +26,23 @@ void RenderSystem::render_position(SECameraComponent* _camera)
 
 void RenderSystem::init(SEEntity* entity)
 {
-    SETextureComponent *texture = dynamic_cast<SETextureComponent *>((SEEntity *)entity);
+    SETextureComponent* texture = dynamic_cast<SETextureComponent*>((SEEntity*)entity);
     if (texture)
         init_texture(texture);
 }
 
-void RenderSystem::init_texture(SETextureComponent *_texture)
+void RenderSystem::init_texture(SETextureComponent* _texture)
 {
     _texture->tex_data.SetData_t(_texture->tex_file);
 }
 
 void RenderSystem::update(SEEntity* entity)
 {
-    SECameraComponent *camera = dynamic_cast<SECameraComponent *>((SEEntity *)entity);
+    SECameraComponent* camera = dynamic_cast<SECameraComponent*>((SEEntity*)entity);
     if (camera)
         render_world(camera);
 
-    SEPositionComponent *position = dynamic_cast<SEPositionComponent *>((SEEntity *)entity);
+    SEPositionComponent* position = dynamic_cast<SEPositionComponent*>((SEEntity*)entity);
     if (dbg_draw_border && position)
         render_border(position);
     if (dbg_draw_id && position)
@@ -50,13 +50,13 @@ void RenderSystem::update(SEEntity* entity)
     if (dbg_draw_position && camera)
         render_position(camera);
 
-    SETextureComponent *texture = dynamic_cast<SETextureComponent *>((SEEntity *)entity);
+    SETextureComponent* texture = dynamic_cast<SETextureComponent*>((SEEntity*)entity);
     if (position && texture)
         render_texture(position, texture);
 
-    SETextComponent *text = dynamic_cast<SETextComponent *>((SEEntity *)entity);
-    SEMouseFocusComponent *mousefocus = dynamic_cast<SEMouseFocusComponent *>((SEEntity *)entity);
-    SEButtonComponent *button = dynamic_cast<SEButtonComponent *>((SEEntity *)entity);
+    SETextComponent* text = dynamic_cast<SETextComponent*>((SEEntity*)entity);
+    SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent*>((SEEntity*)entity);
+    SEButtonComponent* button = dynamic_cast<SEButtonComponent*>((SEEntity*)entity);
     if (position && text && button && mousefocus)
         render_button(position, text, button, mousefocus);
     else if (position && text)
@@ -65,9 +65,7 @@ void RenderSystem::update(SEEntity* entity)
 
 void RenderSystem::render_texture(SEPositionComponent* _position, SETextureComponent* _texture)
 {
-    main_dp->PutTexture(&_texture->tex_data, PIXaabbox2D(
-                                           PIX2D(_position->pos_x, _position->pos_y),
-                                           PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
+    main_dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
 void RenderSystem::render_text(SEPositionComponent* _position, SETextComponent* _text)
@@ -95,7 +93,7 @@ void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    if(_mousefocus->mf_focus)
+    if (_mousefocus->mf_focus)
         col = _button->btn_color2;
     else
         col = _text->txt_color;
@@ -110,7 +108,7 @@ void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent
 
 void RenderSystem::render_border(SEPositionComponent* _position)
 {
-     main_dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, fallback_color);
+    main_dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, fallback_color);
 }
 
 void RenderSystem::render_id(SEEntity* _entity, SEPositionComponent* _position)
@@ -123,7 +121,7 @@ void RenderSystem::render_id(SEEntity* _entity, SEPositionComponent* _position)
 }
 
 void RenderSystem::render_world(SECameraComponent* _camera)
-{  
+{
     CPlacement3D plCamera;
     plCamera.pl_PositionVector = _camera->cam_pos;
     plCamera.pl_OrientationAngle = _camera->cam_rot;
@@ -132,8 +130,7 @@ void RenderSystem::render_world(SECameraComponent* _camera)
     CPerspectiveProjection3D prPerspectiveProjection;
     prPerspectiveProjection.FOVL() = _camera->cam_fov;
     prPerspectiveProjection.ScreenBBoxL() = FLOATaabbox2D(
-        FLOAT2D(0.0f, 0.0f), FLOAT2D((float)main_dp->GetWidth(), (float)main_dp->GetHeight())
-    );
+        FLOAT2D(0.0f, 0.0f), FLOAT2D((float)main_dp->GetWidth(), (float)main_dp->GetHeight()));
     prPerspectiveProjection.AspectRatioL() = 1.0f;
     prPerspectiveProjection.FrontClipDistanceL() = 0.3f;
 
