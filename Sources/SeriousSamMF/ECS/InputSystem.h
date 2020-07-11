@@ -1,15 +1,24 @@
 #ifndef SSMF_INPUTSYSTEM_H
 #define SSMF_INPUTSYSTEM_H
 
-#include "System.h"
+#include <Engine/Base/Types.h>
+#include "Entity.h"
 
-class InputSystem : SESystem
+class InputSystem
 {
     public:
     FLOAT sensibility = 0.25;
     POINT* old_cursor = NULL;
+    ULONG key;
+    ULONG button;
+    POINT cursor;
+    POINT deltacursor;
+    SDL_Event event;
 
-    void update() override;
+    void preupdate();
+    void postupdate();
+    void init(SEEntity* entity);
+    void update(SEEntity* entity);
 };
 
 #endif

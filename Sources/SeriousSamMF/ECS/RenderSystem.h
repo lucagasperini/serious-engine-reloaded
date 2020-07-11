@@ -1,25 +1,22 @@
 #ifndef SSMF_RENDERSYSTEM_H
 #define SSMF_RENDERSYSTEM_H
 
-#include "System.h"
+#include "Entity.h"
 
-class RenderSystem : SESystem
+class RenderSystem
 {
     public:
-    BOOL dbg_draw_border = FALSE;
-    BOOL dbg_draw_id = FALSE;
-    BOOL dbg_draw_position = FALSE;
-
-    void init() override;
+    void init(SEEntity* entity);
     void init_texture(SETextureComponent* _texture);
 
-    void update() override;
+    void update(SEEntity* entity);
     void render_texture(SEPositionComponent* _position, SETextureComponent* _texture);
     void render_text(SEPositionComponent* _position, SETextComponent* _text);
     void render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button, SEMouseFocusComponent* _mousefocus);
     void render_border(SEPositionComponent* _position);
     void render_id(SEEntity* _entity, SEPositionComponent* _position);
-    void render_position();
+    void render_position(SECameraComponent* _camera);
+    void render_world(SECameraComponent* _camera);
 };
 
 #endif

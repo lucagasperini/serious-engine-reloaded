@@ -1,38 +1,30 @@
 #include "PositionSystem.h"
-#include "Manager.h"
 
-extern ECSManager* manager;
 extern CDrawPort* main_dp;
+extern ULONG game_vresolution_width;
+extern ULONG game_vresolution_height;
 
-void PositionSystem::init()
+
+void PositionSystem::init(SEEntity* entity)
 {
-    ULONG width = main_dp->GetWidth();
-    ULONG height = main_dp->GetHeight();
-    FOREACHINDYNAMICCONTAINER(*manager->entities, SEEntity, entity)
-    {
-        SEPositionComponent* position = dynamic_cast<SEPositionComponent *>((SEEntity*)entity);
-        if (!position)
-            continue;
-
-        init_scale(position, width, height);
-
-        SEAlignComponent* align = dynamic_cast<SEAlignComponent *>((SEEntity*)entity);
-        if (align)
-            init_align(position, align);
-    }
-    old_width = width;
-    old_height = height;
+    SEPositionComponent *position = dynamic_cast<SEPositionComponent *>((SEEntity *)entity);
+    
 }
 
-void PositionSystem::init_scale(SEPositionComponent* _position, ULONG _width, ULONG _height)
+void PositionSystem::postinit()
 {
-    FLOAT scaleX = (FLOAT)_width / (FLOAT)old_width;
-    FLOAT scaleY = (FLOAT)_height / (FLOAT)old_height;
+    
+}
 
-    _position->x = (FLOAT)_position->x * scaleX;
-    _position->y = (FLOAT)_position->y * scaleY;
-    _position->w = (FLOAT)_position->w * scaleX;
-    _position->h = (FLOAT)_position->h * scaleY;
+void PositionSystem::init_scale(SEPositionComponent* _position)
+{
+    FLOAT scaleX = (FLOAT)main_dp->GetWidth() / (FLOAT)game_vresolution_width;
+    FLOAT scaleY = (FLOAT)main_dp->GetHeight() / (FLOAT)game_vresolution_height;
+
+    _position->pos_x = (FLOAT)_position->pos_x * scaleX;
+    _position->pos_y = (FLOAT)_position->pos_y * scaleY;
+    _position->pos_w = (FLOAT)_position->pos_w * scaleX;
+    _position->pos_h = (FLOAT)_position->pos_h * scaleY;
 }
 
 void PositionSystem::init_align(SEPositionComponent* _position, SEAlignComponent* _align)
@@ -43,43 +35,59 @@ void PositionSystem::init_align(SEPositionComponent* _position, SEAlignComponent
     switch (_align->align_x)
     {
     case -2:
-        _position->x = 0;
+        _position->pos_x = 0;
         break;
     case -1:
-        _position->x = center_x - _position->w;
+        _position->pos_x = center_x - _position->pos_w;
         break;
     case 0:
-        _position->x = center_x - _position->w / 2;
+        _position->pos_x = center_x - _position->pos_w / 2;
         break;
     case 1:
-        _position->x = center_x;
+        _position->pos_x = center_x;
         break;
     case 2:
-        _position->x = center_x * 2 - _position->w;
+        _position->pos_x = center_x * 2 - _position->pos_w;
         break;
     }
     switch (_align->align_y)
     {
     case -2:
-        _position->y = 0;
+        _position->pos_y = 0;
         break;
     case -1:
-        _position->y = center_y - _position->h;
+        _position->pos_y = center_y - _position->pos_h;
         break;
     case 0:
-        _position->y = center_y - _position->h / 2;
+        _position->pos_y = center_y - _position->pos_h / 2;
         break;
     case 1:
-        _position->y = center_y;
+        _position->pos_y = center_y;
         break;
     case 2:
-        _position->y = center_y * 2 - _position->y;
+        _position->pos_y = center_y * 2 - _position->pos_y;
         break;
     }
 }
 
-void PositionSystem::update()
+void PositionSystem::update(SEEntity* entity)
 {
-    if(old_width != main_dp->GetWidth() || old_height != main_dp->GetHeight())
-        init();
+    if(game_vresolution_width != main_dp->GetWidth() || game_vresolution_height != main_dp->GetHeight()) {
+        SEPositionComponent *position = dynamic_cast<SEPositionComponent *>((SEEntity *)entity);
+        SEAlignComponent *align = dynamic_cast<SEAlignComponent *>((SEEntity *)entity);
+
+        if (position)
+            init_scale(position);
+
+        if (position && align)
+            init_align(position, align);
+    }
+}
+
+void PositionSystem::postupdate()
+{
+    if(game_vresolution_width != main_dp->GetWidth() || game_vresolution_height != main_dp->GetHeight()) {
+        game_vresolution_width = main_dp->GetWidth();
+        game_vresolution_height = main_dp->GetHeight();
+    }
 }

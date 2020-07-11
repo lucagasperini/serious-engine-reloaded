@@ -23,6 +23,12 @@ struct MenuButton : SEEntity,
                     SEActionComponent{};
 struct GameControl : SEEntity,
                       SEKeyboardComponent,
+                      SEKeybindComponent{};
+
+struct Camera : SEEntity,
+                      SEKeybindComponent,
+                      SEMouseDeltaComponent,
+                      SECameraComponent,
                       SEActionComponent{};
 
 #endif

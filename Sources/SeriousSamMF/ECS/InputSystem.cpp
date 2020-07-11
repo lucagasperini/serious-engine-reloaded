@@ -1,66 +1,100 @@
 #include "InputSystem.h"
-#include "Manager.h"
-
-extern ECSManager* manager;
 
 extern BOOL runningLevel;
 extern BOOL main_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event *event);
 
-void InputSystem::update()
+void InputSystem::init(SEEntity* entity)
 {
-    ULONG key;
-    ULONG button;
-    POINT cursor;
-    POINT deltacursor;
-    SDL_Event event;
-    // get real cursor position
+
+}
+
+void InputSystem::preupdate()
+{
+        // get real cursor position
     GetCursorPos(&cursor);
-    if(old_cursor != NULL) {
+    if (old_cursor != NULL)
+    {
         deltacursor.x = (old_cursor->x - cursor.x) * sensibility;
         deltacursor.y = (old_cursor->y - cursor.y) * sensibility;
-    } else {
+    }
+    else
+    {
         old_cursor = new POINT();
     }
-        //pen->en_plPlacement.Rotate_Airplane(ANGLE3D(delta.x, delta.y, 0.0f));
     old_cursor->x = cursor.x;
     old_cursor->y = cursor.y;
-    while (SE_SDL_InputEventPoll(&event)) {
-        if(event.type == SDL_QUIT) {
+
+    while (SE_SDL_InputEventPoll(&event))
+    {
+        if (event.type == SDL_QUIT)
+        {
             main_game_started = FALSE;
         }
-        if(event.type == SDL_KEYDOWN) {
+        if (event.type == SDL_KEYDOWN)
+        {
             key = event.key.keysym.sym;
         }
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
+        if (event.type == SDL_MOUSEBUTTONDOWN)
+        {
             button = event.button.button;
         }
     }
-    FOREACHINDYNAMICCONTAINER(*manager->entities, SEEntity, entity)
+}
+
+void InputSystem::postupdate()
+{
+    key = 0;
+    button = 0;
+    cursor = POINT();
+    deltacursor = POINT();
+}
+
+void InputSystem::update(SEEntity* entity)
+{
+    SEKeyboardComponent *keyboard = dynamic_cast<SEKeyboardComponent *>((SEEntity *)entity);
+    if (keyboard)
+        keyboard->kc_listen_key = key;
+    SEKeybindComponent *keybind = dynamic_cast<SEKeybindComponent *>((SEEntity *)entity);
+    if (keybind)
     {
-        SEKeyboardComponent* keyboard = dynamic_cast<SEKeyboardComponent *>((SEEntity*)entity);
-        if(keyboard)
-            keyboard->sekc_listen_key = key;
-
-        SEPositionComponent* position = dynamic_cast<SEPositionComponent *>((SEEntity*)entity);
-        SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent *>((SEEntity*)entity);
-        if (position && mousefocus)
+        // Reset current keybind first
+        keybind->kb_current = SE_KEYBIND_NULL;
+        for (ULONG i = 1; i < SE_ECS_KEYBIND_MAX; i++)
         {
-            if (position->x < cursor.x &&
-                position->y < cursor.y &&
-                position->x + position->w > cursor.x &&
-                position->y + position->h > cursor.y) {
-                mousefocus->semf_focus = TRUE;
-            }
-            else
+            if (keybind->kb_keybind[i] == key && key != 0)
             {
-                mousefocus->semf_focus = FALSE;
+                keybind->kb_current = i;
+                break;
             }
-            
         }
+    }
 
-        SEMouseClickComponent* mouseclick = dynamic_cast<SEMouseClickComponent *>((SEEntity*)entity);
-        if (mouseclick)
-            mouseclick->semc_button = button;
+    SEPositionComponent *position = dynamic_cast<SEPositionComponent *>((SEEntity *)entity);
+    SEMouseFocusComponent *mousefocus = dynamic_cast<SEMouseFocusComponent *>((SEEntity *)entity);
+    if (position && mousefocus)
+    {
+        if (position->pos_x < cursor.x &&
+            position->pos_y < cursor.y &&
+            position->pos_x + position->pos_w > cursor.x &&
+            position->pos_y + position->pos_h > cursor.y)
+        {
+            mousefocus->mf_focus = TRUE;
+        }
+        else
+        {
+            mousefocus->mf_focus = FALSE;
+        }
+    }
+
+    SEMouseClickComponent *mouseclick = dynamic_cast<SEMouseClickComponent *>((SEEntity *)entity);
+    if (mouseclick)
+        mouseclick->mc_button = button;
+
+    SEMouseDeltaComponent *mousedelta = dynamic_cast<SEMouseDeltaComponent *>((SEEntity *)entity);
+    if (mousedelta)
+    {
+        mousedelta->md_cursor.x = deltacursor.x;
+        mousedelta->md_cursor.y = deltacursor.y;
     }
 }

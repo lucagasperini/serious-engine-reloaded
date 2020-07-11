@@ -3,21 +3,30 @@
 
 #include <Engine/Engine.h>
 #include "Entity.h"
-#include "System.h"
+#include "RenderSystem.h"
+#include "PositionSystem.h"
+#include "InputSystem.h"
+#include "ControlSystem.h"
+
 
 class ECSManager
 {
     private:
     static ULONG entity_counter;
     public:
+    PositionSystem* position_system = NULL;
+    RenderSystem* render_system = NULL;
+    InputSystem* input_system = NULL;
+    ControlSystem* control_system = NULL;
     CDynamicContainer<SEEntity>* entities = NULL;
-    CDynamicContainer<SESystem>* systems = NULL;
 
     ECSManager();
     ~ECSManager();
 
+    void init();
+    void update();
+
     void addEntity(SEEntity* _entity);
-    void addSystem(SESystem* _system);
 };
 
 #endif

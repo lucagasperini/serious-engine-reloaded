@@ -1,19 +1,18 @@
 #ifndef SSMF_POSITIONSYSTEM_H
 #define SSMF_POSITIONSYSTEM_H
 
-#include "System.h"
+#include "Entity.h"
 
-class PositionSystem : SESystem
+class PositionSystem
 {
     public:
-    ULONG old_width = 1920;
-    ULONG old_height = 1080;
-
-    void init() override;
-    void init_scale(SEPositionComponent* _position, ULONG width, ULONG height);
+    void init(SEEntity* entity);
+    void postinit();
+    void init_scale(SEPositionComponent* _position);
     void init_align(SEPositionComponent* _position, SEAlignComponent* _align);
 
-    void update();
+    void update(SEEntity* entity);
+    void postupdate();
 };
 
 #endif

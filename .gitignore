@@ -29,6 +29,10 @@
 !Bison.exe
 !Flex.exe
 
+# Visual Studio Code Directory
+.vscode/*
+
+
 # Build Directory
 Bin/*
 
