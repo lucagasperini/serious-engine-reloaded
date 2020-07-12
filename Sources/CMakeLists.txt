@@ -241,14 +241,11 @@ endif()
 
 include_directories(
     .
+    ${CMAKE_SOURCE_DIR}/External/wx/lib/wx/include/gtk3-unicode-3.1/
+    ${CMAKE_SOURCE_DIR}/External/wx/include
     ${CMAKE_SOURCE_DIR}/External/libogg/include
 )
 if(USE_TREMOR)
-if(PANDORA)
-    include_directories(/mnt/utmp/codeblocks/usr/include/tremor)
-else()
-    # !!!Do something here!
-endif()
 else()
     include_directories(External/libvorbis/include)
 endif()
@@ -960,16 +957,110 @@ if(LINUX)
     endif()
 endif()
 
-add_executable(targatest Utils/targatest.cpp)
-target_link_libraries(targatest ${SENGINELIB})
-set_target_properties(targatest PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-target_link_libraries(targatest "m")
-target_link_libraries(targatest "dl")
-target_link_libraries(targatest "pthread")
-target_link_libraries(targatest ${SDL2_LIBRARY})
-target_link_libraries(targatest ${ZLIB_LIBRARIES})
-add_executable(targa Utils/targa.cpp)
+set(SERIOUSEDITOR "serious-editor")
 
+add_executable(${SERIOUSEDITOR} 
+    WorldEditor/ActiveTextureWnd.cpp
+    WorldEditor/Browser.cpp
+    WorldEditor/BrowseWindow.cpp
+    WorldEditor/BrushPaletteWnd.cpp
+    WorldEditor/ChildFrm.cpp
+    WorldEditor/ColoredButton.cpp
+    WorldEditor/ColorPaletteWnd.cpp
+    WorldEditor/CSGDesitnationCombo.cpp
+    WorldEditor/CtlTipOfTheDayText.cpp
+    WorldEditor/CtrlAxisRadio.cpp
+    WorldEditor/CtrlBrowseFile.cpp
+    WorldEditor/CtrlColorBrowsingModeRadio.cpp
+    WorldEditor/CtrlEditBoolean.cpp
+    WorldEditor/CtrlEditFlags.cpp
+    WorldEditor/CtrlEditFloat.cpp
+    WorldEditor/CtrlEditString.cpp
+    WorldEditor/CtrlEnumCombo.cpp
+    WorldEditor/CustomComboWnd.cpp
+    WorldEditor/DlgAllignVertices.cpp
+    WorldEditor/DlgAutoDeltaCSG.cpp
+    WorldEditor/DlgAutTexturize.cpp
+    WorldEditor/DlgBrowseByClass.cpp
+    WorldEditor/DlgComment.cpp
+    WorldEditor/DlgCreateVirtualDirectory.cpp
+    WorldEditor/DlgDisplaceMapSize.cpp
+    WorldEditor/DlgEditFloat.cpp
+    WorldEditor/DlgEditTerrainBrush.cpp
+    WorldEditor/DlgEditTerrainLayer.cpp
+    WorldEditor/DlgFilterPolygonSelection.cpp
+    WorldEditor/DlgFilterVertexSelection.cpp
+    WorldEditor/DlgGenerateFBM.cpp
+    WorldEditor/DlgLightAnimationEditor.cpp
+    WorldEditor/DlgLinkTree.cpp
+    WorldEditor/DlgMirrorAndStretch.cpp
+    WorldEditor/DlgNumericAlpha.cpp
+    WorldEditor/DlgPgGlobal.cpp
+    WorldEditor/DlgPgPolygon.cpp
+    WorldEditor/DlgPgPosition.cpp
+    WorldEditor/DlgPgPrimitive.cpp
+    WorldEditor/DlgPgRenderingStatistics.cpp
+    WorldEditor/DlgPgSector.cpp
+    WorldEditor/DlgPgShadow.cpp
+    WorldEditor/DlgPgTerrain.cpp
+    WorldEditor/DlgPgTexture.cpp
+    WorldEditor/DlgPreferences.cpp
+    WorldEditor/DlgProgress.cpp
+    WorldEditor/DlgRenderingPreferences.cpp
+    WorldEditor/DlgSelectByName.cpp
+    WorldEditor/DlgSnapVertex.cpp
+    WorldEditor/DlgStretchChildOffset.cpp
+    WorldEditor/DlgTEOperationSettings.cpp
+    WorldEditor/DlgTerrainProperties.cpp
+    WorldEditor/DlgTipOfTheDay.cpp
+    WorldEditor/DlgTreeShortcuts.cpp
+    WorldEditor/DlgWorldSettings.cpp
+    WorldEditor/EditMipSwitchDistance.cpp
+    WorldEditor/EntitySelectionListBox.cpp
+    WorldEditor/InfoFrame.cpp
+    WorldEditor/InfoSheet.cpp
+    WorldEditor/MainFrm.cpp
+    WorldEditor/PrimitiveHistoryCombo.cpp
+    WorldEditor/PropertyComboBar.cpp
+    WorldEditor/PropertyComboBox.cpp
+    WorldEditor/SkyFloat.cpp
+    WorldEditor/StdAfx.cpp
+    WorldEditor/TerrainEditing.cpp
+    WorldEditor/TerrainInterface.cpp
+    WorldEditor/ToolTipWnd.cpp
+    WorldEditor/TriangularisationCombo.cpp
+    WorldEditor/Viewers.cpp
+    WorldEditor/ViewTexture.cpp
+    WorldEditor/VirtualTreeCtrl.cpp
+    WorldEditor/VirtualTreeNode.cpp
+    WorldEditor/WndAnimationFrames.cpp
+    WorldEditor/WndDisplayTexture.cpp
+    WorldEditor/WndTerrainTilePalette.cpp
+    WorldEditor/WndTestAnimation.cpp
+    WorldEditor/WorldEditor.cpp
+    WorldEditor/WorldEditorDoc.cpp
+    WorldEditor/WorldEditorView.cpp
+
+    EngineGui/DlgChooseTextureType.cpp
+    EngineGui/DlgCreateAnimatedTexture.cpp
+    EngineGui/DlgCreateEffectTexture.cpp
+    EngineGui/DlgCreateNormalTexture.cpp
+    EngineGui/DlgSelectMode.cpp
+    EngineGui/EngineGUI.cpp
+    EngineGui/FileRequester.cpp
+    EngineGui/StdH.cpp
+    EngineGui/WndDisplayTexture.cpp
+)
+
+target_link_libraries(${SERIOUSEDITOR} /Sources/External/wx/lib/ -lwx_gtk2u_xrc-3.1 -lwx_gtk2u_html-3.1 -lwx_gtk2u_qa-3.1 -lwx_gtk2u_adv-3.1 -lwx_gtk2u_core-3.1 -lwx_baseu_xml-3.1 -lwx_baseu_net-3.1 -lwx_baseu-3.1)
+
+target_link_libraries(${SERIOUSEDITOR}  ${SENGINELIB})
+set_target_properties(${SERIOUSEDITOR}  PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+target_link_libraries(${SERIOUSEDITOR}  "m")
+target_link_libraries(${SERIOUSEDITOR}  "dl")
+target_link_libraries(${SERIOUSEDITOR}  "pthread")
+target_link_libraries(${SERIOUSEDITOR}  ${SDL2_LIBRARY})
+target_link_libraries(${SERIOUSEDITOR}  ${ZLIB_LIBRARIES})
 
 # !!! FIXME: this is an option because you have to recompile the entire engine twice.
 # !!! FIXME:  If we can put the engine in a static library and not lose symbols,
