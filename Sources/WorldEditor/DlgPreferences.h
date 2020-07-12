@@ -72,7 +72,11 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlgPreferences)
+	#ifdef PLATFORM_WIN32
 	virtual BOOL OnInitDialog();
+	#else
+	virtual void OnInitDialog();
+	#endif
 	afx_msg void OnSavePreferences();
 	afx_msg void OnLoadPreferences();
 	afx_msg void OnChangeFullScreenDisplayMode();

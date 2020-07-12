@@ -32,6 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TERRAIN_MODE 5
 #define CSG_MODE 6
 
+#include "WorldEditor.h"
+#include "WorldEditorView.h"
+
 enum ESelectionType
 {
   ST_NONE = 0,
@@ -70,6 +73,8 @@ public:
   /* Destructor. */
   ~CUndo(void);
 };
+
+class CTerrainUndo;
 
 class CWorldEditorDoc : public CDocument
 {
@@ -260,7 +265,12 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CWorldEditorDoc)
 	public:
+  #ifdef PLATFORM_WIN32
 	virtual BOOL OnNewDocument();
+  #else
+  virtual bool OnNewDocument();
+  #endif
+
 	virtual void Serialize(CArchive& ar);
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);

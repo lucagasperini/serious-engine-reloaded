@@ -18,12 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef WORLDEDITOR_H
 #define WORLDEDITOR_H 1
 
+#ifdef PLATFORM_WIN32
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
+#endif
 #endif
 
 #include "resource.h"       // main symbols
 #include "Viewers.h"
+#include "WorldEditorDoc.h"
 
 
 #define CHILD_CONFIGURATION_VER "V012"
@@ -90,6 +93,7 @@ enum TriangularisationType {
 
 #define VALUES_FOR_PRIMITIVE_VERSION2 "VFP2"
 #define VALUES_FOR_PRIMITIVE_VERSION3 "VFP3"
+
 // values for primitive
 class CValuesForPrimitive
 {
@@ -657,7 +661,6 @@ inline CValuesForPrimitive CValuesForPrimitive::operator-(const
   return CValuesForPrimitive(*this) -= vfpToSub;
 }
 
-#define SNAP_FLOAT_GRID 0.25f
 inline void CValuesForPrimitive::CorrectInvalidValues(void)
 {
   // some values must be valid, so if they are not, coorect them

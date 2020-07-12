@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef VIEWERS_H
 #define VIEWERS_H
 
+class CSlaveViewer;
 /*
  * Definition of viewer and target placement
  */

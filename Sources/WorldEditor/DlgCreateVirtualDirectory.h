@@ -53,7 +53,11 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlgCreateVirtualDirectory)
+	#ifdef PLATFORM_WIN32
 	virtual BOOL OnInitDialog();
+	#else
+	virtual void OnInitDialog();
+	#endif
 	afx_msg void OnDblclkDirectoryIconList(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

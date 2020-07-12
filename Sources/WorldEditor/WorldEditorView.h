@@ -19,6 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef WORLDEDITORVIEW_H
 #define WORLDEDITORVIEW_H 1
 
+#include "WorldEditor.h"
+
+class CValuesForPrimitive;
+class CViewPrefs;
+
 
 extern BOOL MyChooseColor( COLORREF &clrNewColor, CWnd &wndOwner);
 

@@ -89,7 +89,11 @@ protected:
 	afx_msg void OnTexture3();
 	afx_msg void OnRemoveTexture();
 	afx_msg void OnSelchangeScrollCombo();
+	#ifdef PLATFORM_WIN32
 	virtual BOOL OnInitDialog();
+	#else
+	virtual void OnInitDialog();
+	#endif
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnSelchangeBlendType();
 	afx_msg void OnDropdownScrollCombo();

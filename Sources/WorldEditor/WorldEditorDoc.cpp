@@ -22,7 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <Engine/Base/Profiling.h>
 #include <Engine/Build.h>
+
+#ifdef PLATFORM_WIN32
 #include <direct.h>
+#endif
 
 #ifdef _DEBUG
 #undef new

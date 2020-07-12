@@ -68,7 +68,11 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CDlgLinkTree)
+	#ifdef PLATFORM_WIN32
 	virtual BOOL OnInitDialog();
+	#else
+	virtual void OnInitDialog();
+	#endif
 	afx_msg void OnDblclkLinkTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLtContractAll();

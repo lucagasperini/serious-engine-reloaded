@@ -18,10 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SKYFLOAT_H
 #define SKYFLOAT_H 1
 
+#ifdef PLATFORM_WIN32
 #include <afxwin.h>
+#endif
 
-void AFXAPI DDX_SkyFloat(CDataExchange* pDX, int nIDC, float &fNumber, BOOL &bValid);
-void AFXAPI DDX_SkyFloat(CDataExchange* pDX, int nIDC, float &fNumber);
-BOOL FloatFromString(HWND  pWnd, float &fNumber, BOOL &bValid);
-void StringFromFloat(HWND hWnd, float fNumber, BOOL &bValid);
+void AFXAPI DDX_SkyFloat(CDataExchange* pDX, int nIDC, float& fNumber, BOOL& bValid);
+void AFXAPI DDX_SkyFloat(CDataExchange* pDX, int nIDC, float& fNumber);
+BOOL FloatFromString(HWND pWnd, float& fNumber, BOOL& bValid);
+void StringFromFloat(HWND hWnd, float fNumber, BOOL& bValid);
 #endif // SKYFLOAT_H

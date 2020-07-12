@@ -72,7 +72,11 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CDlgTerrainProperties)
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	#ifdef PLATFORM_WIN32
 	virtual BOOL OnInitDialog();
+	#else
+	virtual void OnInitDialog();
+	#endif
 	afx_msg void OnSelchangeTerrainHmWidth();
 	afx_msg void OnSelchangeTerrainHmHeight();
 	virtual void OnOK();
