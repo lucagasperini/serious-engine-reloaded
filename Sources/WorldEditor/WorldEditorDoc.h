@@ -32,7 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TERRAIN_MODE 5
 #define CSG_MODE 6
 
-#include "WorldEditor.h"
 #include "WorldEditorView.h"
 
 enum ESelectionType
@@ -61,6 +60,28 @@ enum CSGType
   CSG_JOIN_ALL_POLYGONS_KEEP_TEXTURES,
   CSG_JOIN_LAYERS,
   CSG_ADD_ENTITIES,
+};
+
+//Moved from WorldEditor.h
+enum TriangularisationType {
+  TT_NONE=0,
+  TT_CENTER_VERTEX,
+  TT_FROM_VTX00,
+  TT_FROM_VTX01,
+  TT_FROM_VTX02,
+  TT_FROM_VTX03,
+  TT_FROM_VTX04,
+  TT_FROM_VTX05,
+  TT_FROM_VTX06,
+  TT_FROM_VTX07,
+  TT_FROM_VTX08,
+  TT_FROM_VTX09,
+  TT_FROM_VTX10,
+  TT_FROM_VTX11,
+  TT_FROM_VTX12,
+  TT_FROM_VTX13,
+  TT_FROM_VTX14,
+  TT_FROM_VTX15,
 };
 
 class CUndo
@@ -104,7 +125,7 @@ public:
   DOUBLE m_fLastPrimitiveWidth;
   DOUBLE m_fLastPrimitiveLenght;
   BOOL m_bLastIfOuter;
-  TriangularisationType m_ttLastTriangularisationType;
+  enum TriangularisationType m_ttLastTriangularisationType;
   // index of vertice on volume box that user is currently dragging
   INDEX m_iVolumeBoxDragVertice;
   // starting position of volume box vertice before drag started

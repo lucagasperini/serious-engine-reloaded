@@ -70,6 +70,7 @@ enum PrimitiveType {
   PT_TERRAIN,
 };
 
+/* Moved to WorldEditorDoc.h
 enum TriangularisationType {
   TT_NONE=0,
   TT_CENTER_VERTEX,
@@ -90,7 +91,7 @@ enum TriangularisationType {
   TT_FROM_VTX14,
   TT_FROM_VTX15,
 };
-
+*/
 #define VALUES_FOR_PRIMITIVE_VERSION2 "VFP2"
 #define VALUES_FOR_PRIMITIVE_VERSION3 "VFP3"
 
@@ -743,8 +744,10 @@ extern CWorldEditorApp theApp;
 #include "DlgLinkTree.h"
 #include "MainFrm.h"
 #include "ChildFrm.h"
+#ifdef PLATFORM_WIN32
 #include "WorldEditorDoc.h"
 #include "WorldEditorView.h"
+#endif
 
 #include "SkyFloat.h"
 #endif // WORLDEDITOR_H

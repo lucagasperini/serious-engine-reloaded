@@ -184,6 +184,7 @@ typedef LONG_PTR LRESULT;
 
 
 #define HELP_CONTEXT NULL
+#define ON_CONTROL_REFLECT(x, y)
 
 struct _TREEITEM{
 
@@ -292,6 +293,8 @@ typedef struct tagMEASUREITEMSTRUCT {
 
 #endif
 
+#define SNAP_FLOAT_GRID 0.25f
+
 #define ENGINE_INTERNAL 1
 #include <Engine/Base/ChangeableRT.h>
 #include <Engine/Base/SDL/SDLEvents.h>
@@ -304,7 +307,4 @@ typedef struct tagMEASUREITEMSTRUCT {
 
 #include "WorldEditor.h"
 
-#define SNAP_FLOAT_GRID 0.25f
-
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif

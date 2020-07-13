@@ -1,6 +1,26 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(SeriousEngine)
 
+cmake_minimum_required(VERSION 3.10)
+
+# your project name
+project("qt-widgets-cmake")
+
+# find includes in the corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# run moc automatically
+set(CMAKE_AUTOMOC ON)
+# if you're using Widgets and editing .ui forms in Designer
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt5 REQUIRED Core Widgets)
+if (${Qt5_FOUND})
+    message("Found Qt " ${Qt5_VERSION})
+else()
+    message("Couldn't find Qt")
+endif()
+
+include_directories(${Qt5_INCLUDES})
 # Set @rpath for Mac OS X shared library install names.
 #cmake_policy(SET CMP0042 NEW)
 
@@ -241,8 +261,6 @@ endif()
 
 include_directories(
     .
-    ${CMAKE_SOURCE_DIR}/External/wx/lib/wx/include/gtk3-unicode-3.1/
-    ${CMAKE_SOURCE_DIR}/External/wx/include
     ${CMAKE_SOURCE_DIR}/External/libogg/include
 )
 if(USE_TREMOR)
@@ -957,6 +975,7 @@ if(LINUX)
     endif()
 endif()
 
+if(BUILD_WORLD_EDITOR)
 set(SERIOUSEDITOR "serious-editor")
 
 add_executable(${SERIOUSEDITOR} 
@@ -1052,8 +1071,6 @@ add_executable(${SERIOUSEDITOR}
     EngineGui/WndDisplayTexture.cpp
 )
 
-target_link_libraries(${SERIOUSEDITOR} /Sources/External/wx/lib/ -lwx_gtk2u_xrc-3.1 -lwx_gtk2u_html-3.1 -lwx_gtk2u_qa-3.1 -lwx_gtk2u_adv-3.1 -lwx_gtk2u_core-3.1 -lwx_baseu_xml-3.1 -lwx_baseu_net-3.1 -lwx_baseu-3.1)
-
 target_link_libraries(${SERIOUSEDITOR}  ${SENGINELIB})
 set_target_properties(${SERIOUSEDITOR}  PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
 target_link_libraries(${SERIOUSEDITOR}  "m")
@@ -1061,7 +1078,27 @@ target_link_libraries(${SERIOUSEDITOR}  "dl")
 target_link_libraries(${SERIOUSEDITOR}  "pthread")
 target_link_libraries(${SERIOUSEDITOR}  ${SDL2_LIBRARY})
 target_link_libraries(${SERIOUSEDITOR}  ${ZLIB_LIBRARIES})
+else()
 
+
+set(SERIOUSEDITORFM "serious-editor")
+add_executable(${SERIOUSEDITORFM}
+    SeriousEditor/main.cpp
+    SeriousEditor/MainWindow.cpp
+    SeriousEditor/MainWindow.ui
+    SeriousEditor/Thread.cpp
+)
+
+target_link_libraries( ${SERIOUSEDITORFM} Qt5::Core Qt5::Widgets )
+
+target_link_libraries(${SERIOUSEDITORFM}  ${SENGINELIB})
+set_target_properties(${SERIOUSEDITORFM}  PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+target_link_libraries(${SERIOUSEDITORFM}  "m")
+target_link_libraries(${SERIOUSEDITORFM}  "dl")
+target_link_libraries(${SERIOUSEDITORFM}  "pthread")
+target_link_libraries(${SERIOUSEDITORFM}  ${SDL2_LIBRARY})
+target_link_libraries(${SERIOUSEDITORFM}  ${ZLIB_LIBRARIES})
+endif()
 # !!! FIXME: this is an option because you have to recompile the entire engine twice.
 # !!! FIXME:  If we can put the engine in a static library and not lose symbols,
 # !!! FIXME:  that's a better plan and we can remove the toggle here.

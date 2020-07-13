@@ -20,12 +20,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define WORLDEDITORVIEW_H 1
 
 #include "WorldEditor.h"
+#include "WorldEditorDoc.h"
 
 class CValuesForPrimitive;
 class CViewPrefs;
+class CWorldEditorApp;
 
 
 extern BOOL MyChooseColor( COLORREF &clrNewColor, CWnd &wndOwner);
+extern CWorldEditorApp theApp;
 
 #define WM_CHANGE_EDITING_MODE WM_USER
 #define GRID_DISCRETE_VALUES (theApp.m_bDecadicGrid ? 10:8)
