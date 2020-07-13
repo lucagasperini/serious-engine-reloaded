@@ -84,7 +84,7 @@ void ControlSystem::control_camera(SECameraComponent* _camera, SEMouseDeltaCompo
 }
 
 extern void resolution_fullscreen();
-extern void resolution_change(ULONG w, ULONG h);
+extern void resolution_change(UINT w, UINT h);
 extern BOOL dbg_draw_border;
 extern BOOL dbg_draw_id;
 extern BOOL dbg_draw_position;

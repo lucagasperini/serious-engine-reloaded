@@ -1,8 +1,8 @@
 #include "PositionSystem.h"
 
 extern CDrawPort* main_dp;
-extern ULONG game_vresolution_width;
-extern ULONG game_vresolution_height;
+extern UINT game_vresolution_width;
+extern UINT game_vresolution_height;
 
 void PositionSystem::init(SEEntity* entity)
 {

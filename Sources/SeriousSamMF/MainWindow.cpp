@@ -4,19 +4,15 @@
 #include <Engine/Engine.h>
 
 #include "Colors.h"
-#include "InterfaceSDL.h"
 #include "MainWindow.h"
 
 SEMainWindow::SEMainWindow()
 {
     /* Set default values */
-    x = SEInterfaceSDL::posWinCentered();
-    y = SEInterfaceSDL::posWinCentered();
+    x = SDL_WINDOWPOS_CENTERED;
+    y = SDL_WINDOWPOS_CENTERED;
     api = GfxAPIType::GAT_OGL;
-    mode = SE_WINDOW_MODE_WINDOWED;
-    resizable = FALSE;
-    status = SE_WINDOW_STATUS_NORMAL;
-    adapter = 0;
+    flags = SE_MAINWINDOW_FLAGS_NULL;
 }
 
 SEMainWindow::~SEMainWindow()
@@ -46,7 +42,12 @@ BOOL SEMainWindow::create()
     // try to set new display mode
     _pGfx->SetDisplayMode(api, adapter, w, h, depth);
 
-    pWindow = SEInterfaceSDL::createWindow(title, x, y, w, h, api, mode, resizable, status);
+    ULONG tmp_flags = flags;
+
+    if (api == GAT_OGL && !(tmp_flags & SDL_WINDOW_OPENGL))
+        tmp_flags = tmp_flags | SDL_WINDOW_OPENGL;
+
+    pWindow = SDL_CreateWindow(title, x, y, w, h, tmp_flags);
 
     if (pWindow == NULL)
         FatalError(TRANS("Cannot open main window!"));

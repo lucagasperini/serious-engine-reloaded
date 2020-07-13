@@ -33,10 +33,10 @@ struct SEComponent {
 };
 
 struct SEPositionComponent : SEComponent {
-    ULONG pos_x = 0;
-    ULONG pos_y = 0;
-    ULONG pos_w = 0;
-    ULONG pos_h = 0;
+    UINT pos_x = 0;
+    UINT pos_y = 0;
+    UINT pos_w = 0;
+    UINT pos_h = 0;
 };
 
 struct SETextureComponent : SEComponent {

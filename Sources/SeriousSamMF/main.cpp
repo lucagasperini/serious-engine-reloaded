@@ -10,7 +10,6 @@
 #include "ECS/Component.h"
 #include "ECS/Entity.h"
 #include "ECS/Manager.h"
-#include "InterfaceSDL.h"
 #include "MainWindow.h"
 #include "SplashScreen.h"
 
@@ -46,14 +45,14 @@ BOOL dbg_draw_position = FALSE;
 BOOL dbg_draw_fps = FALSE;
 ULONG dbg_count_fps = 0;
 
-ULONG game_vresolution_width = 1920;
-ULONG game_vresolution_height = 1080;
+UINT game_vresolution_width = 1920;
+UINT game_vresolution_height = 1080;
 // display mode settings
-INDEX main_win_mode = SE_WINDOW_MODE_WINDOWED;
-INDEX main_win_api = 0; // 0==OpenGL
-INDEX main_win_width = 1280; // current size of the window
-INDEX main_win_height = 720; // current size of the window
-INDEX main_win_depth = 0; // 0==default, 1==16bit, 2==32bit
+ULONG main_win_flags = SE_MAINWINDOW_FLAGS_NULL;
+GfxAPIType main_win_api = GfxAPIType::GAT_OGL; // 0==OpenGL
+ULONG main_win_width = 1280; // current size of the window
+ULONG main_win_height = 720; // current size of the window
+DisplayDepth main_win_depth = DisplayDepth::DD_32BIT;
 INDEX main_win_adapter = 0;
 
 // list of possible display modes for recovery
@@ -62,11 +61,6 @@ const INDEX fallback_win_modes[][3] = {
     { DD_DEFAULT, GAT_OGL, 0 },
     { DD_16BIT, GAT_OGL, 0 },
     { DD_16BIT, GAT_OGL, 1 }, // 3dfx Voodoo2
-#ifdef SE1_D3D
-    { DD_DEFAULT, GAT_D3D, 0 },
-    { DD_16BIT, GAT_D3D, 0 },
-    { DD_16BIT, GAT_D3D, 1 },
-#endif // SE1_D3D
 };
 const INDEX fallback_win_modes_counter = ARRAYCOUNT(fallback_win_modes);
 
@@ -79,10 +73,11 @@ void quitgame()
 
 void resolution_fullscreen()
 {
-    if (main_win->getMode() == SE_WINDOW_MODE_FULLSCREEN)
-        main_win->setMode(SE_WINDOW_MODE_WINDOWED);
+    ULONG current_flags = main_win->getFlags();
+    if (current_flags & SDL_WINDOW_FULLSCREEN)
+        main_win->setFlags(current_flags ^ SDL_WINDOW_FULLSCREEN);
     else
-        main_win->setMode(SE_WINDOW_MODE_FULLSCREEN);
+        main_win->setFlags(current_flags | SDL_WINDOW_FULLSCREEN);
 
     main_dp->Unlock();
     main_win->create();
@@ -91,7 +86,7 @@ void resolution_fullscreen()
     main_dp->Lock();
 }
 
-void resolution_change(ULONG w, ULONG h)
+void resolution_change(UINT w, UINT h)
 {
     if (main_win->getW() != w || main_win->getH() != h) {
         game_vresolution_width = main_win->getW();
@@ -110,11 +105,12 @@ BOOL init(CTString strCmdLine)
 {
     scr_splashscreen = new SESplashScreen();
     main_win = new SEMainWindow();
-
-    if (!SEInterfaceSDL::init()) {
-        FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SEInterfaceSDL::getError());
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) {
+        FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SDL_GetError());
         return FALSE;
     }
+
+    SDL_Init(SDL_INIT_JOYSTICK); // don't care if this fails.
 
     scr_splashscreen->setBitmapFile("Splash.bmp");
     scr_splashscreen->show();
