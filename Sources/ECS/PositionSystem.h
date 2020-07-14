@@ -15,33 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_SPLASHSCREEN_H
-#define SSMF_SPLASHSCREEN_H
+#ifndef SER_ECS_POSITIONSYSTEM_H
+#define SER_ECS_POSITIONSYSTEM_H
 
-#include <SDL.h>
+#include "Entity.h"
 
-#include <Engine/Base/CTString.h>
-
-class SESplashScreen {
-private:
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Texture* texture;
-    CTString str_bitmap_file;
-    CTString str_wintitle;
-
+class PositionSystem {
 public:
-    SESplashScreen();
-    ~SESplashScreen();
+    void init(SEEntity* entity);
+    void postinit();
+    void init_scale(component_position* _position);
+    void init_align(component_position* _position, component_align* _align);
 
-    void setBitmapFile(const CTString& _str_bitmap_file) { str_bitmap_file = _str_bitmap_file; }
-    void setWinTitle(const CTString& _str_wintitle) { str_wintitle = _str_wintitle; }
-
-    CTString getWinTitle() { return str_wintitle; }
-    CTString getBitmapFile() { return str_wintitle; }
-
-    void hide();
-    int show();
+    void update(SEEntity* entity);
+    void postupdate();
 };
 
 #endif

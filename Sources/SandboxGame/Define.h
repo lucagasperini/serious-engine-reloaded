@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_COLORS_H
-#define SSMF_COLORS_H
+#ifndef SER_SBGAME_DEFINE_H
+#define SER_SBGAME_DEFINE_H
 
 #define SE_COL_ORANGE_LIGHT 0xffd70000
 #define SE_COL_ORANGE_NEUTRAL 0xee9c0000
@@ -29,5 +29,10 @@
 #define SE_COL_BLUE_NEUTRAL_LT 0x6097cc00
 #define SE_COL_BLUE_LIGHT 0x64b4ff00
 #define SE_COL_BLUEGREEN_LT 0x6cff6c00
+
+#define SER_WINDOW_FALLBACK_COUNT 3
+#define SE_MAINWINDOW_FLAGS_NULL 0x0
+#define SE_WINDOW_RECOVERY_W 640
+#define SE_WINDOW_RECOVERY_H 480
 
 #endif

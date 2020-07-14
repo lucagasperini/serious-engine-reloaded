@@ -945,30 +945,41 @@ add_dependencies(${SSAM} ParseEntities)
 # Make symbols in the main executable available to dynamic objects
 set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 
-set(SSAMFM "ssamfm")
-add_executable(${SSAMFM}
-    SeriousSamMF/Main.cpp
-    SeriousSamMF/SplashScreen.cpp
-    SeriousSamMF/MainWindow.cpp
-    SeriousSamMF/ECS/Manager.cpp
-    SeriousSamMF/ECS/RenderSystem.cpp
-    SeriousSamMF/ECS/InputSystem.cpp
-    SeriousSamMF/ECS/PositionSystem.cpp
-    SeriousSamMF/ECS/ControlSystem.cpp
+set(ECSLIB "ser-ecs${DEBUGSUFFIX}")
+add_library(${ECSLIB} SHARED
+    ECS/Manager.cpp
+    ECS/RenderSystem.cpp
+    ECS/InputSystem.cpp
+    ECS/PositionSystem.cpp
+    ECS/ControlSystem.cpp
+)
+target_link_libraries(${ECSLIB} ${SENGINELIB})
+
+set_target_properties(${ECSLIB} PROPERTIES ENABLE_EXPORTS ON)
+if(DEBUG)
+    set_target_properties(${ECSLIB} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+endif()
+
+set(SANDBOXGAME "sandbox-game")
+add_executable(${SANDBOXGAME}
+    SandboxGame/Main.cpp
+    SandboxGame/SplashScreen.cpp
+    SandboxGame/MainWindow.cpp
 )
 
-target_link_libraries(${SSAMFM} ${SENGINELIB})
-add_dependencies(${SSAMFM} ParseEntities)
+target_link_libraries(${SANDBOXGAME} ${SENGINELIB})
+target_link_libraries(${SANDBOXGAME} ${ECSLIB})
+add_dependencies(${SANDBOXGAME} ParseEntities)
 
 if(LINUX)
-    set_target_properties(${SSAMFM} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
-    target_link_libraries(${SSAMFM} "m")
-    target_link_libraries(${SSAMFM} "dl")
-    target_link_libraries(${SSAMFM} "pthread")
-    target_link_libraries(${SSAMFM} ${SDL2_LIBRARY})
-    target_link_libraries(${SSAMFM} ${ZLIB_LIBRARIES})
+    set_target_properties(${SANDBOXGAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
+    target_link_libraries(${SANDBOXGAME} "m")
+    target_link_libraries(${SANDBOXGAME} "dl")
+    target_link_libraries(${SANDBOXGAME} "pthread")
+    target_link_libraries(${SANDBOXGAME} ${SDL2_LIBRARY})
+    target_link_libraries(${SANDBOXGAME} ${ZLIB_LIBRARIES})
     if(PANDORA)
-    	target_link_libraries(${SSAMFM} "rt")
+    	target_link_libraries(${SANDBOXGAME} "rt")
     endif()
 endif()
 

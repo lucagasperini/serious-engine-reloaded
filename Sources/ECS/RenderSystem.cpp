@@ -17,21 +17,47 @@
 
 #include "RenderSystem.h"
 
-extern CDrawPort* main_dp;
-extern CFontData* main_font_small;
-extern CFontData* main_font_medium;
-extern COLOR fallback_color;
-extern BOOL dbg_draw_border;
-extern BOOL dbg_draw_id;
-extern BOOL dbg_draw_position;
-extern BOOL dbg_draw_fps;
-extern ULONG dbg_count_fps;
-extern CWorld* world_data;
+extern CDrawPort* g_drawport;
+extern CViewPort* g_viewport;
+//TODO: Create a structure to manage fonts.
+//extern CFontData* main_font_small;
+//extern CFontData* main_font_medium;
+extern COLOR g_fb_color;
+extern BOOL g_dbg_draw_border;
+extern BOOL g_dbg_draw_id;
+extern BOOL g_dbg_draw_position;
+extern BOOL g_dbg_draw_fps;
+extern CWorld* g_world_data;
+
+void RenderSystem::preupdate()
+{
+    //TODO: What's the sense of calculate Milliseconds with a signed int???
+    tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+    if (!g_drawport->Lock()) {
+        //FIXME: Add some stop render flag.
+        return;
+    }
+    // clear z-buffer
+    g_drawport->FillZBuffer(ZBUF_BACK);
+    g_drawport->Fill(C_BLACK | 0xff);
+}
+
+void RenderSystem::postupdate()
+{
+    g_drawport->Unlock();
+    g_viewport->SwapBuffers();
+    tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+    //TODO: Maybe do this 1 time at second, or render the value 1 time at second.
+    if (tloop2 - tloop1)
+        count_fps = 1000 / ((FLOAT)(tloop2 - tloop1));
+    else
+        count_fps = 0.0f;
+}
 
 void RenderSystem::render_position(component_camera* _camera)
 {
     PIXaabbox2D box(PIX2D(0, 0), PIX2D(200, 100));
-    main_dp->SetFont(main_font_small);
+    //g_drawport->SetFont(main_font_small);
     char* buffer = new char[128];
     float px = _camera->cam_pos(1);
     float py = _camera->cam_pos(2);
@@ -41,16 +67,16 @@ void RenderSystem::render_position(component_camera* _camera)
     float az = _camera->cam_rot(3);
 
     snprintf(buffer, 128, "X: %f\nY: %f\nZ: %f\nAX: %f \nAY: %f \nAZ: %f", px, py, pz, ax, ay, az);
-    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
+    g_drawport->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
 void RenderSystem::render_fps()
 {
     PIXaabbox2D box(PIX2D(0, 100), PIX2D(100, 100));
-    main_dp->SetFont(main_font_medium);
+    //g_drawport->SetFont(main_font_medium);
     char* buffer = new char[16];
-    snprintf(buffer, 16, "FPS: %u", dbg_count_fps);
-    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
+    snprintf(buffer, 16, "FPS: %f", count_fps);
+    g_drawport->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
 void RenderSystem::init(SEEntity* entity)
@@ -72,13 +98,13 @@ void RenderSystem::update(SEEntity* entity)
         render_world(camera);
 
     component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
-    if (dbg_draw_border && position)
+    if (g_dbg_draw_border && position)
         render_border(position);
-    if (dbg_draw_id && position)
+    if (g_dbg_draw_id && position)
         render_id(entity, position);
-    if (dbg_draw_position && camera)
+    if (g_dbg_draw_position && camera)
         render_position(camera);
-    if (dbg_draw_fps)
+    if (g_dbg_draw_fps)
         render_fps();
 
     component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
@@ -96,31 +122,31 @@ void RenderSystem::update(SEEntity* entity)
 
 void RenderSystem::render_texture(component_position* _position, component_texture* _texture)
 {
-    main_dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
+    g_drawport->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
 void RenderSystem::render_text(component_position* _position, component_text* _text)
 {
-    main_dp->SetFont(&_text->txt_fontdata);
-    main_dp->SetTextScaling(1.0f);
-    main_dp->SetTextAspect(1.0f);
-    main_dp->SetTextMode(_text->txt_mode);
+    g_drawport->SetFont(&_text->txt_fontdata);
+    g_drawport->SetTextScaling(1.0f);
+    g_drawport->SetTextAspect(1.0f);
+    g_drawport->SetTextMode(_text->txt_mode);
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     if (_text->txt_align == -1)
-        main_dp->PutText(_text->txt_str, box.Min()(1), box.Min()(2), _text->txt_color);
+        g_drawport->PutText(_text->txt_str, box.Min()(1), box.Min()(2), _text->txt_color);
     else if (_text->txt_align == +1)
-        main_dp->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), _text->txt_color);
+        g_drawport->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), _text->txt_color);
     else
-        main_dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), _text->txt_color);
+        g_drawport->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), _text->txt_color);
 }
 
 void RenderSystem::render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus)
 {
-    main_dp->SetFont(&_text->txt_fontdata);
-    main_dp->SetTextScaling(1.0f);
-    main_dp->SetTextAspect(1.0f);
-    main_dp->SetTextMode(_text->txt_mode);
+    g_drawport->SetFont(&_text->txt_fontdata);
+    g_drawport->SetTextScaling(1.0f);
+    g_drawport->SetTextAspect(1.0f);
+    g_drawport->SetTextMode(_text->txt_mode);
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
@@ -130,25 +156,25 @@ void RenderSystem::render_button(component_position* _position, component_text* 
         col = _text->txt_color;
 
     if (_text->txt_align == -1)
-        main_dp->PutText(_text->txt_str, box.Min()(1), box.Min()(2), col);
+        g_drawport->PutText(_text->txt_str, box.Min()(1), box.Min()(2), col);
     else if (_text->txt_align == +1)
-        main_dp->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), col);
+        g_drawport->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), col);
     else
-        main_dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), col);
+        g_drawport->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), col);
 }
 
 void RenderSystem::render_border(component_position* _position)
 {
-    main_dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, fallback_color);
+    g_drawport->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, g_fb_color);
 }
 
 void RenderSystem::render_id(SEEntity* _entity, component_position* _position)
 {
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
-    main_dp->SetFont(main_font_small);
+    //g_drawport->SetFont(main_font_small);
     char* buffer = new char[32];
     snprintf(buffer, 32, "%i", _entity->id);
-    main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
+    g_drawport->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
 void RenderSystem::render_world(component_camera* _camera)
@@ -161,7 +187,7 @@ void RenderSystem::render_world(component_camera* _camera)
     CPerspectiveProjection3D prPerspectiveProjection;
     prPerspectiveProjection.FOVL() = _camera->cam_fov;
     prPerspectiveProjection.ScreenBBoxL() = FLOATaabbox2D(
-        FLOAT2D(0.0f, 0.0f), FLOAT2D((float)main_dp->GetWidth(), (float)main_dp->GetHeight()));
+        FLOAT2D(0.0f, 0.0f), FLOAT2D((float)g_drawport->GetWidth(), (float)g_drawport->GetHeight()));
     prPerspectiveProjection.AspectRatioL() = 1.0f;
     prPerspectiveProjection.FrontClipDistanceL() = 0.3f;
 
@@ -171,5 +197,5 @@ void RenderSystem::render_world(component_camera* _camera)
     // set up viewer position
     prProjection->ViewerPlacementL() = plCamera;
     // render the view
-    RenderView(*world_data, *(CEntity*)NULL, prProjection, *main_dp);
+    RenderView(*g_world_data, *(CEntity*)NULL, prProjection, *g_drawport);
 }

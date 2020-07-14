@@ -15,34 +15,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_MANAGER_H
-#define SSMF_MANAGER_H
+#ifndef SER_ECS_INPUTSYSTEM_H
+#define SER_ECS_INPUTSYSTEM_H
 
-#include "ControlSystem.h"
 #include "Entity.h"
-#include "InputSystem.h"
-#include "PositionSystem.h"
-#include "RenderSystem.h"
-#include <Engine/Engine.h>
+#include <Engine/Base/Types.h>
 
-class ECSManager {
-private:
-    static ULONG entity_counter;
-
+class InputSystem {
 public:
-    PositionSystem* position_system = NULL;
-    RenderSystem* render_system = NULL;
-    InputSystem* input_system = NULL;
-    ControlSystem* control_system = NULL;
-    CDynamicContainer<SEEntity>* entities = NULL;
+    FLOAT sensibility = 0.25;
+    POINT* old_cursor = NULL;
+    ULONG key;
+    ULONG button;
+    POINT cursor;
+    POINT deltacursor;
+    SDL_Event event;
 
-    ECSManager();
-    ~ECSManager();
-
-    void init();
-    void update();
-
-    void addEntity(SEEntity* _entity);
+    void preupdate();
+    void postupdate();
+    void init(SEEntity* entity);
+    void update(SEEntity* entity);
 };
 
 #endif

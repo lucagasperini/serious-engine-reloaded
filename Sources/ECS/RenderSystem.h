@@ -15,17 +15,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_RENDERSYSTEM_H
-#define SSMF_RENDERSYSTEM_H
+#ifndef SER_ECS_RENDERSYSTEM_H
+#define SER_ECS_RENDERSYSTEM_H
 
 #include "Entity.h"
 
 class RenderSystem {
+private:
+    int64_t tloop1;
+    int64_t tloop2;
+    FLOAT count_fps = 0;
+
 public:
     void init(SEEntity* entity);
     void init_texture(component_texture* _texture);
 
+    void preupdate();
     void update(SEEntity* entity);
+    void postupdate();
     void render_texture(component_position* _position, component_texture* _texture);
     void render_text(component_position* _position, component_text* _text);
     void render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);

@@ -17,7 +17,7 @@
 
 #include "InputSystem.h"
 
-extern BOOL main_game_started;
+extern BOOL g_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event* event);
 
 void InputSystem::init(SEEntity* entity)
@@ -39,7 +39,7 @@ void InputSystem::preupdate()
 
     while (SE_SDL_InputEventPoll(&event)) {
         if (event.type == SDL_QUIT) {
-            main_game_started = FALSE;
+            g_game_started = FALSE;
         }
         if (event.type == SDL_KEYDOWN) {
             key = event.key.keysym.sym;

@@ -15,26 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_INPUTSYSTEM_H
-#define SSMF_INPUTSYSTEM_H
+#ifndef SER_ECS_CONTROLSYSTEM_H
+#define SER_ECS_CONTROLSYSTEM_H
 
 #include "Entity.h"
-#include <Engine/Base/Types.h>
 
-class InputSystem {
+class ControlSystem {
 public:
-    FLOAT sensibility = 0.25;
-    POINT* old_cursor = NULL;
-    ULONG key;
-    ULONG button;
-    POINT cursor;
-    POINT deltacursor;
-    SDL_Event event;
-
-    void preupdate();
-    void postupdate();
     void init(SEEntity* entity);
     void update(SEEntity* entity);
+
+    void control_button(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick);
+    void control_keyboard(component_action* _action, component_keyboard* _keyboard);
+    void control_camera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind);
+    void control_game(component_keybind* _keybind);
 };
 
 #endif

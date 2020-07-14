@@ -17,7 +17,7 @@
 
 #include "Manager.h"
 
-ULONG ECSManager::entity_counter = 0;
+ULONG ECSManager::s_entity_counter = 0;
 
 ECSManager::ECSManager()
 {
@@ -34,7 +34,7 @@ ECSManager::~ECSManager()
 
 void ECSManager::addEntity(SEEntity* _entity)
 {
-    _entity->id = entity_counter++;
+    _entity->id = s_entity_counter++;
     entities->Add(_entity);
 }
 
@@ -53,6 +53,7 @@ void ECSManager::init()
 void ECSManager::update()
 {
     input_system->preupdate();
+    render_system->preupdate();
     FOREACHINDYNAMICCONTAINER(*entities, SEEntity, entity)
     {
         input_system->update(entity);
@@ -60,6 +61,7 @@ void ECSManager::update()
         render_system->update(entity);
         control_system->update(entity);
     }
+    render_system->postupdate();
     position_system->postupdate();
     input_system->postupdate();
 }

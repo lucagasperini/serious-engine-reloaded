@@ -17,9 +17,9 @@
 
 #include "PositionSystem.h"
 
-extern CDrawPort* main_dp;
-extern UINT game_vresolution_width;
-extern UINT game_vresolution_height;
+extern CDrawPort* g_drawport;
+extern UINT g_vresolution_width;
+extern UINT g_vresolution_height;
 
 void PositionSystem::init(SEEntity* entity)
 {
@@ -32,8 +32,8 @@ void PositionSystem::postinit()
 
 void PositionSystem::init_scale(component_position* _position)
 {
-    FLOAT scaleX = (FLOAT)main_dp->GetWidth() / (FLOAT)game_vresolution_width;
-    FLOAT scaleY = (FLOAT)main_dp->GetHeight() / (FLOAT)game_vresolution_height;
+    FLOAT scaleX = (FLOAT)g_drawport->GetWidth() / (FLOAT)g_vresolution_width;
+    FLOAT scaleY = (FLOAT)g_drawport->GetHeight() / (FLOAT)g_vresolution_height;
 
     _position->pos_x = (FLOAT)_position->pos_x * scaleX;
     _position->pos_y = (FLOAT)_position->pos_y * scaleY;
@@ -43,8 +43,8 @@ void PositionSystem::init_scale(component_position* _position)
 
 void PositionSystem::init_align(component_position* _position, component_align* _align)
 {
-    ULONG center_x = main_dp->GetWidth() / 2;
-    ULONG center_y = main_dp->GetHeight() / 2;
+    ULONG center_x = g_drawport->GetWidth() / 2;
+    ULONG center_y = g_drawport->GetHeight() / 2;
 
     switch (_align->align_x) {
     case -2:
@@ -84,7 +84,7 @@ void PositionSystem::init_align(component_position* _position, component_align* 
 
 void PositionSystem::update(SEEntity* entity)
 {
-    if (game_vresolution_width != main_dp->GetWidth() || game_vresolution_height != main_dp->GetHeight()) {
+    if (g_vresolution_width != g_drawport->GetWidth() || g_vresolution_height != g_drawport->GetHeight()) {
         component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
         component_align* align = dynamic_cast<component_align*>((SEEntity*)entity);
 
@@ -98,8 +98,8 @@ void PositionSystem::update(SEEntity* entity)
 
 void PositionSystem::postupdate()
 {
-    if (game_vresolution_width != main_dp->GetWidth() || game_vresolution_height != main_dp->GetHeight()) {
-        game_vresolution_width = main_dp->GetWidth();
-        game_vresolution_height = main_dp->GetHeight();
+    if (g_vresolution_width != g_drawport->GetWidth() || g_vresolution_height != g_drawport->GetHeight()) {
+        g_vresolution_width = g_drawport->GetWidth();
+        g_vresolution_height = g_drawport->GetHeight();
     }
 }

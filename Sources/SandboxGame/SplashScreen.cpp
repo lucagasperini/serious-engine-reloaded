@@ -47,29 +47,41 @@ void SESplashScreen::hide()
     }
 }
 
-int SESplashScreen::show()
+BOOL SESplashScreen::show()
 {
-    SDL_Surface* bmp = SDL_LoadBMP(str_bitmap_file);
+    SDL_Surface* bmp = SDL_LoadBMP(bitmap);
 
     if (!bmp)
         return FALSE;
 
-    // RAKE!: commented out as its post SDL2.0.4 |SDL_WINDOW_SKIP_TASKBAR);
-    window = SDL_CreateWindow(str_wintitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, bmp->w, bmp->h, SDL_WINDOW_BORDERLESS);
+    SDL_SetColorKey(bmp, SDL_RLEACCEL, SDL_MapRGB(bmp->format, 0, 0xff, 0));
+
+    window = SDL_CreateShapedWindow("", SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, bmp->w, bmp->h, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 
     if (!window)
         return FALSE;
+
+    SDL_WindowShapeMode mode;
+    SDL_zero(mode);
+    mode.mode = ShapeModeColorKey;
+    SDL_Color colorkey = { 0x0, 0xFF, 0x0, 0x0 };
+    mode.parameters.colorKey = colorkey;
+    if (SDL_SetWindowShape(window, bmp, &mode) != 0) {
+        SDL_DestroyWindow(window);
+        window = NULL;
+        return FALSE;
+    }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     if (!renderer)
         return FALSE;
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
-
     texture = SDL_CreateTextureFromSurface(renderer, bmp);
+
+    /* get rid of surface */
+    SDL_FreeSurface(bmp);
 
     if (!texture) {
         hide();

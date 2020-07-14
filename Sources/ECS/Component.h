@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_COMPONENT_H
-#define SSMF_COMPONENT_H
+#ifndef SER_ECS_COMPONENT_H
+#define SER_ECS_COMPONENT_H
 
 #include <Engine/Base/SDL/SDLEvents.h>
 #include <Engine/Base/Types.h>

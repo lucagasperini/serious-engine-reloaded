@@ -25,8 +25,8 @@
 CTString main_gamename = "serioussammf";
 CTString cmdline;
 
-CDrawPort* main_dp = NULL;
-CViewPort* main_vp = NULL;
+CDrawPort* g_drawport = NULL;
+CViewPort* g_viewport = NULL;
 
 INDEX main_win_mode = 0;
 GfxAPIType main_win_api = GfxAPIType::GAT_OGL; // 0==OpenGL
@@ -70,7 +70,7 @@ SEThread::SEThread(QWidget* _win)
 
         SE_UpdateWindowHandle(sdl_window);
 
-        _pGfx->CreateWindowCanvas(sdl_window, &main_vp, &main_dp);
+        _pGfx->CreateWindowCanvas(sdl_window, &g_viewport, &g_drawport);
 
         main_game_started = TRUE;
     }
@@ -83,10 +83,10 @@ void SEThread::run()
     {
         while (main_game_started) {
             // initial screen fill and swap, just to get context running
-            if (main_dp != NULL && main_dp->Lock()) {
-                main_dp->Fill(0xee9c0000 | 255);
-                main_dp->Unlock();
-                main_vp->SwapBuffers();
+            if (g_drawport != NULL && g_drawport->Lock()) {
+                g_drawport->Fill(0xee9c0000 | 255);
+                g_drawport->Unlock();
+                g_viewport->SwapBuffers();
             }
         }
     }

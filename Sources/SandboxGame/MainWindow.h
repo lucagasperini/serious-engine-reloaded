@@ -15,14 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SSMF_MAINWINDOW_H
-#define SSMF_MAINWINDOW_H
+#ifndef SER_SBGAME_MAINWINDOW_H
+#define SER_SBGAME_MAINWINDOW_H
 
 #include <Engine/Base/CTString.h>
 #include <Engine/Graphics/DrawPort.h> /* CDrawPort */
 #include <Engine/Graphics/ViewPort.h> /* CViewPort */
-
-#define SE_MAINWINDOW_FLAGS_NULL 0x0
 
 class SEMainWindow {
 private:

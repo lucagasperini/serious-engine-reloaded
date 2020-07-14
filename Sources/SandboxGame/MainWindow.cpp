@@ -20,7 +20,7 @@
 #include <Engine/Base/SDL/SDLEvents.h>
 #include <Engine/Engine.h>
 
-#include "Colors.h"
+#include "Define.h"
 #include "MainWindow.h"
 
 SEMainWindow::SEMainWindow()

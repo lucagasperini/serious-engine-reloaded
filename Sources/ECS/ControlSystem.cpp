@@ -18,9 +18,14 @@
 #include "ControlSystem.h"
 #include "Manager.h"
 
-extern ECSManager* manager;
-extern CDrawPort* main_dp;
-extern FLOAT3D world_start_position;
+extern ECSManager* g_manager;
+
+extern void g_resolution_fullscreen();
+extern void g_resolution_change(UINT w, UINT h);
+extern BOOL g_dbg_draw_border;
+extern BOOL g_dbg_draw_id;
+extern BOOL g_dbg_draw_position;
+extern BOOL g_dbg_draw_fps;
 
 void ControlSystem::init(SEEntity* entity)
 {
@@ -46,23 +51,29 @@ void ControlSystem::update(SEEntity* entity)
         control_camera(camera, mousedelta, keybind);
 }
 
-void ControlSystem::control_button(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick)
+void ControlSystem::control_button(component_action* _action,
+    component_mousefocus* _mousefocus,
+    component_mouseclick* _mouseclick)
 {
     if (_mousefocus->mf_focus && _mouseclick->mc_button == SDL_BUTTON_LEFT)
         _action->sea_action();
 }
 
-void ControlSystem::control_keyboard(component_action* _action, component_keyboard* _keyboard)
+void ControlSystem::control_keyboard(component_action* _action,
+    component_keyboard* _keyboard)
 {
     if (_keyboard->kc_key == _keyboard->kc_listen_key)
         _action->sea_action();
 }
 
-void ControlSystem::control_camera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind)
+void ControlSystem::control_camera(component_camera* _camera,
+    component_mousedelta* _mousedelta,
+    component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_CAMERA_RESET:
-        _camera->cam_pos = world_start_position;
+        //TODO: I dont like world_start_position as global, maybe find a workaround?
+        //_camera->cam_pos = world_start_position;
         break;
     case SE_KEYBIND_CAMERA_RIGHT:
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,
@@ -100,42 +111,35 @@ void ControlSystem::control_camera(component_camera* _camera, component_mousedel
         0.0f);
 }
 
-extern void resolution_fullscreen();
-extern void resolution_change(UINT w, UINT h);
-extern BOOL dbg_draw_border;
-extern BOOL dbg_draw_id;
-extern BOOL dbg_draw_position;
-extern BOOL dbg_draw_fps;
-
 void ControlSystem::control_game(component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_FULLSCREEN:
-        resolution_fullscreen();
+        g_resolution_fullscreen();
         break;
     case SE_KEYBIND_RESOLUTION_VGA:
-        resolution_change(640, 480);
+        g_resolution_change(640, 480);
         break;
     case SE_KEYBIND_RESOLUTION_SVGA:
-        resolution_change(800, 600);
+        g_resolution_change(800, 600);
         break;
     case SE_KEYBIND_RESOLUTION_WXGA:
-        resolution_change(1280, 720);
+        g_resolution_change(1280, 720);
         break;
     case SE_KEYBIND_RESOLUTION_HD:
-        resolution_change(1920, 1080);
+        g_resolution_change(1920, 1080);
         break;
     case SE_KEYBIND_DEBUG_BORDER:
-        dbg_draw_border = !dbg_draw_border;
+        g_dbg_draw_border = !g_dbg_draw_border;
         break;
     case SE_KEYBIND_DEBUG_ENTITYID:
-        dbg_draw_id = !dbg_draw_id;
+        g_dbg_draw_id = !g_dbg_draw_id;
         break;
     case SE_KEYBIND_DEBUG_POSITION:
-        dbg_draw_position = !dbg_draw_position;
+        g_dbg_draw_position = !g_dbg_draw_position;
         break;
     case SE_KEYBIND_DEBUG_FPS:
-        dbg_draw_fps = !dbg_draw_fps;
+        g_dbg_draw_fps = !g_dbg_draw_fps;
         break;
     }
 }
