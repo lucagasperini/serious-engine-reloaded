@@ -950,8 +950,6 @@ add_executable(${SSAMFM}
     SeriousSamMF/Main.cpp
     SeriousSamMF/SplashScreen.cpp
     SeriousSamMF/MainWindow.cpp
-    SeriousSamMF/ECS/Entity.cpp
-    SeriousSamMF/ECS/Component.cpp
     SeriousSamMF/ECS/Manager.cpp
     SeriousSamMF/ECS/RenderSystem.cpp
     SeriousSamMF/ECS/InputSystem.cpp

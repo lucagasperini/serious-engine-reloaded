@@ -416,14 +416,14 @@ int submain(char* cmdline)
     return TRUE;
 }
 
-int main(int argc, char** argv)
+int main(int _argc, char** _argv)
 {
-    argv0 = argv[0];
+    argv0 = _argv[0];
 
     CTString cmdline;
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < _argc; i++) {
         cmdline += " \"";
-        cmdline += argv[i];
+        cmdline += _argv[i];
         cmdline += "\"";
     }
 

@@ -70,39 +70,64 @@ typedef uint_fast16_t PIX;
 typedef uint32_t COLOR;
 
 #endif
-
 /*
     Maybe define a standard for NAMES:
 
     Fundamental types:              Upper Case              (INT, CHAR, UBYTE, etc...)
     Fundamental types with context: Upper Case              (INDEX, PIX, COLOR, etc...)
     Class Names:                    Pascal Case             (SEMainWindow, RenderSystem, ECSManager, etc...)
-    Struct Names:                   Pascal Case             (SEPositionComponent, SEKeyboardComponent, SECameraComponent, etc...)
+    Struct Names:                   Lower Case              (component_position, component_keyboard, component_camera, etc...)
     Function Names:                 Lower Case              (main, init, resolution_change, etc...)
     Method Names:                   Camel Case              (getX, addEntity, setDrawPort, etc...)
     Variables Names:                Lower Case              (result, manager, world_start_position, etc...)
     Member Names:                   Lower Case              (title, texture, render_system, etc...)
-    Arguments Name:                 Underscore + Lower Case (_w, _position, _camera, etc...)
+    Argument Names:                 Underscore + Lower Case (_w, _position, _camera, etc...)
     Constant Names:                 Upper Case              (SE_COL_ORANGE_NEUTRAL, FOO_BAR, etc...)
     Define Names:                   Upper Case              (SE_MAINWINDOW_FLAGS_NULL, SSMF_WINDOW_RECOVERY_H, SSMF_INPUTSYSTEM_H, ecc...)
     File Name CPP:                  Pascal Case             (PositionSystem.cpp, MainWindow.cpp, Entity.cpp, etc...)
     File Name H:                    Pascal Case             (PositionSystem.h, Types.h, Manager.h)
     File Name UI:                   Pascal Case             (MainWindow.ui, etc...)
     Folder Names:                   Pascal Case             (SeriousSam, SeriousEditor, Bin)
-    Comment Fixme:                  FIXME(<EMAIL>, BugID):  FIXME(<luca.gasperini@xsoftware.it>, 111): Please fix this stuff!
-    Comment Todo:                   TODO(<EMAIL>, BugID):   TODO(<luca.gasperini@xsoftware.it>, 111): Please do this stuff!
-    Static Variable:                (?)                     (?)
-    Static Method:                  (?)                     (?)
-    Static Member:                  (?)                     (?)
-    Namespace:                      (?)                     (?)
+    Comment Fixme:                  FIXME: <Text>           FIXME: Please fix this stuff!
+    Comment Todo:                   TODO: <Text>            TODO: Please do this stuff!
+    Comment Bug:                    BUG: <Text>             BUG: This is a well-known bug!
+    Comment Hack:                   HACK: <Text>            HACK: This is a workaround!
+    Global Variable:                g_ + Lower Case         (g_myvariable, g_thisthing, etc...)
+    Global Function:                g_ + Lower Case         (g_dothis, g_function, etc...)
+    Static Variable:                s_ + Lower Case         (s_static, s_something, etc...)
+    Static Method:                  s_ + Camel Case         (s_myMethod, s_mySomething, etc...)
+    Static Member:                  s_ + Lower Case         (s_title, s_member, etc...)
+    Array Names:                    a_ + Lower Case         (a_array, a_object, a_mode, etc...)
+    Matrix Names:                   m_ + Lower Case         (m_matrix, m_object, m_mode, etc...)
+    Global Array:                   ga_ + Lower Case        (ga_array, ga_object, ga_mode, etc...)
+    Global Matrix:                  gm_ + Lower Case        (gm_matrix, gm_object, gm_mode, etc...)
+    Static Array:                   sa_ + Lower Case        (sa_array, sa_object, sa_mode, etc...)
+    Static Matrix:                  sm_ + Lower Case        (sm_matrix, sm_object, sm_mode, etc...)
+    Array Argument Names:           _ + a_ + Lower Case     (_a_array, _a_object, _a_mode, etc...)
+    Matrix Argument Names:          _ + m_ + Lower Case     (_m_matrix, _m_object, _m_mode, etc...)
+    Namespace:                      Lower Case              (ser, etc...)
+    Component Member Names:         <Context>_ + Lower Case (cam_rot, kb_keybind, txt_fontsize, etc...)              
 
     Other cool RULES:
 
+    Always avoid use plurals forms.
+    Add License Boilerplate on top of files
+    Don't use spaces on folder names or file names.
+    Comment stay on the same width of the code.
+    Dont use Fixme, Todo, Bug, Hack as block comment, use multiple inline if needed.
+    Never use block comment as inline comment!
+    Namespace must be short.
+    Struct are only container for other data, try to avoid define non Fundamental types.
     When define a pointer of a variable, place the "*" char on type name, not the variable name (example : VOID* myptr).
-    Float numbers end with "f" char and a number after point (example : 1.0f)
+    Float numbers end with "f" char and a number after point (example : 1.0f).
     Try to stay on 80 char row length (Except for comment).
     Use Inline comment to describe code.
     Use Block comment to describe functions, class, struct, enum and method declaration.
     Use Preprocessor Directives at the start of the line.
-    Namespaces have not extra level of indentation
+    Namespaces have not extra level of indentation.
+    Hex values are upper case except for the "x" char (example : 0xABCDEF0).
+
+    Coding Style:
+
+    Actually using WebKit coding style, in fact most of the main rules are shareable, however a part may be different in the future.
 */
