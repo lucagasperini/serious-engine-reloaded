@@ -28,13 +28,13 @@ void ControlSystem::init(SEEntity* entity)
 
 void ControlSystem::update(SEEntity* entity)
 {
-    SEKeyboardComponent* keyboard = dynamic_cast<SEKeyboardComponent*>((SEEntity*)entity);
-    SEKeybindComponent* keybind = dynamic_cast<SEKeybindComponent*>((SEEntity*)entity);
-    SEActionComponent* action = dynamic_cast<SEActionComponent*>((SEEntity*)entity);
-    SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent*>((SEEntity*)entity);
-    SEMouseClickComponent* mouseclick = dynamic_cast<SEMouseClickComponent*>((SEEntity*)entity);
-    SEMouseDeltaComponent* mousedelta = dynamic_cast<SEMouseDeltaComponent*>((SEEntity*)entity);
-    SECameraComponent* camera = dynamic_cast<SECameraComponent*>((SEEntity*)entity);
+    component_keyboard* keyboard = dynamic_cast<component_keyboard*>((SEEntity*)entity);
+    component_keybind* keybind = dynamic_cast<component_keybind*>((SEEntity*)entity);
+    component_action* action = dynamic_cast<component_action*>((SEEntity*)entity);
+    component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
+    component_mouseclick* mouseclick = dynamic_cast<component_mouseclick*>((SEEntity*)entity);
+    component_mousedelta* mousedelta = dynamic_cast<component_mousedelta*>((SEEntity*)entity);
+    component_camera* camera = dynamic_cast<component_camera*>((SEEntity*)entity);
 
     if (keybind)
         control_game(keybind);
@@ -46,19 +46,19 @@ void ControlSystem::update(SEEntity* entity)
         control_camera(camera, mousedelta, keybind);
 }
 
-void ControlSystem::control_button(SEActionComponent* _action, SEMouseFocusComponent* _mousefocus, SEMouseClickComponent* _mouseclick)
+void ControlSystem::control_button(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick)
 {
     if (_mousefocus->mf_focus && _mouseclick->mc_button == SDL_BUTTON_LEFT)
         _action->sea_action();
 }
 
-void ControlSystem::control_keyboard(SEActionComponent* _action, SEKeyboardComponent* _keyboard)
+void ControlSystem::control_keyboard(component_action* _action, component_keyboard* _keyboard)
 {
     if (_keyboard->kc_key == _keyboard->kc_listen_key)
         _action->sea_action();
 }
 
-void ControlSystem::control_camera(SECameraComponent* _camera, SEMouseDeltaComponent* _mousedelta, SEKeybindComponent* _keybind)
+void ControlSystem::control_camera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_CAMERA_RESET:
@@ -107,7 +107,7 @@ extern BOOL dbg_draw_id;
 extern BOOL dbg_draw_position;
 extern BOOL dbg_draw_fps;
 
-void ControlSystem::control_game(SEKeybindComponent* _keybind)
+void ControlSystem::control_game(component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_FULLSCREEN:

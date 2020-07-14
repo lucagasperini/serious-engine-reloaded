@@ -46,22 +46,22 @@
 #define SE_KEYBIND_RESOLUTION_WXGA 0xF3
 #define SE_KEYBIND_RESOLUTION_HD 0xF4
 
-struct SEComponent {
+struct component {
 };
 
-struct SEPositionComponent : SEComponent {
+struct component_position : component {
     UINT pos_x = 0;
     UINT pos_y = 0;
     UINT pos_w = 0;
     UINT pos_h = 0;
 };
 
-struct SETextureComponent : SEComponent {
+struct component_texture : component {
     CTextureObject tex_data;
     CTFileName tex_file;
 };
 
-struct SETextComponent : SEComponent {
+struct component_text : component {
     INDEX txt_fontsize = 0;
     INDEX txt_align = 0;
     CFontData txt_fontdata;
@@ -70,16 +70,16 @@ struct SETextComponent : SEComponent {
     CTString txt_str;
 };
 
-struct SEKeyboardComponent : SEComponent {
+struct component_keyboard : component {
     ULONG kc_key = 0;
     ULONG kc_listen_key = 0;
 };
 
-struct SEMouseClickComponent : SEComponent {
+struct component_mouseclick : component {
     ULONG mc_button = 0;
 };
 
-struct SECameraComponent : SEComponent {
+struct component_camera : component {
     BOOL cam_on = TRUE;
     FLOAT cam_speed = 1.0f;
     FLOAT3D cam_pos;
@@ -87,27 +87,27 @@ struct SECameraComponent : SEComponent {
     ANGLE cam_fov = 90.0f;
 };
 
-struct SEKeybindComponent : SEComponent {
+struct component_keybind : component {
     ULONG kb_keybind[SE_ECS_KEYBIND_MAX];
     ULONG kb_current = SE_KEYBIND_NULL;
 };
-struct SEMouseDeltaComponent : SEComponent {
+struct component_mousedelta : component {
     POINT md_cursor;
 };
 
-struct SEMouseFocusComponent : SEComponent {
+struct component_mousefocus : component {
     BOOL mf_focus = FALSE;
 };
 
-struct SEButtonComponent : SEComponent {
+struct component_button : component {
     COLOR btn_color2 = 0xff;
 };
 
-struct SEActionComponent : SEComponent {
+struct component_action : component {
     void (*sea_action)() = NULL;
 };
 
-struct SEAlignComponent : SEComponent {
+struct component_align : component {
     /*
     -2 => Left
     -1 => Center Left

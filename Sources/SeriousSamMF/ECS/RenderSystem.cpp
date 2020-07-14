@@ -28,7 +28,7 @@ extern BOOL dbg_draw_fps;
 extern ULONG dbg_count_fps;
 extern CWorld* world_data;
 
-void RenderSystem::render_position(SECameraComponent* _camera)
+void RenderSystem::render_position(component_camera* _camera)
 {
     PIXaabbox2D box(PIX2D(0, 0), PIX2D(200, 100));
     main_dp->SetFont(main_font_small);
@@ -55,23 +55,23 @@ void RenderSystem::render_fps()
 
 void RenderSystem::init(SEEntity* entity)
 {
-    SETextureComponent* texture = dynamic_cast<SETextureComponent*>((SEEntity*)entity);
+    component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
     if (texture)
         init_texture(texture);
 }
 
-void RenderSystem::init_texture(SETextureComponent* _texture)
+void RenderSystem::init_texture(component_texture* _texture)
 {
     _texture->tex_data.SetData_t(_texture->tex_file);
 }
 
 void RenderSystem::update(SEEntity* entity)
 {
-    SECameraComponent* camera = dynamic_cast<SECameraComponent*>((SEEntity*)entity);
+    component_camera* camera = dynamic_cast<component_camera*>((SEEntity*)entity);
     if (camera)
         render_world(camera);
 
-    SEPositionComponent* position = dynamic_cast<SEPositionComponent*>((SEEntity*)entity);
+    component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
     if (dbg_draw_border && position)
         render_border(position);
     if (dbg_draw_id && position)
@@ -81,25 +81,25 @@ void RenderSystem::update(SEEntity* entity)
     if (dbg_draw_fps)
         render_fps();
 
-    SETextureComponent* texture = dynamic_cast<SETextureComponent*>((SEEntity*)entity);
+    component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
     if (position && texture)
         render_texture(position, texture);
 
-    SETextComponent* text = dynamic_cast<SETextComponent*>((SEEntity*)entity);
-    SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent*>((SEEntity*)entity);
-    SEButtonComponent* button = dynamic_cast<SEButtonComponent*>((SEEntity*)entity);
+    component_text* text = dynamic_cast<component_text*>((SEEntity*)entity);
+    component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
+    component_button* button = dynamic_cast<component_button*>((SEEntity*)entity);
     if (position && text && button && mousefocus)
         render_button(position, text, button, mousefocus);
     else if (position && text)
         render_text(position, text);
 }
 
-void RenderSystem::render_texture(SEPositionComponent* _position, SETextureComponent* _texture)
+void RenderSystem::render_texture(component_position* _position, component_texture* _texture)
 {
     main_dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
-void RenderSystem::render_text(SEPositionComponent* _position, SETextComponent* _text)
+void RenderSystem::render_text(component_position* _position, component_text* _text)
 {
     main_dp->SetFont(&_text->txt_fontdata);
     main_dp->SetTextScaling(1.0f);
@@ -115,7 +115,7 @@ void RenderSystem::render_text(SEPositionComponent* _position, SETextComponent* 
         main_dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), _text->txt_color);
 }
 
-void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button, SEMouseFocusComponent* _mousefocus)
+void RenderSystem::render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus)
 {
     main_dp->SetFont(&_text->txt_fontdata);
     main_dp->SetTextScaling(1.0f);
@@ -137,12 +137,12 @@ void RenderSystem::render_button(SEPositionComponent* _position, SETextComponent
         main_dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), col);
 }
 
-void RenderSystem::render_border(SEPositionComponent* _position)
+void RenderSystem::render_border(component_position* _position)
 {
     main_dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, fallback_color);
 }
 
-void RenderSystem::render_id(SEEntity* _entity, SEPositionComponent* _position)
+void RenderSystem::render_id(SEEntity* _entity, component_position* _position)
 {
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
     main_dp->SetFont(main_font_small);
@@ -151,7 +151,7 @@ void RenderSystem::render_id(SEEntity* _entity, SEPositionComponent* _position)
     main_dp->PutText(buffer, box.Min()(1), box.Min()(2), fallback_color);
 }
 
-void RenderSystem::render_world(SECameraComponent* _camera)
+void RenderSystem::render_world(component_camera* _camera)
 {
     CPlacement3D plCamera;
     plCamera.pl_PositionVector = _camera->cam_pos;

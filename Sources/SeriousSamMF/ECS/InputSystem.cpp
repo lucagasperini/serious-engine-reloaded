@@ -60,10 +60,10 @@ void InputSystem::postupdate()
 
 void InputSystem::update(SEEntity* entity)
 {
-    SEKeyboardComponent* keyboard = dynamic_cast<SEKeyboardComponent*>((SEEntity*)entity);
+    component_keyboard* keyboard = dynamic_cast<component_keyboard*>((SEEntity*)entity);
     if (keyboard)
         keyboard->kc_listen_key = key;
-    SEKeybindComponent* keybind = dynamic_cast<SEKeybindComponent*>((SEEntity*)entity);
+    component_keybind* keybind = dynamic_cast<component_keybind*>((SEEntity*)entity);
     if (keybind) {
         // Reset current keybind first
         keybind->kb_current = SE_KEYBIND_NULL;
@@ -75,8 +75,8 @@ void InputSystem::update(SEEntity* entity)
         }
     }
 
-    SEPositionComponent* position = dynamic_cast<SEPositionComponent*>((SEEntity*)entity);
-    SEMouseFocusComponent* mousefocus = dynamic_cast<SEMouseFocusComponent*>((SEEntity*)entity);
+    component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
+    component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
     if (position && mousefocus) {
         if (position->pos_x < cursor.x && position->pos_y < cursor.y && position->pos_x + position->pos_w > cursor.x && position->pos_y + position->pos_h > cursor.y) {
             mousefocus->mf_focus = TRUE;
@@ -85,11 +85,11 @@ void InputSystem::update(SEEntity* entity)
         }
     }
 
-    SEMouseClickComponent* mouseclick = dynamic_cast<SEMouseClickComponent*>((SEEntity*)entity);
+    component_mouseclick* mouseclick = dynamic_cast<component_mouseclick*>((SEEntity*)entity);
     if (mouseclick)
         mouseclick->mc_button = button;
 
-    SEMouseDeltaComponent* mousedelta = dynamic_cast<SEMouseDeltaComponent*>((SEEntity*)entity);
+    component_mousedelta* mousedelta = dynamic_cast<component_mousedelta*>((SEEntity*)entity);
     if (mousedelta) {
         mousedelta->md_cursor.x = deltacursor.x;
         mousedelta->md_cursor.y = deltacursor.y;

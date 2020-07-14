@@ -23,17 +23,17 @@
 class RenderSystem {
 public:
     void init(SEEntity* entity);
-    void init_texture(SETextureComponent* _texture);
+    void init_texture(component_texture* _texture);
 
     void update(SEEntity* entity);
-    void render_texture(SEPositionComponent* _position, SETextureComponent* _texture);
-    void render_text(SEPositionComponent* _position, SETextComponent* _text);
-    void render_button(SEPositionComponent* _position, SETextComponent* _text, SEButtonComponent* _button, SEMouseFocusComponent* _mousefocus);
-    void render_border(SEPositionComponent* _position);
-    void render_id(SEEntity* _entity, SEPositionComponent* _position);
-    void render_position(SECameraComponent* _camera);
+    void render_texture(component_position* _position, component_texture* _texture);
+    void render_text(component_position* _position, component_text* _text);
+    void render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);
+    void render_border(component_position* _position);
+    void render_id(SEEntity* _entity, component_position* _position);
+    void render_position(component_camera* _camera);
     void render_fps();
-    void render_world(SECameraComponent* _camera);
+    void render_world(component_camera* _camera);
 };
 
 #endif

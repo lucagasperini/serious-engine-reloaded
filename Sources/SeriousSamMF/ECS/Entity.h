@@ -26,29 +26,29 @@ struct SEEntity {
 };
 
 struct MenuImage : SEEntity,
-                   SETextureComponent,
-                   SEPositionComponent {
+                   component_texture,
+                   component_position {
 };
 
 struct MenuButton : SEEntity,
-                    SETextComponent,
-                    SEPositionComponent,
-                    SEAlignComponent,
-                    SEButtonComponent,
-                    SEMouseClickComponent,
-                    SEMouseFocusComponent,
-                    SEActionComponent {
+                    component_text,
+                    component_position,
+                    component_align,
+                    component_button,
+                    component_mouseclick,
+                    component_mousefocus,
+                    component_action {
 };
 struct GameControl : SEEntity,
-                     SEKeyboardComponent,
-                     SEKeybindComponent {
+                     component_keyboard,
+                     component_keybind {
 };
 
 struct Camera : SEEntity,
-                SEKeybindComponent,
-                SEMouseDeltaComponent,
-                SECameraComponent,
-                SEActionComponent {
+                component_keybind,
+                component_mousedelta,
+                component_camera,
+                component_action {
 };
 
 #endif

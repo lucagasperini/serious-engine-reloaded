@@ -24,8 +24,8 @@ class PositionSystem {
 public:
     void init(SEEntity* entity);
     void postinit();
-    void init_scale(SEPositionComponent* _position);
-    void init_align(SEPositionComponent* _position, SEAlignComponent* _align);
+    void init_scale(component_position* _position);
+    void init_align(component_position* _position, component_align* _align);
 
     void update(SEEntity* entity);
     void postupdate();

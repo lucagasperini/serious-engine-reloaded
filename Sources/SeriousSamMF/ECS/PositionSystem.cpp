@@ -23,14 +23,14 @@ extern UINT game_vresolution_height;
 
 void PositionSystem::init(SEEntity* entity)
 {
-    SEPositionComponent* position = dynamic_cast<SEPositionComponent*>((SEEntity*)entity);
+    component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
 }
 
 void PositionSystem::postinit()
 {
 }
 
-void PositionSystem::init_scale(SEPositionComponent* _position)
+void PositionSystem::init_scale(component_position* _position)
 {
     FLOAT scaleX = (FLOAT)main_dp->GetWidth() / (FLOAT)game_vresolution_width;
     FLOAT scaleY = (FLOAT)main_dp->GetHeight() / (FLOAT)game_vresolution_height;
@@ -41,7 +41,7 @@ void PositionSystem::init_scale(SEPositionComponent* _position)
     _position->pos_h = (FLOAT)_position->pos_h * scaleY;
 }
 
-void PositionSystem::init_align(SEPositionComponent* _position, SEAlignComponent* _align)
+void PositionSystem::init_align(component_position* _position, component_align* _align)
 {
     ULONG center_x = main_dp->GetWidth() / 2;
     ULONG center_y = main_dp->GetHeight() / 2;
@@ -85,8 +85,8 @@ void PositionSystem::init_align(SEPositionComponent* _position, SEAlignComponent
 void PositionSystem::update(SEEntity* entity)
 {
     if (game_vresolution_width != main_dp->GetWidth() || game_vresolution_height != main_dp->GetHeight()) {
-        SEPositionComponent* position = dynamic_cast<SEPositionComponent*>((SEEntity*)entity);
-        SEAlignComponent* align = dynamic_cast<SEAlignComponent*>((SEEntity*)entity);
+        component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
+        component_align* align = dynamic_cast<component_align*>((SEEntity*)entity);
 
         if (position)
             init_scale(position);
