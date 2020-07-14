@@ -947,7 +947,7 @@ set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 
 set(SSAMFM "ssamfm")
 add_executable(${SSAMFM}
-    SeriousSamMF/main.cpp
+    SeriousSamMF/Main.cpp
     SeriousSamMF/SplashScreen.cpp
     SeriousSamMF/MainWindow.cpp
     SeriousSamMF/ECS/Entity.cpp
@@ -1082,7 +1082,7 @@ else()
 
 set(SERIOUSEDITORFM "serious-editor")
 add_executable(${SERIOUSEDITORFM}
-    SeriousEditor/main.cpp
+    SeriousEditor/Main.cpp
     SeriousEditor/MainWindow.cpp
     SeriousEditor/MainWindow.ui
     SeriousEditor/Thread.cpp
