@@ -23,6 +23,9 @@
 #include "Define.h"
 #include "MainWindow.h"
 
+extern CDrawPort* g_drawport;
+extern CViewPort* g_viewport;
+
 SEMainWindow::SEMainWindow()
 {
     /* Set default values */
@@ -39,9 +42,13 @@ SEMainWindow::~SEMainWindow()
 // close the main application window
 void SEMainWindow::destroy()
 {
-    if (vp != NULL) {
-        _pGfx->DestroyWindowCanvas(vp);
-        vp = NULL;
+    if (g_viewport != NULL) {
+        _pGfx->DestroyWindowCanvas(g_viewport);
+        g_viewport = NULL;
+    }
+    if (g_drawport) {
+        delete g_drawport;
+        g_drawport = NULL;
     }
     // if window exists
     if (pWindow != NULL) {
@@ -71,13 +78,13 @@ BOOL SEMainWindow::create()
 
     SE_UpdateWindowHandle(pWindow);
 
-    _pGfx->CreateWindowCanvas(pWindow, &vp, &dp);
+    _pGfx->CreateWindowCanvas(pWindow, &g_viewport, &g_drawport);
 
     // initial screen fill and swap, just to get context running
-    if (dp != NULL && dp->Lock()) {
-        dp->Fill(SE_COL_ORANGE_NEUTRAL | 255);
-        dp->Unlock();
-        vp->SwapBuffers();
+    if (g_drawport != NULL && g_drawport->Lock()) {
+        g_drawport->Fill(SE_COL_ORANGE_NEUTRAL | 255);
+        g_drawport->Unlock();
+        g_viewport->SwapBuffers();
     }
 
     return TRUE;

@@ -61,11 +61,6 @@ private:
     */
     DisplayDepth depth;
 
-    // TODO: Make sense use this a extern, not as member with dedicated method?
-    CDrawPort* dp;
-    // TODO: Make sense use this a extern, not as member with dedicated method?
-    CViewPort* vp;
-
 public:
     SEMainWindow();
     ~SEMainWindow();
@@ -79,8 +74,6 @@ public:
     inline void setFlags(INDEX _flags) { flags = _flags; }
     inline void setAdapter(INDEX _adapter) { adapter = _adapter; }
     inline void setDepth(DisplayDepth _depth) { depth = _depth; }
-    inline void setDrawPort(const CDrawPort& _dp) { dp = new CDrawPort(_dp); }
-    inline void setViewPort(const CViewPort& _vp) { vp = new CViewPort(_vp); }
 
     inline CTString getTitle() const { return title; }
     inline UINT getX() const { return x; }
@@ -91,8 +84,6 @@ public:
     inline INDEX getFlags() const { return flags; }
     inline INDEX getAdapter() const { return adapter; }
     inline DisplayDepth getDepth() const { return depth; }
-    inline CDrawPort* getDrawPort() const { return dp; }
-    inline CViewPort* getViewPort() const { return vp; }
 
     BOOL isIconic();
     BOOL create();

@@ -65,8 +65,6 @@ void g_resolution_fullscreen()
 
     g_drawport->Unlock();
     main_win->create();
-    g_drawport = main_win->getDrawPort();
-    g_viewport = main_win->getViewPort();
     g_drawport->Lock();
 }
 
@@ -79,8 +77,6 @@ void g_resolution_change(UINT w, UINT h)
         main_win->setW(w);
         main_win->setH(h);
         main_win->create();
-        g_drawport = main_win->getDrawPort();
-        g_viewport = main_win->getViewPort();
         g_drawport->Lock();
     }
 }
@@ -136,8 +132,6 @@ BOOL init(CTString _cmdline)
     main_win->setDepth(DisplayDepth::DD_DEFAULT);
     main_win->setAdapter(win_adapter);
     BOOL result = main_win->create();
-    g_drawport = main_win->getDrawPort();
-    g_viewport = main_win->getViewPort();
 
     if (!result) {
         main_win->setW(SE_WINDOW_RECOVERY_W);
