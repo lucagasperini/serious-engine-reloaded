@@ -46,10 +46,6 @@ void SEMainWindow::destroy()
         _pGfx->DestroyWindowCanvas(g_viewport);
         g_viewport = NULL;
     }
-    if (g_drawport) {
-        delete g_drawport;
-        g_drawport = NULL;
-    }
     // if window exists
     if (pWindow != NULL) {
         // destroy it

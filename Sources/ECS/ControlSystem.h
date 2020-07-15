@@ -19,11 +19,17 @@
 #define SER_ECS_CONTROLSYSTEM_H
 
 #include "Entity.h"
+#include "System.h"
 
-class ControlSystem {
+class ControlSystem : SESystem {
 public:
-    void init(SEEntity* entity);
-    void update(SEEntity* entity);
+    void preinit() override {}
+    void init(SEEntity* entity) override {};
+    void postinit() override {}
+
+    void preupdate() override {}
+    void update(SEEntity* entity) override;
+    void postupdate() override {}
 
     void control_button(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick);
     void control_keyboard(component_action* _action, component_keyboard* _keyboard);

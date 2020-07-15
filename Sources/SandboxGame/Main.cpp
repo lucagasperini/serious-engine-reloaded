@@ -68,14 +68,14 @@ void g_resolution_fullscreen()
     g_drawport->Lock();
 }
 
-void g_resolution_change(UINT w, UINT h)
+void g_resolution_change(UINT _w, UINT _h)
 {
-    if (main_win->getW() != w || main_win->getH() != h) {
+    if (main_win->getW() != _w || main_win->getH() != _h) {
         g_vresolution_width = main_win->getW();
         g_vresolution_height = main_win->getH();
         g_drawport->Unlock();
-        main_win->setW(w);
-        main_win->setH(h);
+        main_win->setW(_w);
+        main_win->setH(_h);
         main_win->create();
         g_drawport->Lock();
     }
@@ -183,6 +183,8 @@ int submain(char* _cmdline)
 
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
+    g_manager = new ECSManager();
+    load_all_game_system();
     load_all_game_entity();
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();

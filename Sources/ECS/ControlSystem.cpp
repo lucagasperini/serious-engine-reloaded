@@ -27,10 +27,6 @@ extern BOOL g_dbg_draw_id;
 extern BOOL g_dbg_draw_position;
 extern BOOL g_dbg_draw_fps;
 
-void ControlSystem::init(SEEntity* entity)
-{
-}
-
 void ControlSystem::update(SEEntity* entity)
 {
     component_keyboard* keyboard = dynamic_cast<component_keyboard*>((SEEntity*)entity);
@@ -56,14 +52,16 @@ void ControlSystem::control_button(component_action* _action,
     component_mouseclick* _mouseclick)
 {
     if (_mousefocus->mf_focus && _mouseclick->mc_button == SDL_BUTTON_LEFT)
-        _action->sea_action();
+        if (_action)
+            _action->sea_action();
 }
 
 void ControlSystem::control_keyboard(component_action* _action,
     component_keyboard* _keyboard)
 {
     if (_keyboard->kc_key == _keyboard->kc_listen_key)
-        _action->sea_action();
+        if (_action)
+            _action->sea_action();
 }
 
 void ControlSystem::control_camera(component_camera* _camera,
@@ -74,6 +72,7 @@ void ControlSystem::control_camera(component_camera* _camera,
     case SE_KEYBIND_CAMERA_RESET:
         //TODO: I dont like world_start_position as global, maybe find a workaround?
         //_camera->cam_pos = world_start_position;
+        g_manager->removeEntity(8);
         break;
     case SE_KEYBIND_CAMERA_RIGHT:
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,

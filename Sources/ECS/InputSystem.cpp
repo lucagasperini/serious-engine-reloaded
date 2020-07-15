@@ -20,10 +20,6 @@
 extern BOOL g_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event* event);
 
-void InputSystem::init(SEEntity* entity)
-{
-}
-
 void InputSystem::preupdate()
 {
     // get real cursor position

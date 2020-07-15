@@ -19,20 +19,25 @@
 #define SER_ECS_RENDERSYSTEM_H
 
 #include "Entity.h"
+#include "System.h"
 
-class RenderSystem {
+class RenderSystem : SESystem {
 private:
     int64_t tloop1;
     int64_t tloop2;
     FLOAT count_fps = 0;
 
 public:
-    void init(SEEntity* entity);
+    void preinit() override {}
+    void init(SEEntity* entity) override;
+    void postinit() override {}
+
     void init_texture(component_texture* _texture);
 
-    void preupdate();
-    void update(SEEntity* entity);
-    void postupdate();
+    void preupdate() override;
+    void update(SEEntity* entity) override;
+    void postupdate() override;
+
     void render_texture(component_position* _position, component_texture* _texture);
     void render_text(component_position* _position, component_text* _text);
     void render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);

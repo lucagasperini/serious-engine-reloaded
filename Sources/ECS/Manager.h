@@ -23,26 +23,59 @@
 #include "InputSystem.h"
 #include "PositionSystem.h"
 #include "RenderSystem.h"
+#include "System.h"
 #include <Engine/Engine.h>
+
+#define SER_ECS_SYSTEM_MAX 64
+
+// 0000 0000
+#define SER_ECS_ENTITY_FLAG_FREE 0x00
+// 1000 0000
+#define SER_ECS_ENTITY_FLAG_ALLOC 0x80
+// 0100 0000
+#define SER_ECS_ENTITY_FLAG_READ_ONLY 0x40
 
 class ECSManager {
 private:
-    static ULONG s_entity_counter;
+    ULONG entity_counter;
+    // Starting pointer for entity buffer
+    BYTE* a_entity;
+    // Maximum space on the buffer in byte
+    // Start to 0 and grow by addspace
+    // Where: addspace is the size to add in the buffer
+    ULONG mem_entity_max;
+    // Pointer for allocations
+    // Start at a_entity and jump for sizeof(ULONG) + objsize
+    // Where: objsize is the size of an entity
+    BYTE* mem_alloc;
+    // Pointer for iterations
+    // Start at a_entity and jump for sizeof(ULONG) + objsize
+    // Where: objsize is the size of an entity
+    BYTE* mem_iter;
+
+    ULONG system_counter;
+
+    SESystem* a_system[SER_ECS_SYSTEM_MAX];
 
 public:
-    PositionSystem* position_system = NULL;
-    RenderSystem* render_system = NULL;
-    InputSystem* input_system = NULL;
-    ControlSystem* control_system = NULL;
-    CDynamicContainer<SEEntity>* entities = NULL;
+    SEEntity* getEntity();
+    SEEntity* getEntity(ULONG _id);
+
+    void removeEntity(ULONG _id);
+    void removeEntity(SEEntity* _entity);
 
     ECSManager();
     ~ECSManager();
 
+    void grow(ULONG _new);
+
     void init();
     void update();
 
-    void addEntity(SEEntity* _entity);
+    inline void resetEntityIter() { mem_iter = a_entity; }
+
+    void addEntity(SEEntity* _entity, ULONG _size);
+    void addSystem(SESystem* _system);
 };
 
 #endif

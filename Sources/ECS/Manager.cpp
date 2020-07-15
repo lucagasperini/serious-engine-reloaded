@@ -17,51 +17,120 @@
 
 #include "Manager.h"
 
-ULONG ECSManager::s_entity_counter = 0;
-
 ECSManager::ECSManager()
 {
-    entities = new CDynamicContainer<SEEntity>;
-    position_system = new PositionSystem;
-    render_system = new RenderSystem;
-    input_system = new InputSystem;
-    control_system = new ControlSystem;
+
+    mem_entity_max = 0;
+    entity_counter = 0;
+    system_counter = 0;
 }
 
 ECSManager::~ECSManager()
 {
+    //delete a_system;
+    //a_system = NULL;
+    delete a_entity;
+    a_entity = NULL;
 }
 
-void ECSManager::addEntity(SEEntity* _entity)
+void ECSManager::addSystem(SESystem* _system)
 {
-    _entity->id = s_entity_counter++;
-    entities->Add(_entity);
+    a_system[system_counter++] = _system;
+}
+
+void ECSManager::grow(ULONG _add)
+{
+    mem_entity_max += _add;
+    a_entity = (BYTE*)malloc(mem_entity_max);
+    memset(a_entity, 0, mem_entity_max);
+
+    mem_alloc = a_entity;
+    mem_iter = a_entity;
+}
+
+void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
+{
+    _entity->id = entity_counter++;
+
+    memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
+    mem_alloc += sizeof(BYTE);
+
+    memcpy(mem_alloc, &_size, sizeof(ULONG));
+    mem_alloc += sizeof(ULONG);
+
+    memcpy(mem_alloc, _entity, _size);
+    mem_alloc += _size;
+}
+
+SEEntity* ECSManager::getEntity()
+{
+    if (mem_iter >= mem_alloc) {
+        resetEntityIter();
+        return NULL;
+    }
+    BYTE obj_flag = (*mem_iter);
+    mem_iter += sizeof(BYTE);
+
+    ULONG obj_size = (ULONG) * ((ULONG*)mem_iter);
+    mem_iter += sizeof(ULONG);
+
+    if (obj_flag ^ SER_ECS_ENTITY_FLAG_ALLOC) {
+        mem_iter += obj_size;
+        return getEntity();
+    }
+
+    SEEntity* return_ptr = (SEEntity*)mem_iter;
+    mem_iter += obj_size;
+    return return_ptr;
+}
+
+SEEntity* ECSManager::getEntity(ULONG _id)
+{
+    while (SEEntity* entity = getEntity()) {
+        if (entity->id == _id)
+            return entity;
+    }
+    return NULL;
+}
+
+void ECSManager::removeEntity(ULONG _id)
+{
+    while (SEEntity* entity = getEntity()) {
+        if (entity->id == _id) {
+            removeEntity(entity);
+            return;
+        }
+    }
+}
+
+void ECSManager::removeEntity(SEEntity* _entity)
+{
+    BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
+    memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
 }
 
 void ECSManager::init()
 {
-    FOREACHINDYNAMICCONTAINER(*entities, SEEntity, entity)
-    {
-        position_system->init(entity);
-        input_system->init(entity);
-        render_system->init(entity);
-        control_system->init(entity);
+    for (ULONG i = 0; i < system_counter; i++)
+        a_system[i]->preinit();
+    while (SEEntity* entity = getEntity()) {
+        for (ULONG i = 0; i < system_counter; i++)
+            a_system[i]->init(entity);
     }
-    position_system->postinit();
+    for (ULONG i = 0; i < system_counter; i++)
+        a_system[i]->postinit();
 }
 
 void ECSManager::update()
 {
-    input_system->preupdate();
-    render_system->preupdate();
-    FOREACHINDYNAMICCONTAINER(*entities, SEEntity, entity)
-    {
-        input_system->update(entity);
-        position_system->update(entity);
-        render_system->update(entity);
-        control_system->update(entity);
+    for (ULONG i = 0; i < system_counter; i++)
+        a_system[i]->preupdate();
+
+    while (SEEntity* entity = getEntity()) {
+        for (ULONG i = 0; i < system_counter; i++)
+            a_system[i]->update(entity);
     }
-    render_system->postupdate();
-    position_system->postupdate();
-    input_system->postupdate();
+
+    for (ULONG i = 0; i < system_counter; i++)
+        a_system[i]->postupdate();
 }

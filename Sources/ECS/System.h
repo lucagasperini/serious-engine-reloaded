@@ -15,24 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_ECS_POSITIONSYSTEM_H
-#define SER_ECS_POSITIONSYSTEM_H
+#ifndef SER_ECS_SYSTEM_H
+#define SER_ECS_SYSTEM_H
 
 #include "Entity.h"
-#include "System.h"
 
-class PositionSystem : SESystem {
+class SESystem {
 public:
-    void preinit() override {}
-    void init(SEEntity* entity) override {};
-    void postinit() override {};
+    virtual void preinit() = 0;
+    virtual void init(SEEntity* entity) = 0;
+    virtual void postinit() = 0;
 
-    void init_scale(component_position* _position);
-    void init_align(component_position* _position, component_align* _align);
-
-    void preupdate() override {}
-    void update(SEEntity* entity) override;
-    void postupdate() override;
+    virtual void preupdate() = 0;
+    virtual void update(SEEntity* entity) = 0;
+    virtual void postupdate() = 0;
 };
 
 #endif

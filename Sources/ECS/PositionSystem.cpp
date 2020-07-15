@@ -21,15 +21,6 @@ extern CDrawPort* g_drawport;
 extern UINT g_vresolution_width;
 extern UINT g_vresolution_height;
 
-void PositionSystem::init(SEEntity* entity)
-{
-    component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
-}
-
-void PositionSystem::postinit()
-{
-}
-
 void PositionSystem::init_scale(component_position* _position)
 {
     FLOAT scaleX = (FLOAT)g_drawport->GetWidth() / (FLOAT)g_vresolution_width;
