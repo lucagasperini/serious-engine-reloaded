@@ -63,9 +63,9 @@ void g_resolution_fullscreen()
     else
         main_win->setFlags(current_flags | SDL_WINDOW_FULLSCREEN);
 
-    g_drawport->Unlock();
+    //g_drawport->Unlock();
     main_win->create();
-    g_drawport->Lock();
+    //g_drawport->Lock();
 }
 
 void g_resolution_change(UINT _w, UINT _h)
@@ -73,14 +73,14 @@ void g_resolution_change(UINT _w, UINT _h)
     if (main_win->getW() != _w || main_win->getH() != _h) {
         g_vresolution_width = main_win->getW();
         g_vresolution_height = main_win->getH();
-        g_drawport->Unlock();
+        //g_drawport->Unlock();
         main_win->setW(_w);
         main_win->setH(_h);
         main_win->create();
-        g_drawport->Lock();
+        //g_drawport->Lock();
     }
 }
-
+/*
 BOOL init(CTString _cmdline)
 {
     // display mode settings
@@ -99,8 +99,7 @@ BOOL init(CTString _cmdline)
         { DD_16BIT, GAT_OGL, 1 }, // 3dfx Voodoo2
     };
 
-    SESplashScreen splashscreen;
-    splashscreen.setBitmap("Splash.bmp");
+    
 
     main_win = new SEMainWindow();
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) {
@@ -160,7 +159,7 @@ BOOL init(CTString _cmdline)
 
     return TRUE;
 }
-
+*/
 /*
 CImageInfo iiImageInfo;
    iiImageInfo.LoadAnyGfxFormat_t( fntex);
@@ -178,10 +177,22 @@ CImageInfo iiImageInfo;
 
 int submain(char* _cmdline)
 {
-    if (!init(_cmdline))
-        return FALSE;
+    //if (!init(_cmdline))
+    //    return FALSE;
+    SESplashScreen splashscreen;
+    splashscreen.setBitmap("Splash.bmp");
+    splashscreen.show();
+
+    // initialize engine
+    SE_InitEngine(argv0, g_gamename);
+
+    SE_LoadDefaultFonts();
 
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+
+    // initialize sound library
+    snd_iFormat = Clamp(snd_iFormat, (INDEX)CSoundLibrary::SF_NONE, (INDEX)CSoundLibrary::SF_44100_16);
+    _pSound->SetFormat((enum CSoundLibrary::SoundFormat)snd_iFormat);
 
     g_manager = new ECSManager();
     load_all_game_system();
@@ -189,7 +200,7 @@ int submain(char* _cmdline)
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
-    g_manager->init();
+    //g_manager->init();
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);
@@ -202,14 +213,16 @@ int submain(char* _cmdline)
     int64_t ticks = 0;
 
     g_game_started = TRUE;
+    splashscreen.hide();
 
-    while (g_game_started) // start of game loop
-    {
-        if (!main_win->isIconic()) {
-            g_manager->update();
-        }
-
-    } // end of game loop
+    //while (g_game_started) // start of game loop
+    //{
+    //    if (!main_win->isIconic()) {
+    //        g_manager->update();
+    //    }
+    //
+    //} // end of game loop
+    g_manager->update();
     return TRUE;
 }
 

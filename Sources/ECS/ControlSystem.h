@@ -24,8 +24,8 @@
 class ControlSystem : SESystem {
 public:
     void preinit() override {}
-    void init(SEEntity* entity) override {};
-    void postinit() override {}
+    void init(SEEntity* entity) override {}
+    void postinit() override { SESystem::postinit(); }
 
     void preupdate() override {}
     void update(SEEntity* entity) override;

@@ -19,10 +19,41 @@
 #define SER_SBGAME_ENTITY_H
 
 #include "Global.h"
+#include <ECS/Entity.h>
 #include <ECS/Manager.h>
 #include <Engine/Graphics/Font.h>
+#include <SDL.h>
 
 extern ECSManager* g_manager;
+
+struct main_window : SEEntity, component_window, component_position {
+};
+
+struct MenuImage : SEEntity,
+                   component_texture,
+                   component_position {
+};
+
+struct MenuButton : SEEntity,
+                    component_text,
+                    component_position,
+                    component_align,
+                    component_button,
+                    component_mouseclick,
+                    component_mousefocus,
+                    component_action {
+};
+struct GameControl : SEEntity,
+                     component_keyboard,
+                     component_keybind {
+};
+
+struct Camera : SEEntity,
+                component_keybind,
+                component_mousedelta,
+                component_camera,
+                component_action {
+};
 
 void quitgame()
 {
@@ -31,10 +62,10 @@ void quitgame()
 
 void load_all_game_system()
 {
-    PositionSystem* position_system = new PositionSystem;
-    g_manager->addSystem((SESystem*)position_system);
     RenderSystem* render_system = new RenderSystem;
     g_manager->addSystem((SESystem*)render_system);
+    PositionSystem* position_system = new PositionSystem;
+    g_manager->addSystem((SESystem*)position_system);
     InputSystem* input_system = new InputSystem;
     g_manager->addSystem((SESystem*)input_system);
     ControlSystem* control_system = new ControlSystem;
@@ -57,6 +88,18 @@ void load_all_game_entity()
     font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
+    main_window* entity_window = new main_window;
+    entity_window->pos_x = SDL_WINDOWPOS_CENTERED;
+    entity_window->pos_y = SDL_WINDOWPOS_CENTERED;
+    entity_window->pos_w = 1280;
+    entity_window->pos_h = 720;
+    entity_window->win_title = "Serious Engine Sandbox Game";
+    entity_window->win_api = GfxAPIType::GAT_OGL;
+    entity_window->win_adapter = 0;
+    entity_window->win_depth = DisplayDepth::DD_32BIT;
+    entity_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
+    g_manager->addEntity((SEEntity*)entity_window, sizeof(main_window));
+
     GameControl* game_control = new GameControl;
     memset(game_control->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     game_control->kb_keybind[SE_KEYBIND_FULLSCREEN] = SDLK_F1;
@@ -71,7 +114,7 @@ void load_all_game_entity()
     g_manager->addEntity((SEEntity*)game_control, sizeof(GameControl));
 
     Camera* camera = new Camera();
-    camera->cam_fov = 90.0f;
+    camera->cam_fov = 120.0f;
     camera->cam_pos = world_start_position;
     camera->cam_rot = world_start_rotation;
     camera->cam_speed = 1.0f;

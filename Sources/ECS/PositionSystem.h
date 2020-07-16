@@ -24,8 +24,8 @@
 class PositionSystem : SESystem {
 public:
     void preinit() override {}
-    void init(SEEntity* entity) override {};
-    void postinit() override {};
+    void init(SEEntity* entity) override {}
+    void postinit() override { SESystem::postinit(); }
 
     void init_scale(component_position* _position);
     void init_align(component_position* _position, component_align* _align);

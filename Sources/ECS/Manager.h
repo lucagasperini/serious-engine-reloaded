@@ -25,6 +25,9 @@
 #include "RenderSystem.h"
 #include "System.h"
 #include <Engine/Engine.h>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #define SER_ECS_SYSTEM_MAX 64
 
@@ -37,45 +40,58 @@
 
 class ECSManager {
 private:
-    ULONG entity_counter;
+    static ULONG entity_counter;
     // Starting pointer for entity buffer
-    BYTE* a_entity;
+    static BYTE* a_entity;
     // Maximum space on the buffer in byte
     // Start to 0 and grow by addspace
     // Where: addspace is the size to add in the buffer
-    ULONG mem_entity_max;
+    static ULONG mem_entity_max;
     // Pointer for allocations
     // Start at a_entity and jump for sizeof(ULONG) + objsize
     // Where: objsize is the size of an entity
-    BYTE* mem_alloc;
+    static BYTE* mem_alloc;
     // Pointer for iterations
     // Start at a_entity and jump for sizeof(ULONG) + objsize
     // Where: objsize is the size of an entity
-    BYTE* mem_iter;
+    static BYTE* mem_iter;
 
-    ULONG system_counter;
+    static ULONG system_counter;
 
-    SESystem* a_system[SER_ECS_SYSTEM_MAX];
+    static SESystem* a_system[SER_ECS_SYSTEM_MAX];
+
+    static std::thread* a_thread;
+
+    static std::mutex* mutex;
+    static std::mutex* mutex_init;
+
+    static std::condition_variable* cv;
+
+    static BOOL all_thread_init;
+
+    static ULONG number_init;
 
 public:
-    SEEntity* getEntity();
-    SEEntity* getEntity(ULONG _id);
+    static SEEntity* getEntity();
+    static SEEntity* getEntity(ULONG _id);
 
-    void removeEntity(ULONG _id);
-    void removeEntity(SEEntity* _entity);
+    static void removeEntity(ULONG _id);
+    static void removeEntity(SEEntity* _entity);
 
     ECSManager();
     ~ECSManager();
 
-    void grow(ULONG _new);
+    static void grow(ULONG _new);
 
-    void init();
-    void update();
+    static void init();
+    static void update();
 
-    inline void resetEntityIter() { mem_iter = a_entity; }
+    static void thread_update(ULONG _system);
 
-    void addEntity(SEEntity* _entity, ULONG _size);
-    void addSystem(SESystem* _system);
+    static inline void resetEntityIter() { mem_iter = a_entity; }
+
+    static void addEntity(SEEntity* _entity, ULONG _size);
+    static void addSystem(SESystem* _system);
 };
 
 #endif

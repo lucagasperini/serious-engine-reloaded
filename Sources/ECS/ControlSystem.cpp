@@ -105,9 +105,9 @@ void ControlSystem::control_camera(component_camera* _camera,
             _camera->cam_pos(3) - _camera->cam_speed);
         break;
     }
-    _camera->cam_rot = ANGLE3D(_camera->cam_rot(1) + _mousedelta->md_cursor.x,
-        _camera->cam_rot(2) + _mousedelta->md_cursor.y,
-        0.0f);
+    _camera->cam_rot = ANGLE3D(_camera->cam_rot(1) + (_mousedelta->md_cursor.x * _camera->cam_speed),
+        _camera->cam_rot(2) + (_mousedelta->md_cursor.y * _camera->cam_speed),
+        1.0f);
 }
 
 void ControlSystem::control_game(component_keybind* _keybind)

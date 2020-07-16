@@ -17,6 +17,22 @@
 
 #include "Manager.h"
 
+extern BOOL g_game_started;
+
+ULONG ECSManager::entity_counter = 0;
+BYTE* ECSManager::a_entity = NULL;
+ULONG ECSManager::mem_entity_max = 0;
+BYTE* ECSManager::mem_alloc = NULL;
+BYTE* ECSManager::mem_iter = NULL;
+ULONG ECSManager::system_counter = 0;
+SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
+std::thread* ECSManager::a_thread = NULL;
+std::mutex* ECSManager::mutex_init = NULL;
+std::mutex* ECSManager::mutex = NULL;
+std::condition_variable* ECSManager::cv = NULL;
+BOOL ECSManager::all_thread_init = FALSE;
+ULONG ECSManager::number_init = 0;
+
 ECSManager::ECSManager()
 {
 
@@ -64,10 +80,13 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 
 SEEntity* ECSManager::getEntity()
 {
+    std::lock_guard<std::mutex> lg(*mutex);
+
     if (mem_iter >= mem_alloc) {
         resetEntityIter();
         return NULL;
     }
+
     BYTE obj_flag = (*mem_iter);
     mem_iter += sizeof(BYTE);
 
@@ -81,6 +100,7 @@ SEEntity* ECSManager::getEntity()
 
     SEEntity* return_ptr = (SEEntity*)mem_iter;
     mem_iter += obj_size;
+
     return return_ptr;
 }
 
@@ -111,26 +131,61 @@ void ECSManager::removeEntity(SEEntity* _entity)
 
 void ECSManager::init()
 {
-    for (ULONG i = 0; i < system_counter; i++)
-        a_system[i]->preinit();
-    while (SEEntity* entity = getEntity()) {
-        for (ULONG i = 0; i < system_counter; i++)
-            a_system[i]->init(entity);
+    /*
+    if (s_thread == NULL)
+        s_thread = new std::thread[system_counter];
+    for (ULONG i = 0; i < system_counter; i++) {
+        s_thread[i] = std::thread(thread_init, i);
+        s_thread[i].join();
     }
-    for (ULONG i = 0; i < system_counter; i++)
-        a_system[i]->postinit();
+    */
+    for (ULONG i = 0; i < system_counter; i++) {
+    }
 }
 
 void ECSManager::update()
 {
-    for (ULONG i = 0; i < system_counter; i++)
-        a_system[i]->preupdate();
+    a_thread = new std::thread[system_counter];
+    mutex = new std::mutex;
+    mutex_init = new std::mutex;
+    cv = new std::condition_variable;
 
-    while (SEEntity* entity = getEntity()) {
-        for (ULONG i = 0; i < system_counter; i++)
-            a_system[i]->update(entity);
+    for (ULONG i = 0; i < system_counter; i++)
+        a_thread[i] = std::thread(thread_update, i);
+
+    BOOL tmp_init = FALSE;
+
+    while (g_game_started) {
+        if (number_init == system_counter) {
+            //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            cv->notify_all();
+        }
     }
-
     for (ULONG i = 0; i < system_counter; i++)
-        a_system[i]->postupdate();
+        a_thread[i].join();
+}
+
+void ECSManager::thread_update(ULONG _system)
+{
+    a_system[_system]->preinit();
+    while (SEEntity* entity = getEntity()) {
+        a_system[_system]->init(entity);
+    }
+    a_system[_system]->postinit();
+
+    number_init++;
+    std::unique_lock<std::mutex> ul(*mutex_init);
+    cv->wait(ul);
+
+    //number_init = 0;
+
+    while (g_game_started) {
+        a_system[_system]->preupdate();
+
+        while (SEEntity* entity = getEntity()) {
+            a_system[_system]->update(entity);
+        }
+
+        a_system[_system]->postupdate();
+    }
 }

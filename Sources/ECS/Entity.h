@@ -25,30 +25,4 @@ struct SEEntity {
     virtual ~SEEntity() {}
 };
 
-struct MenuImage : SEEntity,
-                   component_texture,
-                   component_position {
-};
-
-struct MenuButton : SEEntity,
-                    component_text,
-                    component_position,
-                    component_align,
-                    component_button,
-                    component_mouseclick,
-                    component_mousefocus,
-                    component_action {
-};
-struct GameControl : SEEntity,
-                     component_keyboard,
-                     component_keybind {
-};
-
-struct Camera : SEEntity,
-                component_keybind,
-                component_mousedelta,
-                component_camera,
-                component_action {
-};
-
 #endif

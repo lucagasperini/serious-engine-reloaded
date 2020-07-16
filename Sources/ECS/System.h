@@ -21,10 +21,15 @@
 #include "Entity.h"
 
 class SESystem {
+private:
+    BOOL system_init = FALSE;
+
 public:
     virtual void preinit() = 0;
     virtual void init(SEEntity* entity) = 0;
-    virtual void postinit() = 0;
+    virtual void postinit() { system_init = TRUE; }
+
+    BOOL is_init() { return system_init; }
 
     virtual void preupdate() = 0;
     virtual void update(SEEntity* entity) = 0;
