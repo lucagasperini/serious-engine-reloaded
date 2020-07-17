@@ -30,7 +30,7 @@ private:
 public:
     void preinit() override {}
     void init(SEEntity* entity) override;
-    void postinit() override { SESystem::postinit(); }
+    void postinit() override {}
 
     void init_texture(component_texture* _texture);
     void init_window(component_window* _window, component_position* _position);
@@ -39,6 +39,8 @@ public:
     void update(SEEntity* entity) override;
     void postupdate() override;
 
+    void render_mouse_pos(component_mouse* _mouse);
+    void render_cursor(component_mouse* _mouse, component_texture* _texture);
     void render_texture(component_position* _position, component_texture* _texture);
     void render_text(component_position* _position, component_text* _text);
     void render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);

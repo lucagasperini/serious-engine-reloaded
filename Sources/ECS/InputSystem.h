@@ -32,9 +32,9 @@ public:
     POINT deltacursor;
     SDL_Event event;
 
-    void preinit() override {}
+    void preinit() override;
     void init(SEEntity* entity) override {}
-    void postinit() override { SESystem::postinit(); }
+    void postinit() override {}
 
     void preupdate() override;
     void update(SEEntity* entity) override;

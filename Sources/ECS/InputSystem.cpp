@@ -19,14 +19,30 @@
 
 extern BOOL g_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event* event);
+extern CDrawPort* g_drawport;
+
+void InputSystem::preinit()
+{
+    key = 0;
+    button = 0;
+    cursor.x = 0;
+    cursor.y = 0;
+    deltacursor.x = 0;
+    deltacursor.y = 0;
+}
 
 void InputSystem::preupdate()
 {
     // get real cursor position
     GetCursorPos(&cursor);
+    if (cursor.x > g_drawport->GetWidth())
+        cursor.x = 0;
+    if (cursor.y > g_drawport->GetHeight())
+        cursor.y = 0;
+
     if (old_cursor != NULL) {
-        deltacursor.x = (old_cursor->x - cursor.x) * sensibility;
-        deltacursor.y = (old_cursor->y - cursor.y) * sensibility;
+        deltacursor.x = (old_cursor->x - cursor.x);
+        deltacursor.y = (old_cursor->y - cursor.y);
     } else {
         old_cursor = new POINT();
     }
@@ -48,10 +64,6 @@ void InputSystem::preupdate()
 
 void InputSystem::postupdate()
 {
-    key = 0;
-    button = 0;
-    cursor = POINT();
-    deltacursor = POINT();
 }
 
 void InputSystem::update(SEEntity* entity)
@@ -70,6 +82,10 @@ void InputSystem::update(SEEntity* entity)
             }
         }
     }
+
+    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)entity);
+    if (mouse)
+        mouse->mouse_cursor = cursor;
 
     component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
     component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);

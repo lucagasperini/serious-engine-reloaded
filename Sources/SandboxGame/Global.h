@@ -43,6 +43,7 @@ BOOL g_dbg_draw_border = FALSE;
 BOOL g_dbg_draw_id = FALSE;
 BOOL g_dbg_draw_position = FALSE;
 BOOL g_dbg_draw_fps = FALSE;
+BOOL g_dbg_draw_cursor = FALSE;
 
 UINT g_vresolution_width = 1920;
 UINT g_vresolution_height = 1080;

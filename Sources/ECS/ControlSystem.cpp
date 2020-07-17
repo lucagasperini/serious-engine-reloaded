@@ -26,6 +26,9 @@ extern BOOL g_dbg_draw_border;
 extern BOOL g_dbg_draw_id;
 extern BOOL g_dbg_draw_position;
 extern BOOL g_dbg_draw_fps;
+extern BOOL g_dbg_draw_cursor;
+extern CDrawPort* g_drawport;
+extern BOOL g_game_started;
 
 void ControlSystem::update(SEEntity* entity)
 {
@@ -105,14 +108,36 @@ void ControlSystem::control_camera(component_camera* _camera,
             _camera->cam_pos(3) - _camera->cam_speed);
         break;
     }
-    _camera->cam_rot = ANGLE3D(_camera->cam_rot(1) + (_mousedelta->md_cursor.x * _camera->cam_speed),
-        _camera->cam_rot(2) + (_mousedelta->md_cursor.y * _camera->cam_speed),
-        1.0f);
+    FLOAT x = _camera->cam_rot(1);
+    FLOAT y = _camera->cam_rot(2);
+    if (_mousedelta->md_cursor.x) {
+        FLOAT ax = _mousedelta->md_cursor.x;
+        printf("Camera AX: %f\n", ax);
+        x += ax / g_drawport->GetWidth() * 360;
+        printf("Camera Final AX: %f\n", x);
+    }
+    if (_mousedelta->md_cursor.y) {
+        FLOAT ay = _mousedelta->md_cursor.y;
+        printf("Camera AY: %f\n", ay);
+        y += ay / g_drawport->GetHeight() * 360;
+        printf("Camera Final AY: %f\n", y);
+    }
+
+    if (x > 360.0f)
+        x -= 360.0f;
+    if (y > 360.0f)
+        y -= 360.0f;
+
+    if (x || y)
+        _camera->cam_rot = ANGLE3D(x, y, 0.0f);
 }
 
 void ControlSystem::control_game(component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
+    case SE_KEYBIND_EXIT:
+        g_game_started = FALSE;
+        break;
     case SE_KEYBIND_FULLSCREEN:
         g_resolution_fullscreen();
         break;
@@ -139,6 +164,9 @@ void ControlSystem::control_game(component_keybind* _keybind)
         break;
     case SE_KEYBIND_DEBUG_FPS:
         g_dbg_draw_fps = !g_dbg_draw_fps;
+        break;
+    case SE_KEYBIND_DEBUG_CURSOR:
+        g_dbg_draw_cursor = !g_dbg_draw_cursor;
         break;
     }
 }

@@ -28,6 +28,7 @@ extern BOOL g_dbg_draw_border;
 extern BOOL g_dbg_draw_id;
 extern BOOL g_dbg_draw_position;
 extern BOOL g_dbg_draw_fps;
+extern BOOL g_dbg_draw_cursor;
 extern CWorld* g_world_data;
 
 void RenderSystem::preupdate()
@@ -117,6 +118,8 @@ void RenderSystem::init_window(component_window* _window, component_position* _p
 
     _pGfx->CreateWindowCanvas(_window->win_pointer, &g_viewport, &g_drawport);
 
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
     // initial screen fill and swap, just to get context running
     if (g_drawport != NULL && g_drawport->Lock()) {
         g_drawport->Fill(C_BLACK | 255);
@@ -149,6 +152,11 @@ void RenderSystem::update(SEEntity* entity)
     component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
     if (position && texture)
         render_texture(position, texture);
+    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)entity);
+    if (mouse && g_dbg_draw_cursor)
+        render_mouse_pos(mouse);
+    if (mouse && texture)
+        render_cursor(mouse, texture);
 
     component_text* text = dynamic_cast<component_text*>((SEEntity*)entity);
     component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
@@ -157,6 +165,19 @@ void RenderSystem::update(SEEntity* entity)
         render_button(position, text, button, mousefocus);
     else if (position && text)
         render_text(position, text);
+}
+
+void RenderSystem::render_mouse_pos(component_mouse* _mouse)
+{
+    g_drawport->DrawBorder(_mouse->mouse_cursor.x, _mouse->mouse_cursor.y,
+        32, 32, g_fb_color);
+}
+
+void RenderSystem::render_cursor(component_mouse* _mouse, component_texture* _texture)
+{
+    g_drawport->PutTexture(&_texture->tex_data,
+        PIXaabbox2D(PIX2D(_mouse->mouse_cursor.x, _mouse->mouse_cursor.y),
+            PIX2D(_mouse->mouse_cursor.x + 32, _mouse->mouse_cursor.y + 32)));
 }
 
 void RenderSystem::render_texture(component_position* _position, component_texture* _texture)

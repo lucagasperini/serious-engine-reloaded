@@ -16,6 +16,7 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Manager.h"
+#include <cmath>
 
 extern BOOL g_game_started;
 
@@ -27,10 +28,7 @@ BYTE* ECSManager::mem_iter = NULL;
 ULONG ECSManager::system_counter = 0;
 SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* ECSManager::a_thread = NULL;
-std::mutex* ECSManager::mutex_init = NULL;
-std::mutex* ECSManager::mutex = NULL;
-std::condition_variable* ECSManager::cv = NULL;
-BOOL ECSManager::all_thread_init = FALSE;
+std::mutex ECSManager::mutex;
 ULONG ECSManager::number_init = 0;
 
 ECSManager::ECSManager()
@@ -68,6 +66,9 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 {
     _entity->id = entity_counter++;
 
+    memset(mem_alloc, SER_ECS_ENTITY_THREAD_ZERO, sizeof(uint64_t));
+    mem_alloc += sizeof(uint64_t);
+
     memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
     mem_alloc += sizeof(BYTE);
 
@@ -80,8 +81,6 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 
 SEEntity* ECSManager::getEntity()
 {
-    std::lock_guard<std::mutex> lg(*mutex);
-
     if (mem_iter >= mem_alloc) {
         resetEntityIter();
         return NULL;
@@ -102,6 +101,51 @@ SEEntity* ECSManager::getEntity()
     mem_iter += obj_size;
 
     return return_ptr;
+}
+
+SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag)
+{
+    if (_ptr > mem_alloc) {
+        _ptr = a_entity;
+        return NULL;
+    }
+
+    uint64_t thread_access = *((uint64_t*)_ptr);
+    if (thread_access ^ _thread_flag) {
+
+        BYTE* obj_flag_ptr = _ptr + sizeof(uint64_t);
+        BYTE obj_flag = *obj_flag_ptr;
+
+        if (obj_flag ^ SER_ECS_ENTITY_FLAG_LOCKED) {
+            memset(obj_flag_ptr, obj_flag | SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
+            memset(_ptr, thread_access | _thread_flag, sizeof(uint64_t));
+            _ptr += sizeof(uint64_t);
+            _ptr += sizeof(BYTE);
+
+            ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
+            _ptr += sizeof(ULONG);
+
+            SEEntity* return_ptr = (SEEntity*)_ptr;
+            _ptr += obj_size;
+
+            memset(obj_flag_ptr, obj_flag ^ SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
+
+            return return_ptr;
+        }
+    }
+    _ptr += sizeof(uint64_t);
+    _ptr += sizeof(BYTE);
+    ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
+    _ptr += sizeof(ULONG);
+    _ptr += obj_size;
+
+    return NULL;
+    /*
+    if (obj_flag ^ SER_ECS_ENTITY_FLAG_ALLOC) {
+        mem_iter += obj_size;
+        return getEntity();
+    }
+*/
 }
 
 SEEntity* ECSManager::getEntity(ULONG _id)
@@ -146,46 +190,51 @@ void ECSManager::init()
 void ECSManager::update()
 {
     a_thread = new std::thread[system_counter];
-    mutex = new std::mutex;
-    mutex_init = new std::mutex;
-    cv = new std::condition_variable;
 
     for (ULONG i = 0; i < system_counter; i++)
-        a_thread[i] = std::thread(thread_update, i);
-
-    BOOL tmp_init = FALSE;
+        a_thread[i] = std::thread(threadUpdate, i);
 
     while (g_game_started) {
-        if (number_init == system_counter) {
-            //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            cv->notify_all();
-        }
     }
     for (ULONG i = 0; i < system_counter; i++)
         a_thread[i].join();
 }
 
-void ECSManager::thread_update(ULONG _system)
+void ECSManager::threadUpdate(ULONG _system)
 {
     a_system[_system]->preinit();
-    while (SEEntity* entity = getEntity()) {
-        a_system[_system]->init(entity);
+    ULONG counter = 0;
+    BYTE* tmp_ptr = a_entity;
+    uint64_t thread_flag = (int64_t)pow(2, _system);
+
+    while (counter < entity_counter) {
+        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag);
+        if (entity) {
+            counter++;
+            a_system[_system]->init(entity);
+        }
     }
     a_system[_system]->postinit();
 
+    std::unique_lock<std::mutex> ul(mutex);
     number_init++;
-    std::unique_lock<std::mutex> ul(*mutex_init);
-    cv->wait(ul);
+    ul.unlock();
+    while (number_init != system_counter) {
+    }
 
     //number_init = 0;
 
     while (g_game_started) {
         a_system[_system]->preupdate();
-
-        while (SEEntity* entity = getEntity()) {
-            a_system[_system]->update(entity);
+        counter = 0;
+        tmp_ptr = a_entity;
+        while (counter < entity_counter) {
+            SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag);
+            if (entity) {
+                counter++;
+                a_system[_system]->update(entity);
+            }
         }
-
         a_system[_system]->postupdate();
     }
 }

@@ -29,10 +29,12 @@
 #define SE_ECS_KEYBIND_MAX 256
 
 #define SE_KEYBIND_NULL 0x00
+#define SE_KEYBIND_EXIT 0x01
 #define SE_KEYBIND_DEBUG_BORDER 0xD0
 #define SE_KEYBIND_DEBUG_ENTITYID 0xD1
 #define SE_KEYBIND_DEBUG_POSITION 0xD2
 #define SE_KEYBIND_DEBUG_FPS 0xD3
+#define SE_KEYBIND_DEBUG_CURSOR 0xD4
 #define SE_KEYBIND_CAMERA_RESET 0xC0
 #define SE_KEYBIND_CAMERA_RIGHT 0xC1
 #define SE_KEYBIND_CAMERA_LEFT 0xC2
@@ -128,6 +130,10 @@ struct component_camera : component {
 struct component_keybind : component {
     ULONG kb_keybind[SE_ECS_KEYBIND_MAX];
     ULONG kb_current = SE_KEYBIND_NULL;
+};
+
+struct component_mouse : component {
+    POINT mouse_cursor;
 };
 struct component_mousedelta : component {
     POINT md_cursor;

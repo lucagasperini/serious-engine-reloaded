@@ -29,6 +29,9 @@ extern ECSManager* g_manager;
 struct main_window : SEEntity, component_window, component_position {
 };
 
+struct mouse_texture : SEEntity, component_mouse, component_texture {
+};
+
 struct MenuImage : SEEntity,
                    component_texture,
                    component_position {
@@ -62,10 +65,10 @@ void quitgame()
 
 void load_all_game_system()
 {
-    RenderSystem* render_system = new RenderSystem;
-    g_manager->addSystem((SESystem*)render_system);
     PositionSystem* position_system = new PositionSystem;
     g_manager->addSystem((SESystem*)position_system);
+    RenderSystem* render_system = new RenderSystem;
+    g_manager->addSystem((SESystem*)render_system);
     InputSystem* input_system = new InputSystem;
     g_manager->addSystem((SESystem*)input_system);
     ControlSystem* control_system = new ControlSystem;
@@ -102,6 +105,7 @@ void load_all_game_entity()
 
     GameControl* game_control = new GameControl;
     memset(game_control->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
+    game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
     game_control->kb_keybind[SE_KEYBIND_FULLSCREEN] = SDLK_F1;
     game_control->kb_keybind[SE_KEYBIND_RESOLUTION_VGA] = SDLK_F2;
     game_control->kb_keybind[SE_KEYBIND_RESOLUTION_SVGA] = SDLK_F3;
@@ -111,6 +115,7 @@ void load_all_game_entity()
     game_control->kb_keybind[SE_KEYBIND_DEBUG_ENTITYID] = SDLK_F7;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_POSITION] = SDLK_F8;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_FPS] = SDLK_F9;
+    game_control->kb_keybind[SE_KEYBIND_DEBUG_CURSOR] = SDLK_F10;
     g_manager->addEntity((SEEntity*)game_control, sizeof(GameControl));
 
     Camera* camera = new Camera();
@@ -119,7 +124,7 @@ void load_all_game_entity()
     camera->cam_rot = world_start_rotation;
     camera->cam_speed = 1.0f;
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
-    camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F10;
+    camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F12;
     camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;
     camera->kb_keybind[SE_KEYBIND_CAMERA_LEFT] = SDLK_LEFT;
     camera->kb_keybind[SE_KEYBIND_CAMERA_FORWARD] = SDLK_UP;
@@ -127,6 +132,10 @@ void load_all_game_entity()
     camera->kb_keybind[SE_KEYBIND_CAMERA_UP] = SDLK_SPACE;
     camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;
     g_manager->addEntity(camera, sizeof(Camera));
+
+    mouse_texture* e_mouse_texture = new mouse_texture;
+    e_mouse_texture->tex_file = CTFILENAME("TexturesMP\\General\\Pointer.tex");
+    g_manager->addEntity((SEEntity*)e_mouse_texture, sizeof(mouse_texture));
 
     MenuImage* logosam = new MenuImage();
     logosam->pos_x = 480;

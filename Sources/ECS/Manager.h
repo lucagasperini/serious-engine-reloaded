@@ -31,12 +31,16 @@
 
 #define SER_ECS_SYSTEM_MAX 64
 
+// 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+#define SER_ECS_ENTITY_THREAD_ZERO 0x0000000000000000
 // 0000 0000
 #define SER_ECS_ENTITY_FLAG_FREE 0x00
 // 1000 0000
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x80
 // 0100 0000
 #define SER_ECS_ENTITY_FLAG_READ_ONLY 0x40
+// 0100 1000
+#define SER_ECS_ENTITY_FLAG_LOCKED 0x08
 
 class ECSManager {
 private:
@@ -62,18 +66,15 @@ private:
 
     static std::thread* a_thread;
 
-    static std::mutex* mutex;
-    static std::mutex* mutex_init;
-
-    static std::condition_variable* cv;
-
-    static BOOL all_thread_init;
+    static std::mutex mutex;
 
     static ULONG number_init;
 
 public:
     static SEEntity* getEntity();
     static SEEntity* getEntity(ULONG _id);
+
+    static SEEntity* getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
@@ -86,7 +87,7 @@ public:
     static void init();
     static void update();
 
-    static void thread_update(ULONG _system);
+    static void threadUpdate(ULONG _system);
 
     static inline void resetEntityIter() { mem_iter = a_entity; }
 
