@@ -85,7 +85,7 @@ public:
     static SEEntity* getEntity();
     static SEEntity* getEntity(ULONG _id);
 
-    static SEEntity* getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag, BOOL _xand);
+    static SEEntity* getRandomEntity(BYTE*& _ptr, const uint64_t& _thread_flag, const BOOL& _xand);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
