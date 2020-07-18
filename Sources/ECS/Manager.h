@@ -71,6 +71,9 @@ private:
     static std::mutex mutex;
     static std::mutex mutex_update;
     static std::mutex mutex_counter;
+#if DEBUG_ENTITY_FILE == 1
+    static std::mutex mutex_debug;
+#endif
 
     static BOOL secure_wait;
 

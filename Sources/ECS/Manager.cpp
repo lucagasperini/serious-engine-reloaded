@@ -21,7 +21,7 @@
 #if DEBUG_ENTITY_FILE == 1
 #define DEBUG_ECS_FILE(strformat, ...)                    \
     {                                                     \
-        std::lock_guard<std::mutex> ul(mutex);            \
+        std::lock_guard<std::mutex> ul(mutex_debug);      \
         char buffer[1024];                                \
         snprintf(buffer, 1024, strformat, ##__VA_ARGS__); \
         g_logstream.PutString_t(buffer);                  \
@@ -42,6 +42,9 @@ ULONG ECSManager::system_counter = 0;
 SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* ECSManager::a_thread = NULL;
 std::mutex ECSManager::mutex;
+#if DEBUG_ENTITY_FILE == 1
+std::mutex ECSManager::mutex_debug;
+#endif
 std::mutex ECSManager::mutex_update;
 std::mutex ECSManager::mutex_counter;
 std::condition_variable ECSManager::cv;
@@ -180,8 +183,11 @@ SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag, BOOL _
     ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
     _ptr += sizeof(ULONG);
     _ptr += obj_size;
-
-    DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p AT %p SIZE %u\n", (int)log2(_thread_flag), _ptr, dbg_ptr, obj_size);
+    if (already_access) {
+        DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p AT %p SIZE %u FOR ALREADY ACCESS\n", (int)log2(_thread_flag), _ptr, dbg_ptr, obj_size);
+    } else {
+        DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p AT %p SIZE %u FOR LOCKED\n", (int)log2(_thread_flag), _ptr, dbg_ptr, obj_size);
+    }
     return NULL;
     /*
     if (obj_flag ^ SER_ECS_ENTITY_FLAG_ALLOC) {
@@ -225,13 +231,16 @@ void ECSManager::run()
         a_thread[i] = std::thread(threadUpdate, i);
 
     while (g_game_started) {
-        while (number_update != system_counter) {
+        /*        while (number_update < system_counter) {
         }
-        //std::lock_guard<std::mutex> lck(mutex);
         DEBUG_ECS_FILE("DEBUG: MAIN NOTIFY ALL THREAD %i\n", number_update);
-        secure_wait = FALSE;
-        cv.notify_all();
-        number_update = 0;
+        {
+            std::lock_guard<std::mutex> lck(mutex);
+            secure_wait = FALSE;
+            cv.notify_all();
+            number_update = 0;
+        }
+*/
     }
     for (ULONG i = 0; i < system_counter; i++)
         a_thread[i].join();
@@ -308,10 +317,18 @@ void ECSManager::threadUpdate(ULONG _system)
         DEBUG_ECS_FILE("DEBUG: THREAD %i START UPDATE NUMBER %i\n", _system, number_update);
         update(_system, xand);
         xand = !xand;
-        DEBUG_ECS_FILE("DEBUG: THREAD %i END UPDATE NUMBER %i\n", _system, number_update);
         {
-            std::unique_lock<std::mutex> lck(mutex_counter);
-            number_update++;
+            std::lock_guard<std::mutex> lck(mutex_counter);
+
+            if (number_update >= (system_counter - 1)) {
+                DEBUG_ECS_FILE("DEBUG: THREAD %u NOTIFY ALL THREAD WITH %i UPDATE\n", _system, number_update);
+                secure_wait = FALSE;
+                cv.notify_all();
+                number_update = 0;
+            } else {
+                DEBUG_ECS_FILE("DEBUG: THREAD %i END UPDATE NUMBER %i\n", _system, number_update);
+                number_update++;
+            }
         }
 
         {
