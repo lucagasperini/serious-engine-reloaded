@@ -123,13 +123,13 @@ void ControlSystem::control_camera(component_camera* _camera,
         printf("Camera Final AY: %f\n", y);
     }
 
-    if (x > 360.0f)
-        x -= 360.0f;
-    if (y > 360.0f)
-        y -= 360.0f;
+    //if (x > 360.0f)
+    //    x -= 360.0f;
+    //if (y > 360.0f)
+    //    y -= 360.0f;
 
-    if (x || y)
-        _camera->cam_rot = ANGLE3D(x, y, 0.0f);
+    //if (x || y)
+    _camera->cam_rot = ANGLE3D(x, y, 0.0f);
 }
 
 void ControlSystem::control_game(component_keybind* _keybind)

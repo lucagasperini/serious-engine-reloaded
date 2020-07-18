@@ -42,8 +42,8 @@ struct MenuButton : SEEntity,
                     component_position,
                     component_align,
                     component_button,
-                    component_mouseclick,
-                    component_mousefocus,
+                    //component_mouseclick,
+                    //component_mousefocus,
                     component_action {
 };
 struct GameControl : SEEntity,
@@ -119,7 +119,7 @@ void load_all_game_entity()
     g_manager->addEntity((SEEntity*)game_control, sizeof(GameControl));
 
     Camera* camera = new Camera();
-    camera->cam_fov = 120.0f;
+    camera->cam_fov = 90.0f;
     camera->cam_pos = world_start_position;
     camera->cam_rot = world_start_rotation;
     camera->cam_speed = 1.0f;
@@ -160,7 +160,7 @@ void load_all_game_entity()
     logose->pos_h = 200;
     logose->tex_file = CTFILENAME("Textures\\Logo\\GodGamesLogo.tex");
     g_manager->addEntity((SEEntity*)logose, sizeof(MenuImage));
-
+    /*
     MenuButton* menu_button_sp = new MenuButton;
     menu_button_sp->pos_y = 300;
     menu_button_sp->pos_w = 300;
@@ -273,6 +273,7 @@ void load_all_game_entity()
     menu_button_quit->txt_color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->btn_color2 = SE_COL_ORANGE_DARK | 255;
     g_manager->addEntity((SEEntity*)menu_button_quit, sizeof(MenuButton));
+    */
 }
 
 #endif

@@ -39,7 +39,7 @@
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x80
 // 0100 0000
 #define SER_ECS_ENTITY_FLAG_READ_ONLY 0x40
-// 0100 1000
+// 0000 1000
 #define SER_ECS_ENTITY_FLAG_LOCKED 0x08
 
 class ECSManager {
@@ -66,15 +66,23 @@ private:
 
     static std::thread* a_thread;
 
+    static std::condition_variable cv;
+
     static std::mutex mutex;
+    static std::mutex mutex_update;
+    static std::mutex mutex_counter;
+
+    static BOOL secure_wait;
 
     static ULONG number_init;
+
+    static ULONG number_update;
 
 public:
     static SEEntity* getEntity();
     static SEEntity* getEntity(ULONG _id);
 
-    static SEEntity* getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag);
+    static SEEntity* getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag, BOOL _xand);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
@@ -84,8 +92,10 @@ public:
 
     static void grow(ULONG _new);
 
-    static void init();
-    static void update();
+    static void init(ULONG _system, BOOL _xand);
+    static void update(ULONG _system, BOOL _xand);
+
+    static void run();
 
     static void threadUpdate(ULONG _system);
 

@@ -117,9 +117,9 @@ void RenderSystem::init_window(component_window* _window, component_position* _p
     SE_UpdateWindowHandle(_window->win_pointer);
 
     _pGfx->CreateWindowCanvas(_window->win_pointer, &g_viewport, &g_drawport);
-
+#ifndef DEBUG
     SDL_SetRelativeMouseMode(SDL_TRUE);
-
+#endif
     // initial screen fill and swap, just to get context running
     if (g_drawport != NULL && g_drawport->Lock()) {
         g_drawport->Fill(C_BLACK | 255);

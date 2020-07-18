@@ -18,7 +18,20 @@
 #include "Manager.h"
 #include <cmath>
 
+#if DEBUG_ENTITY_FILE == 1
+#define DEBUG_ECS_FILE(strformat, ...)                    \
+    {                                                     \
+        std::lock_guard<std::mutex> ul(mutex);            \
+        char buffer[1024];                                \
+        snprintf(buffer, 1024, strformat, ##__VA_ARGS__); \
+        g_logstream.PutString_t(buffer);                  \
+    }
+#else
+#define DEBUG_ECS_FILE(strformat, ...)
+#endif
+
 extern BOOL g_game_started;
+extern CTFileStream g_logstream;
 
 ULONG ECSManager::entity_counter = 0;
 BYTE* ECSManager::a_entity = NULL;
@@ -29,7 +42,12 @@ ULONG ECSManager::system_counter = 0;
 SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* ECSManager::a_thread = NULL;
 std::mutex ECSManager::mutex;
+std::mutex ECSManager::mutex_update;
+std::mutex ECSManager::mutex_counter;
+std::condition_variable ECSManager::cv;
 ULONG ECSManager::number_init = 0;
+ULONG ECSManager::number_update = 0;
+BOOL ECSManager::secure_wait = TRUE;
 
 ECSManager::ECSManager()
 {
@@ -66,6 +84,9 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 {
     _entity->id = entity_counter++;
 
+#ifdef DEBUG_ENTITY_FILE
+    void* dbg_ptr = mem_alloc;
+#endif
     memset(mem_alloc, SER_ECS_ENTITY_THREAD_ZERO, sizeof(uint64_t));
     mem_alloc += sizeof(uint64_t);
 
@@ -74,6 +95,8 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 
     memcpy(mem_alloc, &_size, sizeof(ULONG));
     mem_alloc += sizeof(ULONG);
+
+    DEBUG_ECS_FILE("DEBUG: ADD ENTITY ID %u AT %p SIZE %u START AT %p\n", _entity->id, mem_alloc, _size, dbg_ptr);
 
     memcpy(mem_alloc, _entity, _size);
     mem_alloc += _size;
@@ -103,22 +126,36 @@ SEEntity* ECSManager::getEntity()
     return return_ptr;
 }
 
-SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag)
+SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag, BOOL _xand)
 {
-    if (_ptr > mem_alloc) {
+    DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY REQUEST AT %p\n", (int)log2(_thread_flag), _ptr);
+    if (_ptr >= mem_alloc) {
         _ptr = a_entity;
         return NULL;
     }
 
     uint64_t thread_access = *((uint64_t*)_ptr);
-    if (thread_access ^ _thread_flag) {
+    BOOL already_access;
 
+    if (_xand)
+        already_access = !(thread_access & _thread_flag);
+    else
+        already_access = thread_access & _thread_flag;
+
+    if (!already_access) {
         BYTE* obj_flag_ptr = _ptr + sizeof(uint64_t);
         BYTE obj_flag = *obj_flag_ptr;
 
-        if (obj_flag ^ SER_ECS_ENTITY_FLAG_LOCKED) {
+        if (!(obj_flag & SER_ECS_ENTITY_FLAG_LOCKED)) {
             memset(obj_flag_ptr, obj_flag | SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
-            memset(_ptr, thread_access | _thread_flag, sizeof(uint64_t));
+
+            uint64_t tmp_thread_access;
+            if (_xand)
+                tmp_thread_access = thread_access ^ _thread_flag;
+            else
+                tmp_thread_access = thread_access | _thread_flag;
+
+            memcpy(_ptr, &tmp_thread_access, sizeof(uint64_t));
             _ptr += sizeof(uint64_t);
             _ptr += sizeof(BYTE);
 
@@ -128,17 +165,23 @@ SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, uint64_t _thread_flag)
             SEEntity* return_ptr = (SEEntity*)_ptr;
             _ptr += obj_size;
 
-            memset(obj_flag_ptr, obj_flag ^ SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
+            memset(obj_flag_ptr, obj_flag, sizeof(BYTE));
+
+            DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY RETURN AT %p SIZE %u\n", (int)log2(_thread_flag), return_ptr, obj_size);
 
             return return_ptr;
         }
     }
+#ifdef DEBUG_ENTITY_FILE
+    void* dbg_ptr = _ptr;
+#endif
     _ptr += sizeof(uint64_t);
     _ptr += sizeof(BYTE);
     ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
     _ptr += sizeof(ULONG);
     _ptr += obj_size;
 
+    DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p AT %p SIZE %u\n", (int)log2(_thread_flag), _ptr, dbg_ptr, obj_size);
     return NULL;
     /*
     if (obj_flag ^ SER_ECS_ENTITY_FLAG_ALLOC) {
@@ -173,68 +216,108 @@ void ECSManager::removeEntity(SEEntity* _entity)
     memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
 }
 
-void ECSManager::init()
+void ECSManager::run()
 {
-    /*
-    if (s_thread == NULL)
-        s_thread = new std::thread[system_counter];
-    for (ULONG i = 0; i < system_counter; i++) {
-        s_thread[i] = std::thread(thread_init, i);
-        s_thread[i].join();
-    }
-    */
-    for (ULONG i = 0; i < system_counter; i++) {
-    }
-}
-
-void ECSManager::update()
-{
+#ifdef SE_MULTITHREADING_MODE
     a_thread = new std::thread[system_counter];
 
     for (ULONG i = 0; i < system_counter; i++)
         a_thread[i] = std::thread(threadUpdate, i);
 
     while (g_game_started) {
+        while (number_update != system_counter) {
+        }
+        //std::lock_guard<std::mutex> lck(mutex);
+        DEBUG_ECS_FILE("DEBUG: MAIN NOTIFY ALL THREAD %i\n", number_update);
+        secure_wait = FALSE;
+        cv.notify_all();
+        number_update = 0;
     }
     for (ULONG i = 0; i < system_counter; i++)
         a_thread[i].join();
+#else
+    BOOL xand = FALSE;
+    for (ULONG i = 0; i < system_counter; i++) {
+        init(i, xand);
+        xand = !xand;
+    }
+    while (g_game_started) {
+        for (ULONG i = 0; i < system_counter; i++) {
+            update(i, xand);
+            xand = !xand;
+        }
+    }
+#endif
+    g_logstream.Close();
 }
 
-void ECSManager::threadUpdate(ULONG _system)
+void ECSManager::init(ULONG _system, BOOL _xand)
 {
-    a_system[_system]->preinit();
     ULONG counter = 0;
     BYTE* tmp_ptr = a_entity;
+#ifdef SE_MULTITHREADING_MODE
     uint64_t thread_flag = (int64_t)pow(2, _system);
-
+#else
+    uint64_t thread_flag = 0x1;
+#endif
     while (counter < entity_counter) {
-        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag);
+        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag, _xand);
         if (entity) {
             counter++;
             a_system[_system]->init(entity);
         }
     }
     a_system[_system]->postinit();
+}
 
-    std::unique_lock<std::mutex> ul(mutex);
-    number_init++;
-    ul.unlock();
+void ECSManager::update(ULONG _system, BOOL _xand)
+{
+    ULONG counter = 0;
+    BYTE* tmp_ptr = a_entity;
+#ifdef SE_MULTITHREADING_MODE
+    uint64_t thread_flag = (int64_t)pow(2, _system);
+#else
+    uint64_t thread_flag = 0x1;
+#endif
+
+    a_system[_system]->preupdate();
+    while (counter < entity_counter) {
+        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag, _xand);
+        if (entity) {
+            counter++;
+            a_system[_system]->update(entity);
+        }
+    }
+    a_system[_system]->postupdate();
+}
+
+void ECSManager::threadUpdate(ULONG _system)
+{
+    init(_system, FALSE);
+    {
+        std::lock_guard<std::mutex> ul(mutex);
+        number_init++;
+    }
+    DEBUG_ECS_FILE("DEBUG: THREAD %i END INIT NUMBER %i\n", _system, number_init);
     while (number_init != system_counter) {
     }
 
     //number_init = 0;
-
+    BOOL xand = TRUE;
     while (g_game_started) {
-        a_system[_system]->preupdate();
-        counter = 0;
-        tmp_ptr = a_entity;
-        while (counter < entity_counter) {
-            SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag);
-            if (entity) {
-                counter++;
-                a_system[_system]->update(entity);
-            }
+        DEBUG_ECS_FILE("DEBUG: THREAD %i START UPDATE NUMBER %i\n", _system, number_update);
+        update(_system, xand);
+        xand = !xand;
+        DEBUG_ECS_FILE("DEBUG: THREAD %i END UPDATE NUMBER %i\n", _system, number_update);
+        {
+            std::unique_lock<std::mutex> lck(mutex_counter);
+            number_update++;
         }
-        a_system[_system]->postupdate();
+
+        {
+            std::unique_lock<std::mutex> lck(mutex_update);
+            while (secure_wait)
+                cv.wait(lck);
+        }
     }
 }

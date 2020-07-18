@@ -80,86 +80,7 @@ void g_resolution_change(UINT _w, UINT _h)
         //g_drawport->Lock();
     }
 }
-/*
-BOOL init(CTString _cmdline)
-{
-    // display mode settings
-    ULONG win_flags = SE_MAINWINDOW_FLAGS_NULL;
-    GfxAPIType win_api = GfxAPIType::GAT_OGL;
-    UINT win_width = 1280;
-    UINT win_height = 720;
-    DisplayDepth win_depth = DisplayDepth::DD_32BIT;
-    INDEX win_adapter = 0;
 
-    // list of possible display modes for recovery
-    const INDEX m_win_fb_mode[][SER_WINDOW_FALLBACK_COUNT] = {
-        // color, API, adapter
-        { DD_DEFAULT, GAT_OGL, 0 },
-        { DD_16BIT, GAT_OGL, 0 },
-        { DD_16BIT, GAT_OGL, 1 }, // 3dfx Voodoo2
-    };
-
-    
-
-    main_win = new SEMainWindow();
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) {
-        FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SDL_GetError());
-        return FALSE;
-    }
-
-    SDL_Init(SDL_INIT_JOYSTICK); // don't care if this fails.
-
-    splashscreen.show();
-
-    // parse command line before initializing engine
-    // TODO: Maybe add this in future
-    // ParseCommandLine(_cmdline);
-
-    // initialize engine
-    SE_InitEngine(argv0, g_gamename);
-
-    SE_LoadDefaultFonts();
-
-    // initialize sound library
-    snd_iFormat = Clamp(snd_iFormat, (INDEX)CSoundLibrary::SF_NONE, (INDEX)CSoundLibrary::SF_44100_16);
-    _pSound->SetFormat((enum CSoundLibrary::SoundFormat)snd_iFormat);
-
-    // apply application mode
-    main_win->setTitle(g_gamename);
-    main_win->setW(win_width);
-    main_win->setH(win_height);
-    main_win->setDepth(DisplayDepth::DD_DEFAULT);
-    main_win->setAdapter(win_adapter);
-    BOOL result = main_win->create();
-
-    if (!result) {
-        main_win->setW(SE_WINDOW_RECOVERY_W);
-        main_win->setH(SE_WINDOW_RECOVERY_H);
-        for (int i = 0; i < SER_WINDOW_FALLBACK_COUNT; i++) {
-            main_win->setDepth((DisplayDepth)m_win_fb_mode[i][0]);
-            main_win->setAPI((GfxAPIType)m_win_fb_mode[i][1]);
-            main_win->setAdapter(m_win_fb_mode[i][2]);
-            CPrintF(TRANSV("\nTrying recovery mode %d...\n"), i);
-            result = main_win->create();
-            if (result)
-                break;
-        }
-    }
-    // if all failed
-    if (!result) {
-        FatalError(TRANS(
-            "Cannot set display mode!\n"
-            "Serious Sam was unable to find display mode with hardware acceleration.\n"
-            "Make sure you install proper drivers for your video card as recommended\n"
-            "in documentation and set your desktop to 16 bit (65536 colors).\n"
-            "Please see ReadMe file for troubleshooting information.\n"));
-    }
-
-    splashscreen.hide();
-
-    return TRUE;
-}
-*/
 /*
 CImageInfo iiImageInfo;
    iiImageInfo.LoadAnyGfxFormat_t( fntex);
@@ -188,6 +109,8 @@ int submain(char* _cmdline)
 
     SE_LoadDefaultFonts();
 
+    g_logstream.Open_t(g_logfile, CTStream::OM_WRITETEXT);
+
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     // initialize sound library
@@ -199,8 +122,6 @@ int submain(char* _cmdline)
     load_all_game_entity();
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-
-    //g_manager->init();
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);
@@ -215,14 +136,9 @@ int submain(char* _cmdline)
     g_game_started = TRUE;
     splashscreen.hide();
 
-    //while (g_game_started) // start of game loop
-    //{
-    //    if (!main_win->isIconic()) {
-    //        g_manager->update();
-    //    }
-    //
-    //} // end of game loop
-    g_manager->update();
+    // start of game loop
+    g_manager->run();
+
     return TRUE;
 }
 

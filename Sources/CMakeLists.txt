@@ -258,6 +258,15 @@ if(USE_SINGLE_THREAD)
  add_definitions(-DSINGLE_THREADED=1)
 endif()
 
+option(SE_MULTITHREADING_MODE "Use Multi Threaded version" TRUE)
+if(SE_MULTITHREADING_MODE)
+ add_definitions(-DSE_MULTITHREADING_MODE=1)
+endif()
+
+option(SE_DEBUG_ENTITY_FILE "Debug ECS in a file" TRUE)
+if(SE_DEBUG_ENTITY_FILE)
+ add_definitions(-DDEBUG_ENTITY_FILE=1)
+endif()
 
 include_directories(
     .
