@@ -21,6 +21,9 @@
 #include "Component.h"
 #include <ECS/Manager.h>
 
+struct main_window : SEEntity, component_window, component_position {
+};
+
 struct mouse_texture : SEEntity, component_mouse, component_texture {
 };
 

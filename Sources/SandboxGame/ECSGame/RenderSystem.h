@@ -32,7 +32,7 @@ public:
     void init(SEEntity* entity) override;
     void postinit() override {}
 
-    void init_texture(component_texture* _texture);
+    void init_window(component_window* _window, component_position* _position);
 
     void preupdate() override;
     void update(SEEntity* entity) override;
@@ -48,6 +48,8 @@ public:
     void render_position(component_camera* _camera);
     void render_fps();
     void render_world(component_camera* _camera);
+
+    void destroy_window(component_window* _window);
 };
 
 #endif

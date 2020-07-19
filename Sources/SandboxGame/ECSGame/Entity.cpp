@@ -40,6 +40,23 @@
 #include <Engine/Graphics/Font.h>
 #include <SDL.h>
 
+#define SE_COL_ORANGE_LIGHT 0xffd70000
+#define SE_COL_ORANGE_NEUTRAL 0xee9c0000
+#define SE_COL_ORANGE_DARK 0x9b4b0000
+#define SE_COL_ORANGE_DARK_LT 0xbc6a0000
+#define SE_COL_BLUE_DARK_HV 0x151c2300
+#define SE_COL_BLUE_DARK 0x2a384600
+#define SE_COL_BLUE_DARK_LT 0x43596f00
+#define SE_COL_BLUE_NEUTRAL 0x5c7a9900
+#define SE_COL_BLUE_NEUTRAL_LT 0x6097cc00
+#define SE_COL_BLUE_LIGHT 0x64b4ff00
+#define SE_COL_BLUEGREEN_LT 0x6cff6c00
+
+#define SER_WINDOW_FALLBACK_COUNT 3
+#define SE_MAINWINDOW_FLAGS_NULL 0x0
+#define SE_WINDOW_RECOVERY_W 640
+#define SE_WINDOW_RECOVERY_H 480
+
 void quitgame()
 {
     //g_game_started = FALSE;
@@ -47,19 +64,18 @@ void quitgame()
 
 void load_all_game_system()
 {
-    /*
+
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);
     InputSystem* input_system = new InputSystem;
     ECSManager::addSystem((SESystem*)input_system);
     ControlSystem* control_system = new ControlSystem;
     ECSManager::addSystem((SESystem*)control_system);
-    */
 }
 
 void load_all_game_entity()
 {
-    /*
+
     // Add space for 1 MB
     ECSManager::grow(1048576);
 
@@ -73,7 +89,7 @@ void load_all_game_entity()
     font_small.Load_t(CTFILENAME("Fonts\\Display3-narrow.fnt"));
     font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
-    
+
     main_window* entity_window = new main_window;
     entity_window->pos_x = SDL_WINDOWPOS_CENTERED;
     entity_window->pos_y = SDL_WINDOWPOS_CENTERED;
@@ -256,5 +272,4 @@ void load_all_game_entity()
     menu_button_quit->txt_color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->btn_color2 = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_quit, sizeof(MenuButton));
-    */
 }

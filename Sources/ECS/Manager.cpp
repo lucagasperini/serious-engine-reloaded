@@ -170,6 +170,8 @@ void ECSManager::splitThreadMemory()
 
 void ECSManager::run()
 {
+    init(a_entity);
+
     if (thread_number > 0) {
 
         ULONG entity_thread = entity_counter / thread_number;
@@ -192,14 +194,15 @@ void ECSManager::quit()
         a_thread[i].join();
 }
 
-void ECSManager::init(BYTE* _start_ptr, ULONG _number)
+void ECSManager::init(BYTE* _start_ptr)
 {
     SEEntity* tmp_ptr = NULL;
-    for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
-        tmp_ptr = getEntity(_start_ptr);
-        for (ULONG i = 0; i < system_counter; i++) {
+    for (ULONG i = 0; i < system_counter; i++) {
+        a_system[i]->preinit();
+        while (tmp_ptr = getEntity(_start_ptr)) {
             a_system[i]->init(tmp_ptr);
         }
+        a_system[i]->postinit();
     }
 }
 
@@ -216,39 +219,6 @@ void ECSManager::update(BYTE* _start_ptr, ULONG _number)
 
 void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
 {
-    {
-        std::lock_guard<std::mutex> lg(mutex_preinit);
-        for (ULONG i = 0; i < system_counter; i++) {
-            a_system[i]->preinit();
-        }
-    }
-
-    init(_start_ptr, _number);
-
-    {
-        std::lock_guard<std::mutex> lg(mutex_postinit);
-        for (ULONG i = 0; i < system_counter; i++) {
-            a_system[i]->postinit();
-        }
-    }
-
-    {
-        std::lock_guard<std::mutex> lck(mutex_init_counter);
-
-        number_init++;
-
-        if (number_init >= system_counter) {
-            wait_init_secure = FALSE;
-            number_init = 0;
-            cv_init.notify_all();
-        }
-    }
-
-    {
-        std::unique_lock<std::mutex> lck(mutex_init);
-        while (wait_init_secure)
-            cv_init.wait(lck);
-    }
 
     while (g_game_started) {
         {
@@ -265,13 +235,6 @@ void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
             for (ULONG i = 0; i < system_counter; i++) {
                 a_system[i]->postupdate();
             }
-            number_update++;
-        }
-
-        {
-            std::unique_lock<std::mutex> lck(mutex_update);
-            while (wait_update_secure)
-                cv_update.wait(lck);
         }
     }
 }

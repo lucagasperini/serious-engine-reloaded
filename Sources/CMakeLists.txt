@@ -969,7 +969,6 @@ set(SANDBOXGAME "sandbox-game")
 add_executable(${SANDBOXGAME}
     SandboxGame/Main.cpp
     SandboxGame/SplashScreen.cpp
-    SandboxGame/MainWindow.cpp
     SandboxGame/ECSGame/Entity.cpp
     SandboxGame/ECSGame/RenderSystem.cpp
     SandboxGame/ECSGame/InputSystem.cpp

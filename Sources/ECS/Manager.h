@@ -27,16 +27,10 @@
 
 #define SER_ECS_SYSTEM_MAX 64
 
-// 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
-#define SER_ECS_ENTITY_THREAD_ZERO 0x0000000000000000
 // 0000 0000
 #define SER_ECS_ENTITY_FLAG_FREE 0x00
-// 1000 0000
-#define SER_ECS_ENTITY_FLAG_ALLOC 0x80
-// 0100 0000
-#define SER_ECS_ENTITY_FLAG_READ_ONLY 0x40
-// 0000 1000
-#define SER_ECS_ENTITY_FLAG_LOCKED 0x08
+// 0000 0001
+#define SER_ECS_ENTITY_FLAG_ALLOC 0x01
 
 class ECSManager {
 private:
@@ -100,7 +94,7 @@ public:
 
     static void grow(ULONG _new);
 
-    static void init(BYTE* _start_ptr, ULONG _number);
+    static void init(BYTE* _start_ptr);
     static void update(BYTE* _start_ptr, ULONG _number);
 
     static inline void setThreadNumber(ULONG _thread_number)

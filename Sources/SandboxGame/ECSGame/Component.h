@@ -49,6 +49,44 @@
 #define SE_KEYBIND_RESOLUTION_WXGA 0xF3
 #define SE_KEYBIND_RESOLUTION_HD 0xF4
 
+struct component_window : component {
+    CTString win_title;
+    void* win_pointer = NULL;
+    /* List of Gfx API for Serious Engine:
+    GAT_NONE : no gfx API (gfx functions are disabled)
+    GAT_OGL : OpenGL
+    GAT_D3D : Direct3D
+    GAT_VULKAN : Vulkan    FIXME: Actually this engine doesn't support Vulkan, btw adding this for future purpose 
+    GAT_CURRENT : Current API  FIXME: I dunno what is it
+    */
+    GfxAPIType win_api = GfxAPIType::GAT_OGL;
+    /*  List of SDL flags:
+    SDL_WINDOW_FULLSCREEN : fullscreen window
+    SDL_WINDOW_FULLSCREEN_DESKTOP: fullscreen window at the current desktop resolution
+    SDL_WINDOW_OPENGL : window usable with OpenGL context
+    SDL_WINDOW_VULKAN : window usable with a Vulkan instance
+    SDL_WINDOW_HIDDEN : window is not visible
+    SDL_WINDOW_BORDERLESS : no window decoration
+    SDL_WINDOW_RESIZABLE : window can be resized
+    SDL_WINDOW_MINIMIZED : window is minimized
+    SDL_WINDOW_MAXIMIZED : window is maximized
+    SDL_WINDOW_INPUT_GRABBED : window has grabbed input focus
+    SDL_WINDOW_ALLOW_HIGHDPI : window should be created in high-DPI mode if supported (>= SDL 2.0.1)
+    */
+    ULONG win_flags = NULL;
+    /* FIXME: what is adapter? it's called on SetDisplayMode() function on create method */
+    INDEX win_adapter = 0;
+
+    /* List of Display Depth for Serious Engine:
+    DD_NODEPTH : No depth
+    DD_DEFAULT : A default depth FIXME: I dunno what is it
+    DD_16BIT : A 16 BIT depth
+    DD_32BIT : A 32 BIT depth
+    DD_24BIT : A 24 BIT depth with Z-buffer
+    */
+    DisplayDepth win_depth = DisplayDepth::DD_32BIT;
+};
+
 struct component_position : component {
     UINT pos_x = 0;
     UINT pos_y = 0;
