@@ -18,7 +18,7 @@
 #ifndef SER_ECS_ENTITY_H
 #define SER_ECS_ENTITY_H
 
-#include "Component.h"
+#include <Engine/Base/Types.h>
 
 struct SEEntity {
     ULONG id;

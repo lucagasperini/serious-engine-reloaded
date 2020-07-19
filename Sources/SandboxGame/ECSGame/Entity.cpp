@@ -15,61 +15,51 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_SBGAME_ENTITY_H
-#define SER_SBGAME_ENTITY_H
+// Copyright (C) 2020 Luca Gasperini <luca.gasperini@xsoftware.it>
+//
+// This file is part of Serious Engine Reloaded.
+//
+// Serious Engine Reloaded is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// Serious Engine Reloaded is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Global.h"
-#include <ECS/Entity.h>
+#include "Entity.h"
+#include "ControlSystem.h"
+#include "InputSystem.h"
+#include "PositionSystem.h"
 #include <ECS/Manager.h>
 #include <Engine/Graphics/Font.h>
 #include <SDL.h>
 
-struct mouse_texture : SEEntity, component_mouse, component_texture {
-};
-
-struct MenuImage : SEEntity,
-                   component_texture,
-                   component_position {
-};
-
-struct MenuButton : SEEntity,
-                    component_text,
-                    component_position,
-                    component_align,
-                    component_button,
-                    //component_mouseclick,
-                    //component_mousefocus,
-                    component_action {
-};
-struct GameControl : SEEntity,
-                     component_keyboard,
-                     component_keybind {
-};
-
-struct Camera : SEEntity,
-                component_keybind,
-                component_mousedelta,
-                component_camera,
-                component_action {
-};
-
 void quitgame()
 {
-    g_game_started = FALSE;
+    //g_game_started = FALSE;
 }
 
 void load_all_game_system()
 {
+    /*
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);
     InputSystem* input_system = new InputSystem;
     ECSManager::addSystem((SESystem*)input_system);
     ControlSystem* control_system = new ControlSystem;
     ECSManager::addSystem((SESystem*)control_system);
+    */
 }
 
 void load_all_game_entity()
 {
+    /*
     // Add space for 1 MB
     ECSManager::grow(1048576);
 
@@ -83,7 +73,7 @@ void load_all_game_entity()
     font_small.Load_t(CTFILENAME("Fonts\\Display3-narrow.fnt"));
     font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
-    /*
+    
     main_window* entity_window = new main_window;
     entity_window->pos_x = SDL_WINDOWPOS_CENTERED;
     entity_window->pos_y = SDL_WINDOWPOS_CENTERED;
@@ -95,7 +85,7 @@ void load_all_game_entity()
     entity_window->win_depth = DisplayDepth::DD_32BIT;
     entity_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
     ECSManager::addEntity((SEEntity*)entity_window, sizeof(main_window));
-*/
+
     GameControl* game_control = new GameControl;
     memset(game_control->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
@@ -266,6 +256,5 @@ void load_all_game_entity()
     menu_button_quit->txt_color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->btn_color2 = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_quit, sizeof(MenuButton));
+    */
 }
-
-#endif

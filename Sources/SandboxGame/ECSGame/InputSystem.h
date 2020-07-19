@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_ECS_INPUTSYSTEM_H
-#define SER_ECS_INPUTSYSTEM_H
+#ifndef SER_SBGAME_INPUTSYSTEM_H
+#define SER_SBGAME_INPUTSYSTEM_H
 
 #include "Entity.h"
-#include "System.h"
+#include <ECS/System.h>
 #include <Engine/Base/Types.h>
 
 class InputSystem : SESystem {

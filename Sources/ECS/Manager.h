@@ -18,11 +18,7 @@
 #ifndef SER_ECS_MANAGER_H
 #define SER_ECS_MANAGER_H
 
-#include "ControlSystem.h"
 #include "Entity.h"
-#include "InputSystem.h"
-#include "PositionSystem.h"
-#include "RenderSystem.h"
 #include "System.h"
 #include <Engine/Engine.h>
 #include <condition_variable>

@@ -16,7 +16,7 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ControlSystem.h"
-#include "Manager.h"
+#include <ECS/Manager.h>
 
 extern void g_resolution_fullscreen();
 extern void g_resolution_change(UINT w, UINT h);

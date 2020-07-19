@@ -957,10 +957,6 @@ set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 set(ECSLIB "ser-ecs${DEBUGSUFFIX}")
 add_library(${ECSLIB} SHARED
     ECS/Manager.cpp
-    ECS/RenderSystem.cpp
-    ECS/InputSystem.cpp
-    ECS/PositionSystem.cpp
-    ECS/ControlSystem.cpp
 )
 target_link_libraries(${ECSLIB} ${SENGINELIB})
 
@@ -974,6 +970,11 @@ add_executable(${SANDBOXGAME}
     SandboxGame/Main.cpp
     SandboxGame/SplashScreen.cpp
     SandboxGame/MainWindow.cpp
+    SandboxGame/ECSGame/Entity.cpp
+    SandboxGame/ECSGame/RenderSystem.cpp
+    SandboxGame/ECSGame/InputSystem.cpp
+    SandboxGame/ECSGame/PositionSystem.cpp
+    SandboxGame/ECSGame/ControlSystem.cpp
 )
 
 target_link_libraries(${SANDBOXGAME} ${SENGINELIB})

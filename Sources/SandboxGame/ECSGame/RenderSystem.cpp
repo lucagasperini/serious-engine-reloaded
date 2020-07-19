@@ -16,7 +16,7 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "RenderSystem.h"
-#include "Manager.h"
+#include <ECS/Manager.h>
 
 extern CDrawPort* g_drawport;
 extern CViewPort* g_viewport;

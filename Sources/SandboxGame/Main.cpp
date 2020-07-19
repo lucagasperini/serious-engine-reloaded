@@ -25,11 +25,10 @@
 
 #include "MainWindow.h"
 #include "SplashScreen.h"
-#include <ECS/Component.h>
-#include <ECS/Entity.h>
 #include <ECS/Manager.h>
 
-#include "Entity.h"
+#include "ECSGame/Entity.h"
+#include "ECSGame/RenderSystem.h"
 #include "Global.h"
 
 // FIXME: Cant compile without this global variable
@@ -51,6 +50,9 @@ extern CWorld* g_world_data;
 
 SEMainWindow* main_win = NULL;
 static char* argv0 = NULL;
+
+extern void load_all_game_system();
+extern void load_all_game_entity();
 
 //TODO: This two function are called on Control System, but main_win is not a global variable.
 void g_resolution_fullscreen()
