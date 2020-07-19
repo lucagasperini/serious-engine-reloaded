@@ -91,10 +91,6 @@ void load_all_game_entity()
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
     main_window* entity_window = new main_window;
-    entity_window->pos_x = SDL_WINDOWPOS_CENTERED;
-    entity_window->pos_y = SDL_WINDOWPOS_CENTERED;
-    entity_window->pos_w = 1280;
-    entity_window->pos_h = 720;
     entity_window->win_title = "Serious Engine Sandbox Game";
     entity_window->win_api = GfxAPIType::GAT_OGL;
     entity_window->win_adapter = 0;

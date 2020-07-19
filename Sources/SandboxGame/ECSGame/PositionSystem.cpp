@@ -17,14 +17,15 @@
 
 #include "PositionSystem.h"
 
-extern CDrawPort* g_drawport;
-extern UINT g_vresolution_width;
-extern UINT g_vresolution_height;
+extern UINT g_resolution_width;
+extern UINT g_resolution_height;
+extern UINT g_virtual_resolution_width;
+extern UINT g_virtual_resolution_height;
 
 void PositionSystem::updateScale(component_position* _position)
 {
-    FLOAT scaleX = (FLOAT)g_drawport->GetWidth() / (FLOAT)g_vresolution_width;
-    FLOAT scaleY = (FLOAT)g_drawport->GetHeight() / (FLOAT)g_vresolution_height;
+    FLOAT scaleX = (FLOAT)g_resolution_width / (FLOAT)g_virtual_resolution_width;
+    FLOAT scaleY = (FLOAT)g_resolution_height / (FLOAT)g_virtual_resolution_height;
 
     _position->pos_x = (FLOAT)_position->pos_x * scaleX;
     _position->pos_y = (FLOAT)_position->pos_y * scaleY;
@@ -34,8 +35,8 @@ void PositionSystem::updateScale(component_position* _position)
 
 void PositionSystem::updateAlign(component_position* _position, component_align* _align)
 {
-    ULONG center_x = g_drawport->GetWidth() / 2;
-    ULONG center_y = g_drawport->GetHeight() / 2;
+    ULONG center_x = g_resolution_width / 2;
+    ULONG center_y = g_resolution_height / 2;
 
     switch (_align->align_x) {
     case -2:
@@ -75,7 +76,7 @@ void PositionSystem::updateAlign(component_position* _position, component_align*
 
 void PositionSystem::update(SEEntity* entity)
 {
-    if (g_vresolution_width != g_drawport->GetWidth() || g_vresolution_height != g_drawport->GetHeight()) {
+    if (g_virtual_resolution_width != g_resolution_width || g_virtual_resolution_height != g_resolution_height) {
         component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
         component_align* align = dynamic_cast<component_align*>((SEEntity*)entity);
 
@@ -89,8 +90,8 @@ void PositionSystem::update(SEEntity* entity)
 
 void PositionSystem::postupdate()
 {
-    if (g_vresolution_width != g_drawport->GetWidth() || g_vresolution_height != g_drawport->GetHeight()) {
-        g_vresolution_width = g_drawport->GetWidth();
-        g_vresolution_height = g_drawport->GetHeight();
+    if (g_virtual_resolution_width != g_resolution_width || g_virtual_resolution_height != g_resolution_height) {
+        g_virtual_resolution_width = g_resolution_width;
+        g_virtual_resolution_height = g_resolution_height;
     }
 }

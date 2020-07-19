@@ -27,29 +27,32 @@ private:
     int64_t tloop2;
     FLOAT count_fps = 0;
 
+    CDrawPort* dp = NULL;
+    CViewPort* vp = NULL;
+
 public:
     void preinit() override {}
     void init(SEEntity* entity) override;
     void postinit() override {}
 
-    void init_window(component_window* _window, component_position* _position);
+    void initWindow(component_window* _window);
 
     void preupdate() override;
     void update(SEEntity* entity) override;
     void postupdate() override;
 
-    void render_mouse_pos(component_mouse* _mouse);
-    void render_cursor(component_mouse* _mouse, component_texture* _texture);
-    void render_texture(component_position* _position, component_texture* _texture);
-    void render_text(component_position* _position, component_text* _text);
-    void render_button(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);
-    void render_border(component_position* _position);
-    void render_id(SEEntity* _entity, component_position* _position);
-    void render_position(component_camera* _camera);
-    void render_fps();
-    void render_world(component_camera* _camera);
+    void updateMousePos(component_mouse* _mouse);
+    void updateCursor(component_mouse* _mouse, component_texture* _texture);
+    void updateTexture(component_position* _position, component_texture* _texture);
+    void updateText(component_position* _position, component_text* _text);
+    void updateButton(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);
+    void updateBorder(component_position* _position);
+    void updateId(SEEntity* _entity, component_position* _position);
+    void updatePosition(component_camera* _camera);
+    void updateFps();
+    void updateWorld(component_camera* _camera);
 
-    void destroy_window(component_window* _window);
+    void destroyWindow(component_window* _window);
 };
 
 #endif

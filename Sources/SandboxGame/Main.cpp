@@ -41,9 +41,6 @@ CTFileName g_world_file = CTFILENAME("Levels\\TestGame.wld");
 CWorld* g_world_data = NULL;
 CTString g_gamename = "serioussammf";
 
-CDrawPort* g_drawport = NULL;
-CViewPort* g_viewport = NULL;
-
 CTFileName g_logfile = CTFILENAME("fast.log");
 CTFileStream g_logstream;
 
@@ -55,8 +52,11 @@ BOOL g_dbg_draw_position = FALSE;
 BOOL g_dbg_draw_fps = FALSE;
 BOOL g_dbg_draw_cursor = FALSE;
 
-UINT g_vresolution_width = 1920;
-UINT g_vresolution_height = 1080;
+UINT g_resolution_width = 1280;
+UINT g_resolution_height = 720;
+
+UINT g_virtual_resolution_width = 1920;
+UINT g_virtual_resolution_height = 1080;
 
 BOOL g_game_started = FALSE;
 

@@ -25,7 +25,8 @@ extern BOOL g_dbg_draw_id;
 extern BOOL g_dbg_draw_position;
 extern BOOL g_dbg_draw_fps;
 extern BOOL g_dbg_draw_cursor;
-extern CDrawPort* g_drawport;
+extern UINT g_resolution_width;
+extern UINT g_resolution_height;
 extern BOOL g_game_started;
 
 void ControlSystem::update(SEEntity* entity)
@@ -39,16 +40,16 @@ void ControlSystem::update(SEEntity* entity)
     component_camera* camera = dynamic_cast<component_camera*>((SEEntity*)entity);
 
     if (keybind)
-        control_game(keybind);
+        updateGame(keybind);
     if (mouseclick && mousefocus && action)
-        control_button(action, mousefocus, mouseclick);
+        updateButton(action, mousefocus, mouseclick);
     if (keyboard && action)
-        control_keyboard(action, keyboard);
+        updateKeyboard(action, keyboard);
     if (camera && mousedelta && keybind)
-        control_camera(camera, mousedelta, keybind);
+        updateCamera(camera, mousedelta, keybind);
 }
 
-void ControlSystem::control_button(component_action* _action,
+void ControlSystem::updateButton(component_action* _action,
     component_mousefocus* _mousefocus,
     component_mouseclick* _mouseclick)
 {
@@ -57,7 +58,7 @@ void ControlSystem::control_button(component_action* _action,
             _action->sea_action();
 }
 
-void ControlSystem::control_keyboard(component_action* _action,
+void ControlSystem::updateKeyboard(component_action* _action,
     component_keyboard* _keyboard)
 {
     if (_keyboard->kc_key == _keyboard->kc_listen_key)
@@ -65,7 +66,7 @@ void ControlSystem::control_keyboard(component_action* _action,
             _action->sea_action();
 }
 
-void ControlSystem::control_camera(component_camera* _camera,
+void ControlSystem::updateCamera(component_camera* _camera,
     component_mousedelta* _mousedelta,
     component_keybind* _keybind)
 {
@@ -111,13 +112,13 @@ void ControlSystem::control_camera(component_camera* _camera,
     if (_mousedelta->md_cursor.x) {
         FLOAT ax = _mousedelta->md_cursor.x;
         printf("Camera AX: %f\n", ax);
-        x += ax / g_drawport->GetWidth() * 360;
+        x += ax / g_resolution_width * 360;
         printf("Camera Final AX: %f\n", x);
     }
     if (_mousedelta->md_cursor.y) {
         FLOAT ay = _mousedelta->md_cursor.y;
         printf("Camera AY: %f\n", ay);
-        y += ay / g_drawport->GetHeight() * 360;
+        y += ay / g_resolution_height * 360;
         printf("Camera Final AY: %f\n", y);
     }
 
@@ -130,7 +131,7 @@ void ControlSystem::control_camera(component_camera* _camera,
     _camera->cam_rot = ANGLE3D(x, y, 0.0f);
 }
 
-void ControlSystem::control_game(component_keybind* _keybind)
+void ControlSystem::updateGame(component_keybind* _keybind)
 {
     switch (_keybind->kb_current) {
     case SE_KEYBIND_EXIT:

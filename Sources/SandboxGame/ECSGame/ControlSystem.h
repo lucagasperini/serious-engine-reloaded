@@ -31,10 +31,10 @@ public:
     void update(SEEntity* entity) override;
     void postupdate() override {}
 
-    void control_button(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick);
-    void control_keyboard(component_action* _action, component_keyboard* _keyboard);
-    void control_camera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind);
-    void control_game(component_keybind* _keybind);
+    void updateButton(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick);
+    void updateKeyboard(component_action* _action, component_keyboard* _keyboard);
+    void updateCamera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind);
+    void updateGame(component_keybind* _keybind);
 };
 
 #endif

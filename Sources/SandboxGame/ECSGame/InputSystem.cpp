@@ -19,7 +19,8 @@
 
 extern BOOL g_game_started;
 extern int SE_SDL_InputEventPoll(SDL_Event* event);
-extern CDrawPort* g_drawport;
+extern UINT g_resolution_width;
+extern UINT g_resolution_height;
 
 void InputSystem::preinit()
 {
@@ -35,9 +36,9 @@ void InputSystem::preupdate()
 {
     // get real cursor position
     GetCursorPos(&cursor);
-    if (cursor.x > g_drawport->GetWidth())
+    if (cursor.x > g_resolution_width)
         cursor.x = 0;
-    if (cursor.y > g_drawport->GetHeight())
+    if (cursor.y > g_resolution_height)
         cursor.y = 0;
 
     if (old_cursor != NULL) {
