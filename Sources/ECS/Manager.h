@@ -66,26 +66,35 @@ private:
 
     static std::thread* a_thread;
 
-    static std::condition_variable cv;
+    static std::condition_variable cv_init;
 
-    static std::mutex mutex;
-    static std::mutex mutex_update;
-    static std::mutex mutex_counter;
+    static std::mutex mutex_preupdate;
+    static std::mutex mutex_preinit;
+    static std::mutex mutex_postinit;
+    static std::mutex mutex_init;
+    static std::mutex mutex_init_counter;
+    static std::mutex mutex_postupdate;
+    static BOOL wait_init_secure;
+
 #if DEBUG_ENTITY_FILE == 1
     static std::mutex mutex_debug;
 #endif
 
-    static BOOL secure_wait;
-
     static ULONG number_init;
 
-    static ULONG number_update;
+    static BYTE** a_thread_memory;
+
+    static ULONG thread_number;
 
 public:
+    static std::condition_variable cv_update;
+    static ULONG number_update;
+    static std::mutex mutex_update;
+    static BOOL wait_update_secure;
+
     static SEEntity* getEntity();
     static SEEntity* getEntity(ULONG _id);
-
-    static SEEntity* getRandomEntity(BYTE*& _ptr, const uint64_t& _thread_flag, const BOOL& _xand);
+    static SEEntity* getEntity(BYTE*& _iter);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
@@ -95,12 +104,28 @@ public:
 
     static void grow(ULONG _new);
 
-    static void init(ULONG _system, uint64_t _thread_flag, BOOL _xand);
-    static void update(ULONG _system, uint64_t _thread_flag, BOOL _xand);
+    static void init(BYTE* _start_ptr, ULONG _number);
+    static void update(BYTE* _start_ptr, ULONG _number);
+
+    static inline void setThreadNumber(ULONG _thread_number)
+    {
+        if (a_thread)
+            delete[] a_thread;
+        if (a_thread_memory)
+            delete[] a_thread_memory;
+
+        thread_number = _thread_number;
+        a_thread = new std::thread[thread_number];
+        a_thread_memory = new BYTE*[thread_number];
+    }
+    static inline ULONG getThreadNumber() { return thread_number; }
+
+    static void splitThreadMemory();
 
     static void run();
+    static void quit();
 
-    static void threadUpdate(ULONG _system);
+    static void runThread(BYTE* _start_ptr, ULONG _number);
 
     static inline void resetEntityIter() { mem_iter = a_entity; }
 

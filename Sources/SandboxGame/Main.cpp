@@ -49,8 +49,6 @@ extern CTString g_gamename;
 extern CTFileName g_world_file;
 extern CWorld* g_world_data;
 
-extern ECSManager* g_manager;
-
 SEMainWindow* main_win = NULL;
 static char* argv0 = NULL;
 
@@ -81,6 +79,86 @@ void g_resolution_change(UINT _w, UINT _h)
     }
 }
 
+BOOL init(CTString _cmdline)
+{
+    // display mode settings
+    ULONG win_flags = SE_MAINWINDOW_FLAGS_NULL;
+    GfxAPIType win_api = GfxAPIType::GAT_OGL;
+    UINT win_width = 1280;
+    UINT win_height = 720;
+    DisplayDepth win_depth = DisplayDepth::DD_32BIT;
+    INDEX win_adapter = 0;
+
+    // list of possible display modes for recovery
+    const INDEX m_win_fb_mode[][SER_WINDOW_FALLBACK_COUNT] = {
+        // color, API, adapter
+        { DD_DEFAULT, GAT_OGL, 0 },
+        { DD_16BIT, GAT_OGL, 0 },
+        { DD_16BIT, GAT_OGL, 1 }, // 3dfx Voodoo2
+    };
+
+    SESplashScreen splashscreen;
+    splashscreen.setBitmap("Splash.bmp");
+
+    main_win = new SEMainWindow();
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) {
+        FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SDL_GetError());
+        return FALSE;
+    }
+
+    SDL_Init(SDL_INIT_JOYSTICK); // don't care if this fails.
+
+    splashscreen.show();
+
+    // parse command line before initializing engine
+    // TODO: Maybe add this in future
+    // ParseCommandLine(_cmdline);
+
+    // initialize engine
+    SE_InitEngine(argv0, g_gamename);
+
+    SE_LoadDefaultFonts();
+
+    // initialize sound library
+    snd_iFormat = Clamp(snd_iFormat, (INDEX)CSoundLibrary::SF_NONE, (INDEX)CSoundLibrary::SF_44100_16);
+    _pSound->SetFormat((enum CSoundLibrary::SoundFormat)snd_iFormat);
+
+    // apply application mode
+    main_win->setTitle(g_gamename);
+    main_win->setW(win_width);
+    main_win->setH(win_height);
+    main_win->setDepth(DisplayDepth::DD_DEFAULT);
+    main_win->setAdapter(win_adapter);
+    BOOL result = main_win->create();
+
+    if (!result) {
+        main_win->setW(SE_WINDOW_RECOVERY_W);
+        main_win->setH(SE_WINDOW_RECOVERY_H);
+        for (int i = 0; i < SER_WINDOW_FALLBACK_COUNT; i++) {
+            main_win->setDepth((DisplayDepth)m_win_fb_mode[i][0]);
+            main_win->setAPI((GfxAPIType)m_win_fb_mode[i][1]);
+            main_win->setAdapter(m_win_fb_mode[i][2]);
+            CPrintF(TRANSV("\nTrying recovery mode %d...\n"), i);
+            result = main_win->create();
+            if (result)
+                break;
+        }
+    }
+    // if all failed
+    if (!result) {
+        FatalError(TRANS(
+            "Cannot set display mode!\n"
+            "Serious Sam was unable to find display mode with hardware acceleration.\n"
+            "Make sure you install proper drivers for your video card as recommended\n"
+            "in documentation and set your desktop to 16 bit (65536 colors).\n"
+            "Please see ReadMe file for troubleshooting information.\n"));
+    }
+
+    splashscreen.hide();
+
+    return TRUE;
+}
+
 /*
 CImageInfo iiImageInfo;
    iiImageInfo.LoadAnyGfxFormat_t( fntex);
@@ -98,28 +176,17 @@ CImageInfo iiImageInfo;
 
 int submain(char* _cmdline)
 {
-    //if (!init(_cmdline))
-    //    return FALSE;
-    SESplashScreen splashscreen;
-    splashscreen.setBitmap("Splash.bmp");
-    splashscreen.show();
-
-    // initialize engine
-    SE_InitEngine(argv0, g_gamename);
-
-    SE_LoadDefaultFonts();
-
-    g_logstream.Open_t(g_logfile, CTStream::OM_WRITETEXT);
+    if (!init(_cmdline))
+        return FALSE;
 
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
-    // initialize sound library
-    snd_iFormat = Clamp(snd_iFormat, (INDEX)CSoundLibrary::SF_NONE, (INDEX)CSoundLibrary::SF_44100_16);
-    _pSound->SetFormat((enum CSoundLibrary::SoundFormat)snd_iFormat);
-
-    g_manager = new ECSManager();
     load_all_game_system();
     load_all_game_entity();
+
+    ULONG number_thread = 4;
+    ECSManager::setThreadNumber(number_thread);
+    ECSManager::splitThreadMemory();
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
@@ -134,11 +201,48 @@ int submain(char* _cmdline)
     int64_t ticks = 0;
 
     g_game_started = TRUE;
-    splashscreen.hide();
+
+    FLOAT count_fps = 0.0f;
+    RenderSystem* render_system = new RenderSystem;
 
     // start of game loop
-    g_manager->run();
+    ECSManager::run();
+    while (g_game_started) {
+        {
+            //TODO: What's the sense of calculate Milliseconds with a signed int???
+            tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+            if (!g_drawport->Lock()) {
+                //FIXME: Add some stop render flag.
+                return FALSE;
+            }
+            // clear z-buffer
+            g_drawport->FillZBuffer(ZBUF_BACK);
+            g_drawport->Fill(C_BLACK | 0xff);
+        }
 
+        while (ECSManager::number_update < number_thread) {
+        }
+
+        while (SEEntity* entity = ECSManager::getEntity()) {
+            render_system->update(entity);
+        }
+
+        {
+            g_drawport->Unlock();
+            g_viewport->SwapBuffers();
+            tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+            //TODO: Maybe do this 1 time at second, or render the value 1 time at second.
+            if (tloop2 - tloop1)
+                count_fps = 1000 / ((FLOAT)(tloop2 - tloop1));
+            else
+                count_fps = 0.0f;
+        }
+
+        ECSManager::number_update = 0;
+        ECSManager::wait_update_secure = FALSE;
+        ECSManager::cv_update.notify_all();
+    }
+    ECSManager::quit();
     return TRUE;
 }
 

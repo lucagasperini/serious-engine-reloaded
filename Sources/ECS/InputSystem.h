@@ -38,7 +38,7 @@ public:
 
     void preupdate() override;
     void update(SEEntity* entity) override;
-    void postupdate() override;
+    void postupdate() override {};
 };
 
 #endif

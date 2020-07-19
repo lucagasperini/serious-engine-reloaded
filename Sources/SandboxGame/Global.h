@@ -35,7 +35,7 @@ CTString g_gamename = "serioussammf";
 
 CDrawPort* g_drawport = NULL;
 CViewPort* g_viewport = NULL;
-ECSManager* g_manager = NULL;
+
 CTFileName g_logfile = CTFILENAME("fast.log");
 CTFileStream g_logstream;
 

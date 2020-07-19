@@ -74,6 +74,10 @@ BOOL SEMainWindow::create()
 
     SE_UpdateWindowHandle(pWindow);
 
+#ifndef DEBUG
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+#endif
+
     _pGfx->CreateWindowCanvas(pWindow, &g_viewport, &g_drawport);
 
     // initial screen fill and swap, just to get context running

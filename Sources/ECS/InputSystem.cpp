@@ -62,10 +62,6 @@ void InputSystem::preupdate()
     }
 }
 
-void InputSystem::postupdate()
-{
-}
-
 void InputSystem::update(SEEntity* entity)
 {
     component_keyboard* keyboard = dynamic_cast<component_keyboard*>((SEEntity*)entity);

@@ -25,7 +25,7 @@ private:
 public:
     virtual void preinit() = 0;
     virtual void init(SEEntity* entity) = 0;
-    virtual void postinit() {}
+    virtual void postinit() = 0;
 
     virtual void preupdate() = 0;
     virtual void update(SEEntity* entity) = 0;

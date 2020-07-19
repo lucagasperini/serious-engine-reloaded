@@ -18,8 +18,6 @@
 #include "ControlSystem.h"
 #include "Manager.h"
 
-extern ECSManager* g_manager;
-
 extern void g_resolution_fullscreen();
 extern void g_resolution_change(UINT w, UINT h);
 extern BOOL g_dbg_draw_border;
@@ -75,7 +73,7 @@ void ControlSystem::control_camera(component_camera* _camera,
     case SE_KEYBIND_CAMERA_RESET:
         //TODO: I dont like world_start_position as global, maybe find a workaround?
         //_camera->cam_pos = world_start_position;
-        g_manager->removeEntity(8);
+        ECSManager::removeEntity(8);
         break;
     case SE_KEYBIND_CAMERA_RIGHT:
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,

@@ -33,27 +33,10 @@ extern CWorld* g_world_data;
 
 void RenderSystem::preupdate()
 {
-    //TODO: What's the sense of calculate Milliseconds with a signed int???
-    tloop1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-    if (!g_drawport->Lock()) {
-        //FIXME: Add some stop render flag.
-        return;
-    }
-    // clear z-buffer
-    g_drawport->FillZBuffer(ZBUF_BACK);
-    g_drawport->Fill(C_BLACK | 0xff);
 }
 
 void RenderSystem::postupdate()
 {
-    g_drawport->Unlock();
-    g_viewport->SwapBuffers();
-    tloop2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-    //TODO: Maybe do this 1 time at second, or render the value 1 time at second.
-    if (tloop2 - tloop1)
-        count_fps = 1000 / ((FLOAT)(tloop2 - tloop1));
-    else
-        count_fps = 0.0f;
 }
 
 void RenderSystem::render_position(component_camera* _camera)
@@ -83,54 +66,18 @@ void RenderSystem::render_fps()
 
 void RenderSystem::init(SEEntity* entity)
 {
+    /*
     component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
-    component_window* window = dynamic_cast<component_window*>((SEEntity*)entity);
-    if (window && position)
-        init_window(window, position);
 
     component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
     if (texture)
         init_texture(texture);
-}
-
-void RenderSystem::init_window(component_window* _window, component_position* _position)
-{
-    if (_window->win_pointer != NULL)
-        destroy_window(_window);
-
-    // try to set new display mode
-    _pGfx->SetDisplayMode(_window->win_api, _window->win_adapter,
-        _position->pos_w, _position->pos_h, _window->win_depth);
-
-    ULONG tmp_flags = _window->win_flags;
-
-    if (_window->win_api == GAT_OGL && !(tmp_flags & SDL_WINDOW_OPENGL))
-        tmp_flags = tmp_flags | SDL_WINDOW_OPENGL;
-
-    _window->win_pointer = SDL_CreateWindow(_window->win_title,
-        _position->pos_x, _position->pos_y,
-        _position->pos_w, _position->pos_h, tmp_flags);
-
-    if (_window->win_pointer == NULL)
-        FatalError(TRANS("Cannot open main window!"));
-
-    SE_UpdateWindowHandle(_window->win_pointer);
-
-    _pGfx->CreateWindowCanvas(_window->win_pointer, &g_viewport, &g_drawport);
-#ifndef DEBUG
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
-    // initial screen fill and swap, just to get context running
-    if (g_drawport != NULL && g_drawport->Lock()) {
-        g_drawport->Fill(C_BLACK | 255);
-        g_drawport->Unlock();
-        g_viewport->SwapBuffers();
-    }
+        */
 }
 
 void RenderSystem::init_texture(component_texture* _texture)
 {
-    _texture->tex_data.SetData_t(_texture->tex_file);
+    // _texture->tex_data.SetData_t(_texture->tex_file);
 }
 
 void RenderSystem::update(SEEntity* entity)
@@ -258,18 +205,4 @@ void RenderSystem::render_world(component_camera* _camera)
     prProjection->ViewerPlacementL() = plCamera;
     // render the view
     RenderView(*g_world_data, *(CEntity*)NULL, prProjection, *g_drawport);
-}
-
-void RenderSystem::destroy_window(component_window* _window)
-{
-    if (g_viewport != NULL) {
-        _pGfx->DestroyWindowCanvas(g_viewport);
-        g_viewport = NULL;
-    }
-    // if window exists
-    if (_window->win_pointer != NULL) {
-        // destroy it
-        SDL_DestroyWindow((SDL_Window*)_window->win_pointer);
-        _window->win_pointer = NULL;
-    }
 }
