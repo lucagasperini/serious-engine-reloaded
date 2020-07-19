@@ -265,7 +265,7 @@ endif()
 
 option(SE_DEBUG_ENTITY_FILE "Debug ECS in a file" TRUE)
 if(SE_DEBUG_ENTITY_FILE)
- add_definitions(-DDEBUG_ENTITY_FILE=1)
+ add_definitions(-DDEBUG_ENTITY_FILE=0)
 endif()
 
 include_directories(

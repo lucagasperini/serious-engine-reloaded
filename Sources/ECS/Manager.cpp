@@ -141,7 +141,9 @@ SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, const uint64_t& _thread_flag,
         // Return null
         return NULL;
     }
-
+#ifdef DEBUG_ENTITY_FILE
+    void* dbg_ptr = _ptr;
+#endif
     DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY REQUEST AT %p WITH ACCESS %u XAND %u\n", (int)log2(_thread_flag), _ptr, *((uint64_t*)_ptr), _xand);
 
     // Get the thread access list pointer
@@ -153,52 +155,50 @@ SEEntity* ECSManager::getRandomEntity(BYTE*& _ptr, const uint64_t& _thread_flag,
         BYTE* obj_flag_ptr = _ptr + sizeof(uint64_t);
 
         // If this object is locked by another thread, skip
-        if (!((*obj_flag_ptr) & SER_ECS_ENTITY_FLAG_LOCKED)) {
-            // Set this object as locked
-            memset(obj_flag_ptr, (*obj_flag_ptr) | SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
+        //if (!((*obj_flag_ptr) & SER_ECS_ENTITY_FLAG_LOCKED)) {
+        // Set this object as locked
+        //memset(obj_flag_ptr, (*obj_flag_ptr) | SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
 
-            // Write new thread access list
-            if (_xand)
-                // Remove 1 at bit position (2 ^ thread_number)
-                *thread_access_ptr = *thread_access_ptr ^ _thread_flag;
-            else
-                // Add 1 at bit position (2 ^ thread_number)
-                *thread_access_ptr = *thread_access_ptr | _thread_flag;
+        // Write new thread access list
+        if (_xand)
+            // Remove 1 at bit position (2 ^ thread_number)
+            *thread_access_ptr = *thread_access_ptr ^ _thread_flag;
+        else
+            // Add 1 at bit position (2 ^ thread_number)
+            *thread_access_ptr = *thread_access_ptr | _thread_flag;
 
-            // Go ahead with the pointer by 9 byte
-            _ptr += sizeof(uint64_t);
-            _ptr += sizeof(BYTE);
+        // Go ahead with the pointer by 9 byte
+        _ptr += sizeof(uint64_t);
+        _ptr += sizeof(BYTE);
 
-            // Read the size of this object
-            ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
-            _ptr += sizeof(ULONG);
+        // Read the size of this object
+        ULONG* obj_size_ptr = (ULONG*)_ptr;
+        _ptr += sizeof(ULONG);
 
-            // Get the pointer of this object
-            SEEntity* return_ptr = (SEEntity*)_ptr;
-            // Go at next object
-            _ptr += obj_size;
+        // Get the pointer of this object
+        SEEntity* return_ptr = (SEEntity*)_ptr;
+        // Go at next object
+        _ptr += *obj_size_ptr;
 
-            // Unlock this object
-            memset(obj_flag_ptr, (*obj_flag_ptr) ^ SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
+        // Unlock this object
+        //memset(obj_flag_ptr, (*obj_flag_ptr) ^ SER_ECS_ENTITY_FLAG_LOCKED, sizeof(BYTE));
 
-            DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY RETURN AT %p SIZE %u\n", (int)log2(_thread_flag), return_ptr, obj_size);
-            // Return the pointer of this object
-            return return_ptr;
-        }
+        DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY RETURN FROM %p AT %p SIZE %u WITH ACCESS %u XAND %u\n", (int)log2(_thread_flag), dbg_ptr, return_ptr, *obj_size_ptr, *thread_access_ptr, _xand);
+        // Return the pointer of this object
+        return return_ptr;
+        //}
     }
-#ifdef DEBUG_ENTITY_FILE
-    void* dbg_ptr = _ptr;
-#endif
+
     // Go ahead with the pointer by 9 byte
     _ptr += sizeof(uint64_t);
     _ptr += sizeof(BYTE);
     // Read the size of this object
-    ULONG obj_size = (ULONG) * ((ULONG*)_ptr);
+    ULONG* obj_size_ptr = (ULONG*)_ptr;
     // Go at next object
     _ptr += sizeof(ULONG);
-    _ptr += obj_size;
+    _ptr += *obj_size_ptr;
 
-    DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p AT %p SIZE %u WITH XAND %u\n", (int)log2(_thread_flag), _ptr, dbg_ptr, obj_size, _xand);
+    DEBUG_ECS_FILE("DEBUG: THREAD %i ENTITY SKIP FROM %p SIZE %u WITH ACCESS %u XAND %u\n", (int)log2(_thread_flag), dbg_ptr, *obj_size_ptr, *thread_access_ptr, _xand);
 
     // Return null pointer
     return NULL;
@@ -270,6 +270,7 @@ void ECSManager::init(ULONG _system, BOOL _xand)
 #else
     uint64_t thread_flag = 0x1;
 #endif
+    a_system[_system]->preinit();
     while (counter < entity_counter) {
         SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag, _xand);
         if (entity) {
@@ -313,10 +314,9 @@ void ECSManager::threadUpdate(ULONG _system)
     }
 
     //number_init = 0;
-    BOOL xand = FALSE;
+    BOOL xand = TRUE;
     while (g_game_started) {
         DEBUG_ECS_FILE("DEBUG: THREAD %i START UPDATE NUMBER %i\n", _system, number_update);
-        xand = !xand;
         update(_system, xand);
         {
             std::lock_guard<std::mutex> lck(mutex_counter);
@@ -336,6 +336,8 @@ void ECSManager::threadUpdate(ULONG _system)
             std::unique_lock<std::mutex> lck(mutex_update);
             while (secure_wait)
                 cv.wait(lck);
+
+            xand = !xand;
         }
     }
 }
