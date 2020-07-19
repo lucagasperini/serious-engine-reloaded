@@ -129,7 +129,9 @@ int submain(char* _cmdline)
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
-    while (SEEntity* entity = ECSManager::getEntity()) {
+    BYTE* tmp_ptr = ECSManager::getFirst();
+
+    while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
         render_system->init(entity);
     }
 
@@ -152,7 +154,8 @@ int submain(char* _cmdline)
 
         render_system->preupdate();
 
-        while (SEEntity* entity = ECSManager::getEntity()) {
+        tmp_ptr = ECSManager::getFirst();
+        while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
             render_system->update(entity);
         }
 

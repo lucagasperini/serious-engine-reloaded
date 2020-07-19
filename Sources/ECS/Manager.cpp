@@ -25,22 +25,11 @@ ULONG ECSManager::entity_counter = 0;
 BYTE* ECSManager::a_entity = NULL;
 ULONG ECSManager::mem_entity_max = 0;
 BYTE* ECSManager::mem_alloc = NULL;
-BYTE* ECSManager::mem_iter = NULL;
 ULONG ECSManager::system_counter = 0;
 SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* ECSManager::a_thread = NULL;
-#if DEBUG_ENTITY_FILE == 1
-std::mutex ECSManager::mutex_debug;
-#endif
 std::mutex ECSManager::mutex_preupdate;
-std::mutex ECSManager::mutex_preinit;
-std::mutex ECSManager::mutex_postinit;
-std::mutex ECSManager::mutex_init;
-std::mutex ECSManager::mutex_init_counter;
 std::mutex ECSManager::mutex_postupdate;
-std::condition_variable ECSManager::cv_init;
-ULONG ECSManager::number_init = 0;
-BOOL ECSManager::wait_init_secure = TRUE;
 BYTE** ECSManager::a_thread_memory = NULL;
 ULONG ECSManager::thread_number = 0;
 
@@ -77,37 +66,20 @@ void ECSManager::grow(ULONG _add)
     memset(a_entity, 0, mem_entity_max);
 
     mem_alloc = a_entity;
-    mem_iter = a_entity;
 }
 
 void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
 {
     _entity->id = entity_counter++;
 
-#ifdef DEBUG_ENTITY_FILE
-    void* dbg_ptr = mem_alloc;
-#endif
+    memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
+    mem_alloc += sizeof(BYTE);
+
     memcpy(mem_alloc, &_size, sizeof(ULONG));
     mem_alloc += sizeof(ULONG);
 
     memcpy(mem_alloc, _entity, _size);
     mem_alloc += _size;
-}
-
-SEEntity* ECSManager::getEntity()
-{
-    if (mem_iter >= mem_alloc) {
-        resetEntityIter();
-        return NULL;
-    }
-
-    ULONG* obj_size_ptr = (ULONG*)mem_iter;
-    mem_iter += sizeof(ULONG);
-
-    SEEntity* return_ptr = (SEEntity*)mem_iter;
-    mem_iter += *obj_size_ptr;
-
-    return return_ptr;
 }
 
 SEEntity* ECSManager::getEntity(BYTE*& _iter)
@@ -116,6 +88,13 @@ SEEntity* ECSManager::getEntity(BYTE*& _iter)
         _iter = a_entity;
         return NULL;
     }
+
+    if (*_iter ^ SER_ECS_ENTITY_FLAG_ALLOC) {
+        _iter += *((ULONG*)_iter + sizeof(BYTE)) + sizeof(BYTE);
+        return getEntity(_iter);
+    }
+
+    _iter += sizeof(BYTE);
 
     ULONG* obj_size_ptr = (ULONG*)_iter;
     _iter += sizeof(ULONG);
@@ -128,7 +107,8 @@ SEEntity* ECSManager::getEntity(BYTE*& _iter)
 
 SEEntity* ECSManager::getEntity(ULONG _id)
 {
-    while (SEEntity* entity = getEntity()) {
+    BYTE* tmp_ptr = a_entity;
+    while (SEEntity* entity = getEntity(tmp_ptr)) {
         if (entity->id == _id)
             return entity;
     }
@@ -137,7 +117,8 @@ SEEntity* ECSManager::getEntity(ULONG _id)
 
 void ECSManager::removeEntity(ULONG _id)
 {
-    while (SEEntity* entity = getEntity()) {
+    BYTE* tmp_ptr = a_entity;
+    while (SEEntity* entity = getEntity(tmp_ptr)) {
         if (entity->id == _id) {
             removeEntity(entity);
             return;
@@ -149,6 +130,18 @@ void ECSManager::removeEntity(SEEntity* _entity)
 {
     BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
     memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
+}
+
+void ECSManager::setThreadNumber(ULONG _thread_number)
+{
+    if (a_thread)
+        delete[] a_thread;
+    if (a_thread_memory)
+        delete[] a_thread_memory;
+
+    thread_number = _thread_number;
+    a_thread = new std::thread[thread_number];
+    a_thread_memory = new BYTE*[thread_number];
 }
 
 void ECSManager::splitThreadMemory()

@@ -45,10 +45,6 @@ private:
     // Start at a_entity and jump for sizeof(ULONG) + objsize
     // Where: objsize is the size of an entity
     static BYTE* mem_alloc;
-    // Pointer for iterations
-    // Start at a_entity and jump for sizeof(ULONG) + objsize
-    // Where: objsize is the size of an entity
-    static BYTE* mem_iter;
 
     static ULONG system_counter;
 
@@ -56,21 +52,8 @@ private:
 
     static std::thread* a_thread;
 
-    static std::condition_variable cv_init;
-
     static std::mutex mutex_preupdate;
-    static std::mutex mutex_preinit;
-    static std::mutex mutex_postinit;
-    static std::mutex mutex_init;
-    static std::mutex mutex_init_counter;
     static std::mutex mutex_postupdate;
-    static BOOL wait_init_secure;
-
-#if DEBUG_ENTITY_FILE == 1
-    static std::mutex mutex_debug;
-#endif
-
-    static ULONG number_init;
 
     static BYTE** a_thread_memory;
 
@@ -82,9 +65,9 @@ public:
     static std::mutex mutex_update;
     static BOOL wait_update_secure;
 
-    static SEEntity* getEntity();
     static SEEntity* getEntity(ULONG _id);
     static SEEntity* getEntity(BYTE*& _iter);
+    static inline BYTE* getFirst() { return a_entity; }
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
@@ -97,17 +80,7 @@ public:
     static void init(BYTE* _start_ptr);
     static void update(BYTE* _start_ptr, ULONG _number);
 
-    static inline void setThreadNumber(ULONG _thread_number)
-    {
-        if (a_thread)
-            delete[] a_thread;
-        if (a_thread_memory)
-            delete[] a_thread_memory;
-
-        thread_number = _thread_number;
-        a_thread = new std::thread[thread_number];
-        a_thread_memory = new BYTE*[thread_number];
-    }
+    static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }
 
     static void splitThreadMemory();
@@ -116,8 +89,6 @@ public:
     static void quit();
 
     static void runThread(BYTE* _start_ptr, ULONG _number);
-
-    static inline void resetEntityIter() { mem_iter = a_entity; }
 
     static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(SESystem* _system);

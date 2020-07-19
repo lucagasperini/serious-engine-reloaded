@@ -27,8 +27,8 @@ public:
     void init(SEEntity* entity) override {}
     void postinit() override {}
 
-    void init_scale(component_position* _position);
-    void init_align(component_position* _position, component_align* _align);
+    void updateScale(component_position* _position);
+    void updateAlign(component_position* _position, component_align* _align);
 
     void preupdate() override {}
     void update(SEEntity* entity) override;

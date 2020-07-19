@@ -21,7 +21,7 @@ extern CDrawPort* g_drawport;
 extern UINT g_vresolution_width;
 extern UINT g_vresolution_height;
 
-void PositionSystem::init_scale(component_position* _position)
+void PositionSystem::updateScale(component_position* _position)
 {
     FLOAT scaleX = (FLOAT)g_drawport->GetWidth() / (FLOAT)g_vresolution_width;
     FLOAT scaleY = (FLOAT)g_drawport->GetHeight() / (FLOAT)g_vresolution_height;
@@ -32,7 +32,7 @@ void PositionSystem::init_scale(component_position* _position)
     _position->pos_h = (FLOAT)_position->pos_h * scaleY;
 }
 
-void PositionSystem::init_align(component_position* _position, component_align* _align)
+void PositionSystem::updateAlign(component_position* _position, component_align* _align)
 {
     ULONG center_x = g_drawport->GetWidth() / 2;
     ULONG center_y = g_drawport->GetHeight() / 2;
@@ -80,10 +80,10 @@ void PositionSystem::update(SEEntity* entity)
         component_align* align = dynamic_cast<component_align*>((SEEntity*)entity);
 
         if (position)
-            init_scale(position);
+            updateScale(position);
 
         if (position && align)
-            init_align(position, align);
+            updateAlign(position, align);
     }
 }
 
