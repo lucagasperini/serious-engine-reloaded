@@ -246,14 +246,15 @@ void ECSManager::run()
     for (ULONG i = 0; i < system_counter; i++)
         a_thread[i].join();
 #else
+    uint64_t thread_flag = 0x1;
     BOOL xand = FALSE;
     for (ULONG i = 0; i < system_counter; i++) {
-        init(i, xand);
+        init(i, thread_flag, xand);
         xand = !xand;
     }
     while (g_game_started) {
         for (ULONG i = 0; i < system_counter; i++) {
-            update(i, xand);
+            update(i, thread_flag, xand);
             xand = !xand;
         }
     }
@@ -261,7 +262,7 @@ void ECSManager::run()
     g_logstream.Close();
 }
 
-void ECSManager::init(ULONG _system, BOOL _xand)
+void ECSManager::init(ULONG _system, uint64_t _thread_flag, BOOL _xand)
 {
     ULONG counter = 0;
     BYTE* tmp_ptr = a_entity;
@@ -272,7 +273,7 @@ void ECSManager::init(ULONG _system, BOOL _xand)
 #endif
     a_system[_system]->preinit();
     while (counter < entity_counter) {
-        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag, _xand);
+        SEEntity* entity = getRandomEntity(tmp_ptr, _thread_flag, _xand);
         if (entity) {
             counter++;
             a_system[_system]->init(entity);
@@ -281,19 +282,14 @@ void ECSManager::init(ULONG _system, BOOL _xand)
     a_system[_system]->postinit();
 }
 
-void ECSManager::update(ULONG _system, BOOL _xand)
+void ECSManager::update(ULONG _system, uint64_t _thread_flag, BOOL _xand)
 {
     ULONG counter = 0;
     BYTE* tmp_ptr = a_entity;
-#ifdef SE_MULTITHREADING_MODE
-    uint64_t thread_flag = (int64_t)pow(2, _system);
-#else
-    uint64_t thread_flag = 0x1;
-#endif
 
     a_system[_system]->preupdate();
     while (counter < entity_counter) {
-        SEEntity* entity = getRandomEntity(tmp_ptr, thread_flag, _xand);
+        SEEntity* entity = getRandomEntity(tmp_ptr, _thread_flag, _xand);
         if (entity) {
             counter++;
             a_system[_system]->update(entity);
@@ -304,7 +300,9 @@ void ECSManager::update(ULONG _system, BOOL _xand)
 
 void ECSManager::threadUpdate(ULONG _system)
 {
-    init(_system, FALSE);
+    uint64_t thread_flag = (int64_t)pow(2, _system);
+
+    init(_system, thread_flag, FALSE);
     {
         std::lock_guard<std::mutex> ul(mutex);
         number_init++;
@@ -317,7 +315,7 @@ void ECSManager::threadUpdate(ULONG _system)
     BOOL xand = TRUE;
     while (g_game_started) {
         DEBUG_ECS_FILE("DEBUG: THREAD %i START UPDATE NUMBER %i\n", _system, number_update);
-        update(_system, xand);
+        update(_system, thread_flag, xand);
         {
             std::lock_guard<std::mutex> lck(mutex_counter);
 

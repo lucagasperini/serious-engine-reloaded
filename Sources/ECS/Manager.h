@@ -95,8 +95,8 @@ public:
 
     static void grow(ULONG _new);
 
-    static void init(ULONG _system, BOOL _xand);
-    static void update(ULONG _system, BOOL _xand);
+    static void init(ULONG _system, uint64_t _thread_flag, BOOL _xand);
+    static void update(ULONG _system, uint64_t _thread_flag, BOOL _xand);
 
     static void run();
 
