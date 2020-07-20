@@ -27,7 +27,8 @@
 #include <Engine/Math/Projection.h>
 #include <Engine/Math/Vector.h>
 
-#define SE_ECS_KEYBIND_MAX 256
+#define SER_KEYBIND_MAX 1024
+#define SER_EVENT_MAX 1024
 
 #define SE_KEYBIND_NULL 0x00
 #define SE_KEYBIND_EXIT 0x01
@@ -48,6 +49,27 @@
 #define SE_KEYBIND_RESOLUTION_SVGA 0xF2
 #define SE_KEYBIND_RESOLUTION_WXGA 0xF3
 #define SE_KEYBIND_RESOLUTION_HD 0xF4
+
+#define SER_EVENT_NULL 0x00000000
+#define SER_EVENT_EXIT 0x01
+#define SER_EVENT_DEBUG_BORDER 0xD0
+#define SER_EVENT_DEBUG_ENTITYID 0xD1
+#define SER_EVENT_DEBUG_POSITION 0xD2
+#define SER_EVENT_DEBUG_FPS 0xD3
+#define SER_EVENT_DEBUG_CURSOR 0xD4
+#define SER_EVENT_CAMERA_RESET 0xC0
+#define SER_EVENT_CAMERA_RIGHT 0xC1
+#define SER_EVENT_CAMERA_LEFT 0xC2
+#define SER_EVENT_CAMERA_FORWARD 0xC3
+#define SER_EVENT_CAMERA_BACK 0xC4
+#define SER_EVENT_CAMERA_UP 0xC5
+#define SER_EVENT_CAMERA_DOWN 0xC6
+#define SER_EVENT_FULLSCREEN 0xF0
+#define SER_EVENT_RESOLUTION_VGA 0xF1
+#define SER_EVENT_RESOLUTION_SVGA 0xF2
+#define SER_EVENT_RESOLUTION_WXGA 0xF3
+#define SER_EVENT_RESOLUTION_HD 0xF4
+#define SER_EVENT_SCALE_UI 0xF5
 
 struct component_window : component {
     CTString win_title;
@@ -107,11 +129,6 @@ struct component_text : component {
     CTString txt_str;
 };
 
-struct component_keyboard : component {
-    ULONG kc_key = 0;
-    ULONG kc_listen_key = 0;
-};
-
 struct component_mouseclick : component {
     ULONG mc_button = 0;
 };
@@ -122,11 +139,6 @@ struct component_camera : component {
     FLOAT3D cam_pos;
     ANGLE3D cam_rot;
     ANGLE cam_fov = 90.0f;
-};
-
-struct component_keybind : component {
-    ULONG kb_keybind[SE_ECS_KEYBIND_MAX];
-    ULONG kb_current = SE_KEYBIND_NULL;
 };
 
 struct component_mouse : component {

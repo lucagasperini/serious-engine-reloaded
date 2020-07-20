@@ -21,6 +21,7 @@ extern UINT g_resolution_width;
 extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
+extern BOOL g_event_current;
 
 void PositionSystem::updateScale(component_position* _position)
 {
@@ -74,24 +75,17 @@ void PositionSystem::updateAlign(component_position* _position, component_align*
     }
 }
 
-void PositionSystem::update(SEEntity* entity)
+void PositionSystem::trigger(SEEntity* _entity, UINT _event)
 {
-    if (g_virtual_resolution_width != g_resolution_width || g_virtual_resolution_height != g_resolution_height) {
-        component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
-        component_align* align = dynamic_cast<component_align*>((SEEntity*)entity);
+    if (_event == SER_EVENT_SCALE_UI) {
+
+        component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
+        component_align* align = dynamic_cast<component_align*>((SEEntity*)_entity);
 
         if (position)
             updateScale(position);
 
         if (position && align)
             updateAlign(position, align);
-    }
-}
-
-void PositionSystem::postupdate()
-{
-    if (g_virtual_resolution_width != g_resolution_width || g_virtual_resolution_height != g_resolution_height) {
-        g_virtual_resolution_width = g_resolution_width;
-        g_virtual_resolution_height = g_resolution_height;
     }
 }

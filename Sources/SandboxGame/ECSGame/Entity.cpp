@@ -33,7 +33,7 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Entity.h"
-#include "ControlSystem.h"
+#include "EventSystem.h"
 #include "InputSystem.h"
 #include "PositionSystem.h"
 #include <ECS/Manager.h>
@@ -64,13 +64,16 @@ void quitgame()
 
 void load_all_game_system()
 {
-
+    EventSystem* event_system = new EventSystem;
+    ECSManager::addSystem((SESystem*)event_system);
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);
+    /*
     InputSystem* input_system = new InputSystem;
     ECSManager::addSystem((SESystem*)input_system);
     ControlSystem* control_system = new ControlSystem;
     ECSManager::addSystem((SESystem*)control_system);
+    */
 }
 
 void load_all_game_entity()
@@ -98,8 +101,7 @@ void load_all_game_entity()
     entity_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
     ECSManager::addEntity((SEEntity*)entity_window, sizeof(main_window));
 
-    GameControl* game_control = new GameControl;
-    memset(game_control->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
+    /*
     game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
     game_control->kb_keybind[SE_KEYBIND_FULLSCREEN] = SDLK_F1;
     game_control->kb_keybind[SE_KEYBIND_RESOLUTION_VGA] = SDLK_F2;
@@ -111,13 +113,13 @@ void load_all_game_entity()
     game_control->kb_keybind[SE_KEYBIND_DEBUG_POSITION] = SDLK_F8;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_FPS] = SDLK_F9;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_CURSOR] = SDLK_F10;
-    ECSManager::addEntity((SEEntity*)game_control, sizeof(GameControl));
+    */
 
     Camera* camera = new Camera();
     camera->cam_fov = 90.0f;
     camera->cam_pos = world_start_position;
     camera->cam_rot = world_start_rotation;
-    camera->cam_speed = 1.0f;
+    camera->cam_speed = 1.0f; /*
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F12;
     camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;
@@ -125,7 +127,7 @@ void load_all_game_entity()
     camera->kb_keybind[SE_KEYBIND_CAMERA_FORWARD] = SDLK_UP;
     camera->kb_keybind[SE_KEYBIND_CAMERA_BACK] = SDLK_DOWN;
     camera->kb_keybind[SE_KEYBIND_CAMERA_UP] = SDLK_SPACE;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;
+    camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;*/
     ECSManager::addEntity(camera, sizeof(Camera));
 
     mouse_texture* e_mouse_texture = new mouse_texture;

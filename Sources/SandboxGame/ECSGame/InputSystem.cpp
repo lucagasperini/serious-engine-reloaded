@@ -18,76 +18,41 @@
 #include "InputSystem.h"
 
 extern BOOL g_game_started;
-extern int SE_SDL_InputEventPoll(SDL_Event* event);
 extern UINT g_resolution_width;
 extern UINT g_resolution_height;
+extern UINT g_event_current;
+extern POINT g_cursor_position;
+extern UINT g_press_key;
+extern UINT g_press_button;
 
 void InputSystem::preinit()
 {
-    key = 0;
-    button = 0;
-    cursor.x = 0;
-    cursor.y = 0;
     deltacursor.x = 0;
     deltacursor.y = 0;
 }
 
-void InputSystem::preupdate()
+void InputSystem::update(SEEntity* entity)
 {
-    // get real cursor position
-    GetCursorPos(&cursor);
-    if (cursor.x > g_resolution_width)
-        cursor.x = 0;
-    if (cursor.y > g_resolution_height)
-        cursor.y = 0;
-
     if (old_cursor != NULL) {
-        deltacursor.x = (old_cursor->x - cursor.x);
-        deltacursor.y = (old_cursor->y - cursor.y);
+        deltacursor.x = (old_cursor->x - g_cursor_position.x);
+        deltacursor.y = (old_cursor->y - g_cursor_position.y);
     } else {
         old_cursor = new POINT();
     }
-    old_cursor->x = cursor.x;
-    old_cursor->y = cursor.y;
-
-    while (SE_SDL_InputEventPoll(&event)) {
-        if (event.type == SDL_QUIT) {
-            g_game_started = FALSE;
-        }
-        if (event.type == SDL_KEYDOWN) {
-            key = event.key.keysym.sym;
-        }
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-            button = event.button.button;
-        }
-    }
-}
-
-void InputSystem::update(SEEntity* entity)
-{
-    component_keyboard* keyboard = dynamic_cast<component_keyboard*>((SEEntity*)entity);
-    if (keyboard)
-        keyboard->kc_listen_key = key;
-    component_keybind* keybind = dynamic_cast<component_keybind*>((SEEntity*)entity);
-    if (keybind) {
-        // Reset current keybind first
-        keybind->kb_current = SE_KEYBIND_NULL;
-        for (ULONG i = 1; i < SE_ECS_KEYBIND_MAX; i++) {
-            if (keybind->kb_keybind[i] == key && key != 0) {
-                keybind->kb_current = i;
-                break;
-            }
-        }
-    }
+    old_cursor->x = g_cursor_position.x;
+    old_cursor->y = g_cursor_position.y;
 
     component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)entity);
     if (mouse)
-        mouse->mouse_cursor = cursor;
+        mouse->mouse_cursor = g_cursor_position;
 
     component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
     component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
     if (position && mousefocus) {
-        if (position->pos_x < cursor.x && position->pos_y < cursor.y && position->pos_x + position->pos_w > cursor.x && position->pos_y + position->pos_h > cursor.y) {
+        if (position->pos_x < g_cursor_position.x
+            && position->pos_y < g_cursor_position.y
+            && position->pos_x + position->pos_w > g_cursor_position.x
+            && position->pos_y + position->pos_h > g_cursor_position.y) {
             mousefocus->mf_focus = TRUE;
         } else {
             mousefocus->mf_focus = FALSE;
@@ -96,7 +61,7 @@ void InputSystem::update(SEEntity* entity)
 
     component_mouseclick* mouseclick = dynamic_cast<component_mouseclick*>((SEEntity*)entity);
     if (mouseclick)
-        mouseclick->mc_button = button;
+        mouseclick->mc_button = g_press_button;
 
     component_mousedelta* mousedelta = dynamic_cast<component_mousedelta*>((SEEntity*)entity);
     if (mousedelta) {

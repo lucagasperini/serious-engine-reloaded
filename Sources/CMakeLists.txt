@@ -971,9 +971,8 @@ add_executable(${SANDBOXGAME}
     SandboxGame/SplashScreen.cpp
     SandboxGame/ECSGame/Entity.cpp
     SandboxGame/ECSGame/RenderSystem.cpp
-    SandboxGame/ECSGame/InputSystem.cpp
     SandboxGame/ECSGame/PositionSystem.cpp
-    SandboxGame/ECSGame/ControlSystem.cpp
+    SandboxGame/ECSGame/EventSystem.cpp
 )
 
 target_link_libraries(${SANDBOXGAME} ${SENGINELIB})

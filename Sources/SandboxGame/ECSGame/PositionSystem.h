@@ -30,9 +30,8 @@ public:
     void updateScale(component_position* _position);
     void updateAlign(component_position* _position, component_align* _align);
 
-    void preupdate() override {}
-    void update(SEEntity* entity) override;
-    void postupdate() override;
+    void update(SEEntity* _entity) override {};
+    void trigger(SEEntity* _entity, UINT _event) override;
 };
 
 #endif

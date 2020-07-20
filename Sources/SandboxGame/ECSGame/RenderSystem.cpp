@@ -30,6 +30,9 @@ extern BOOL g_dbg_draw_cursor;
 extern CWorld* g_world_data;
 extern UINT g_resolution_width;
 extern UINT g_resolution_height;
+extern UINT g_virtual_resolution_width;
+extern UINT g_virtual_resolution_height;
+extern BOOL g_game_started;
 
 void RenderSystem::preupdate()
 {
@@ -90,8 +93,9 @@ void RenderSystem::init(SEEntity* entity)
 
 void RenderSystem::initWindow(component_window* _window)
 {
-    if (_window->win_pointer != NULL)
+    if (_window->win_pointer != NULL) {
         destroyWindow(_window);
+    }
 
     // try to set new display mode
     _pGfx->SetDisplayMode(_window->win_api, _window->win_adapter,

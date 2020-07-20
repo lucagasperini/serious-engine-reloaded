@@ -25,7 +25,8 @@
 #include <mutex>
 #include <thread>
 
-#define SER_ECS_SYSTEM_MAX 64
+#define SER_ECS_SYSTEM_MAX 256
+#define SER_ECS_EVENT_MAX 256
 
 // 0000 0000
 #define SER_ECS_ENTITY_FLAG_FREE 0x00
@@ -59,6 +60,11 @@ private:
 
     static ULONG thread_number;
 
+    static UINT a_event[SER_ECS_EVENT_MAX];
+    static ULONG event_number;
+
+    static std::mutex mutex_event;
+
 public:
     static std::condition_variable cv_update;
     static ULONG number_update;
@@ -68,9 +74,14 @@ public:
     static SEEntity* getEntity(ULONG _id);
     static SEEntity* getEntity(BYTE*& _iter);
     static inline BYTE* getFirst() { return a_entity; }
+    static UINT getEvent();
+
+    static BOOL searchEvent(UINT _event);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
+    static void removeEvent(UINT _event);
+    static void removeEvent();
 
     ECSManager();
     ~ECSManager();
@@ -92,6 +103,7 @@ public:
 
     static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(SESystem* _system);
+    static void addEvent(UINT _event);
 };
 
 #endif

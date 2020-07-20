@@ -29,6 +29,8 @@
 #include "ECSGame/Entity.h"
 #include "ECSGame/RenderSystem.h"
 
+#include <thread>
+
 // FIXME: Cant compile without this global variable
 HWND _hwndMain = NULL;
 
@@ -59,52 +61,56 @@ UINT g_virtual_resolution_width = 1920;
 UINT g_virtual_resolution_height = 1080;
 
 BOOL g_game_started = FALSE;
+BOOL g_window_started = FALSE;
 
-//TODO: This two function are called on Control System, but main_win is not a global variable.
-void g_resolution_fullscreen()
+UINT g_event_current = 0;
+POINT g_cursor_position;
+UINT g_press_key;
+UINT g_press_button;
+
+UINT kb_keylist[SER_KEYBIND_MAX];
+UINT kb_eventlist[SER_KEYBIND_MAX];
+
+void fetch_input()
 {
-    /*
-    ULONG current_flags = main_win->getFlags();
-    if (current_flags & SDL_WINDOW_FULLSCREEN)
-        main_win->setFlags(current_flags ^ SDL_WINDOW_FULLSCREEN);
-    else
-        main_win->setFlags(current_flags | SDL_WINDOW_FULLSCREEN);
+    SDL_Event event;
+    while (g_game_started) {
+        g_press_key = 0;
+        // get real cursor position
+        GetCursorPos(&g_cursor_position);
+        if (g_cursor_position.x > g_resolution_width)
+            g_cursor_position.x = 0;
+        if (g_cursor_position.y > g_resolution_height)
+            g_cursor_position.y = 0;
 
-    //g_drawport->Unlock();
-    main_win->create();
-    //g_drawport->Lock();
-    */
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                g_game_started = FALSE;
+                g_window_started = FALSE;
+            }
+            if (event.type == SDL_KEYDOWN) {
+                for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
+                    if (kb_keylist[i] == event.key.keysym.sym && event.key.keysym.sym != 0) {
+                        ECSManager::addEvent(kb_eventlist[i]);
+                    }
+                }
+            }
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                g_press_button = event.button.button;
+            }
+        }
+    }
 }
 
-void g_resolution_change(UINT _w, UINT _h)
+void load_keybind()
 {
-    /*
-    if (main_win->getW() != _w || main_win->getH() != _h) {
-        g_vresolution_width = main_win->getW();
-        g_vresolution_height = main_win->getH();
-        //g_drawport->Unlock();
-        main_win->setW(_w);
-        main_win->setH(_h);
-        main_win->create();
-        //g_drawport->Lock();
-    }
-    */
+    memset(kb_eventlist, 0, sizeof(UINT) * SER_EVENT_MAX);
+    memset(kb_keylist, 0, sizeof(UINT) * SER_KEYBIND_MAX);
+    kb_eventlist[0] = SER_EVENT_RESOLUTION_HD;
+    kb_keylist[0] = SDLK_F5;
+    kb_eventlist[1] = SER_EVENT_FULLSCREEN;
+    kb_keylist[1] = SDLK_F1;
 }
-
-/*
-CImageInfo iiImageInfo;
-   iiImageInfo.LoadAnyGfxFormat_t( fntex);
-    // both dimension must be potentions of 2
-    if( (iiImageInfo.ii_Width  == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Width))) &&
-        (iiImageInfo.ii_Height == 1<<((int)Log2( (FLOAT)iiImageInfo.ii_Height))) )
-    {
-      CTFileName fnTexture = fntex.FileDir()+fntex.FileName()+".tex";
-      // creates new texture with one frame
-      CTextureData tdPicture;
-      tdPicture.Create_t( &iiImageInfo, iiImageInfo.ii_Width, 1, FALSE);
-      tdPicture.Save_t( fnTexture);
-    }
-*/
 
 int submain(char* _cmdline)
 {
@@ -123,7 +129,9 @@ int submain(char* _cmdline)
     RenderSystem* render_system = new RenderSystem;
     load_all_game_entity();
 
-    ULONG number_thread = 4;
+    load_keybind();
+
+    ULONG number_thread = 1;
     ECSManager::setThreadNumber(number_thread);
     ECSManager::splitThreadMemory();
 
@@ -131,37 +139,41 @@ int submain(char* _cmdline)
 
     BYTE* tmp_ptr = ECSManager::getFirst();
 
-    while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
-        render_system->init(entity);
-    }
-
-    g_world_data = new CWorld;
-    g_world_data->Load_t(g_world_file);
-
-    int64_t t2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-    printf("Loading time t1: %ld\n", t1 - t0);
-    printf("Loading time t2: %ld\n", t2 - t1);
-    int64_t tloop1;
-    int64_t tloop2;
-    int64_t ticks = 0;
-
+    g_window_started = TRUE;
     splashscreen.hide();
-    g_game_started = TRUE;
+    UINT event = 0;
+    ECSManager::addEvent(SER_EVENT_SCALE_UI);
 
-    // start of game loop
-    ECSManager::run();
-    while (g_game_started) {
-
-        render_system->preupdate();
-
-        tmp_ptr = ECSManager::getFirst();
+    while (g_window_started) {
         while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
-            render_system->update(entity);
+            render_system->init(entity);
         }
 
-        render_system->postupdate();
+        g_world_data = new CWorld;
+        g_world_data->Load_t(g_world_file);
+
+        int64_t t2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+        printf("Loading time t1: %ld\n", t1 - t0);
+        printf("Loading time t2: %ld\n", t2 - t1);
+        int64_t tloop1;
+        int64_t tloop2;
+        int64_t ticks = 0;
+
+        // start of game loop
+        g_game_started = TRUE;
+        std::thread input_thread = std::thread(fetch_input);
+        ECSManager::run();
+        while (g_game_started) {
+            render_system->preupdate();
+            tmp_ptr = ECSManager::getFirst();
+            while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
+                render_system->update(entity);
+            }
+            render_system->postupdate();
+        }
+        ECSManager::quit();
+        input_thread.join();
     }
-    ECSManager::quit();
     return TRUE;
 }
 

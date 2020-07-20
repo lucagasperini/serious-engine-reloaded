@@ -15,26 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_SBGAME_CONTROLSYSTEM_H
-#define SER_SBGAME_CONTROLSYSTEM_H
+#ifndef SER_SBGAME_EVENTSYSTEM_H
+#define SER_SBGAME_EVENTSYSTEM_H
 
 #include "Entity.h"
 #include <ECS/System.h>
 
-class ControlSystem : SESystem {
-public:
+class EventSystem : SESystem {
     void preinit() override {}
     void init(SEEntity* entity) override {}
     void postinit() override {}
 
-    void preupdate() override {}
-    void update(SEEntity* entity) override;
-    void postupdate() override {}
+    void update(SEEntity* entity) override {};
 
-    void updateButton(component_action* _action, component_mousefocus* _mousefocus, component_mouseclick* _mouseclick);
-    void updateKeyboard(component_action* _action, component_keyboard* _keyboard);
-    void updateCamera(component_camera* _camera, component_mousedelta* _mousedelta, component_keybind* _keybind);
-    void updateGame(component_keybind* _keybind);
+    void eventWindow(component_window* _window, UINT _event);
+    void trigger(SEEntity* _entity, UINT _event) override;
 };
 
 #endif

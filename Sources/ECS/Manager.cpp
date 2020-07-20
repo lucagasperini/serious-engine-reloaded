@@ -19,7 +19,7 @@
 #include <cmath>
 
 extern BOOL g_game_started;
-extern CTFileStream g_logstream;
+extern UINT g_event_current;
 
 ULONG ECSManager::entity_counter = 0;
 BYTE* ECSManager::a_entity = NULL;
@@ -36,11 +36,14 @@ ULONG ECSManager::thread_number = 0;
 std::condition_variable ECSManager::cv_update;
 ULONG ECSManager::number_update = 0;
 std::mutex ECSManager::mutex_update;
+std::mutex ECSManager::mutex_event;
 BOOL ECSManager::wait_update_secure = TRUE;
+
+UINT ECSManager::a_event[SER_ECS_EVENT_MAX];
+ULONG ECSManager::event_number = 0;
 
 ECSManager::ECSManager()
 {
-
     mem_entity_max = 0;
     entity_counter = 0;
     system_counter = 0;
@@ -175,9 +178,6 @@ void ECSManager::run()
 
             a_thread[i] = std::thread(runThread, a_thread_memory[i], entity_thread);
         }
-
-    } else {
-        runThread(a_entity, entity_counter);
     }
 }
 
@@ -202,32 +202,67 @@ void ECSManager::init(BYTE* _start_ptr)
 void ECSManager::update(BYTE* _start_ptr, ULONG _number)
 {
     SEEntity* tmp_ptr = NULL;
+    UINT event = getEvent();
     for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
         tmp_ptr = getEntity(_start_ptr);
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->update(tmp_ptr);
+            if (event)
+                a_system[i]->trigger(tmp_ptr, event);
         }
     }
+    removeEvent(event);
 }
 
 void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
 {
-
     while (g_game_started) {
-        {
-            std::lock_guard<std::mutex> lg(mutex_preupdate);
-            for (ULONG i = 0; i < system_counter; i++) {
-                a_system[i]->preupdate();
-            }
-        }
-
         update(_start_ptr, _number);
+    }
+}
 
-        {
-            std::lock_guard<std::mutex> lg(mutex_postupdate);
-            for (ULONG i = 0; i < system_counter; i++) {
-                a_system[i]->postupdate();
-            }
+UINT ECSManager::getEvent()
+{
+    if (event_number)
+        return a_event[0];
+    return 0;
+}
+
+void ECSManager::addEvent(UINT _event)
+{
+    std::lock_guard<std::mutex> lg(mutex_event);
+    if (event_number < SER_ECS_EVENT_MAX)
+        a_event[event_number++] = _event;
+}
+
+void ECSManager::removeEvent(UINT _event)
+{
+    if (event_number <= 0)
+        return;
+    for (ULONG i = 0; i < event_number; i++) {
+        if (a_event[i] == _event) {
+            std::lock_guard<std::mutex> lg(mutex_event);
+            a_event[i] = a_event[i + 1];
+            event_number--;
         }
     }
+}
+
+void ECSManager::removeEvent()
+{
+    if (event_number > 0) {
+        std::lock_guard<std::mutex> lg(mutex_event);
+        for (ULONG i = 0; i < event_number; i++)
+            a_event[i] = a_event[i + 1];
+
+        event_number--;
+    }
+}
+
+BOOL ECSManager::searchEvent(UINT _event)
+{
+    for (ULONG i = 0; i < event_number; i++)
+        if (a_event[i] == _event)
+            return TRUE;
+    return FALSE;
 }

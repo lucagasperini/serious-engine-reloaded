@@ -37,9 +37,11 @@ public:
 
     void initWindow(component_window* _window);
 
-    void preupdate() override;
+    void preupdate();
     void update(SEEntity* entity) override;
-    void postupdate() override;
+    void postupdate();
+
+    void trigger(SEEntity* _entity, UINT _event) override {};
 
     void updateMousePos(component_mouse* _mouse);
     void updateCursor(component_mouse* _mouse, component_texture* _texture);

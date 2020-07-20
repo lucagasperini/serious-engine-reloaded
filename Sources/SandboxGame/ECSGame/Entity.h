@@ -41,13 +41,8 @@ struct MenuButton : SEEntity,
                     //component_mousefocus,
                     component_action {
 };
-struct GameControl : SEEntity,
-                     component_keyboard,
-                     component_keybind {
-};
 
 struct Camera : SEEntity,
-                component_keybind,
                 component_mousedelta,
                 component_camera,
                 component_action {
