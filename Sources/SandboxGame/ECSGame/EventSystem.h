@@ -21,12 +21,30 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
+struct keybind {
+    ULONG key;
+    SEEvent event;
+};
+
 class EventSystem : SESystem {
+private:
+    int x = 0;
+    int y = 0;
+    int delta_x = 0;
+    int delta_y = 0;
+    int old_x = 0;
+    int old_y = 0;
+    int* event_parameter_mouse = new int[4];
+    int* event_parameter_mouse_click = new int[3];
+    SDL_Event event;
+
+public:
+    keybind* a_keybind;
     void preinit() override {}
     void init(SEEntity* entity) override {}
     void postinit() override {}
 
-    void preupdate() override {};
+    void preupdate() override;
     void update(SEEntity* entity) override {};
     void postupdate() override {};
     void eventMouse(component_mouse* _mouse, SEEvent* _event);

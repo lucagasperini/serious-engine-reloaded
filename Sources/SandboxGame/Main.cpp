@@ -62,85 +62,6 @@ UINT g_virtual_resolution_height = 1080;
 BOOL g_game_started = FALSE;
 BOOL g_window_started = FALSE;
 
-struct keybind {
-    ULONG key;
-    SEEvent event;
-};
-
-keybind a_keybind[SER_KEYBIND_MAX];
-
-void fetch_input()
-{
-    int x = 0;
-    int y = 0;
-    int delta_x = 0;
-    int delta_y = 0;
-    int old_x = 0;
-    int old_y = 0;
-    int* event_parameter_mouse = new int[4];
-    int* event_parameter_mouse_click = new int[3];
-    SDL_Event event;
-    while (g_game_started) {
-        old_x = x;
-        old_y = y;
-        // get real cursor position
-        SDL_GetMouseState(&x, &y);
-
-        if (x != old_x || y != old_y) {
-            delta_x = old_x - x;
-            delta_y = old_y - y;
-            event_parameter_mouse[0] = x;
-            event_parameter_mouse[1] = y;
-            event_parameter_mouse[2] = delta_x;
-            event_parameter_mouse[3] = delta_y;
-            ECSManager::addEvent(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
-        }
-
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                g_game_started = FALSE;
-                g_window_started = FALSE;
-            }
-            if (event.type == SDL_KEYDOWN) {
-                for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
-                    if (a_keybind[i].key == event.key.keysym.sym && event.key.keysym.sym != 0) {
-                        ECSManager::addEvent(a_keybind[i].event);
-                    }
-                }
-            }
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
-                event_parameter_mouse_click[0] = x;
-                event_parameter_mouse_click[1] = y;
-                event_parameter_mouse_click[2] = event.button.button;
-                ECSManager::addEvent(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
-            }
-        }
-    }
-}
-
-void load_keybind()
-{
-    memset(a_keybind, 0, sizeof(keybind) * SER_KEYBIND_MAX);
-    a_keybind[0].event.code = SER_EVENT_FULLSCREEN_CHANGE;
-    a_keybind[0].key = SDLK_F1;
-    UINT* p_res_vga = new UINT[2] { 640, 480 };
-    a_keybind[1].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[1].event.parameter = p_res_vga;
-    a_keybind[1].key = SDLK_F2;
-    UINT* p_res_svga = new UINT[2] { 800, 600 };
-    a_keybind[2].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[2].event.parameter = p_res_svga;
-    a_keybind[2].key = SDLK_F3;
-    UINT* p_res_wxga = new UINT[2] { 1280, 720 };
-    a_keybind[3].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[3].event.parameter = p_res_wxga;
-    a_keybind[3].key = SDLK_F4;
-    UINT* p_res_hd = new UINT[2] { 1920, 1080 };
-    a_keybind[4].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[4].event.parameter = p_res_hd;
-    a_keybind[4].key = SDLK_F5;
-}
-
 int submain(char* _cmdline)
 {
     SESplashScreen splashscreen;
@@ -156,8 +77,6 @@ int submain(char* _cmdline)
 
     load_all_game_system();
     load_all_game_entity();
-
-    load_keybind();
 
     ULONG number_thread = 1;
     ECSManager::setThreadNumber(number_thread);
@@ -185,11 +104,9 @@ int submain(char* _cmdline)
 
         // start of game loop
         g_game_started = TRUE;
-        std::thread input_thread = std::thread(fetch_input);
         ECSManager::run();
 
         ECSManager::quit();
-        input_thread.join();
     }
     return TRUE;
 }

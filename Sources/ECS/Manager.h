@@ -75,6 +75,8 @@ private:
     static std::condition_variable cv_render;
     static BOOL wait_render;
 
+    static ULONG loop_status;
+
 public:
     static SEEntity* getEntity(ULONG _id);
     static SEEntity* getEntity(BYTE*& _iter);
@@ -91,7 +93,7 @@ public:
     ECSManager();
     ~ECSManager();
 
-    static inline void setRenderSystem(SESystem* _render) { render_system = _render; };
+    static inline void setRenderSystem(SESystem* _render_system) { render_system = _render_system; };
 
     static void grow(ULONG _new);
 
@@ -107,6 +109,7 @@ public:
     static void quit();
 
     static void runThread(BYTE* _start_ptr, ULONG _number);
+    static void runThreadRender();
 
     static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(SESystem* _system);

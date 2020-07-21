@@ -47,6 +47,8 @@ std::mutex ECSManager::mutex_render;
 std::condition_variable ECSManager::cv_render;
 BOOL ECSManager::wait_render = TRUE;
 
+ULONG ECSManager::loop_status = 0;
+
 ECSManager::ECSManager()
 {
     mem_entity_max = 0;
@@ -187,23 +189,7 @@ void ECSManager::run()
 
             a_thread[i] = std::thread(runThread, a_thread_memory[i], entity_thread);
         }
-        while (g_game_started) {
-            {
-                std::unique_lock<std::mutex> lck(mutex_render);
-                cv_render.wait(lck, [] { return number_update >= thread_number; });
-            }
-            render_system->preupdate();
-            SEEvent* event = getEvent();
-            BYTE* tmp_ptr = getFirst();
-            while (SEEntity* entity = getEntity(tmp_ptr)) {
-                render_system->update(entity);
-                render_system->trigger(entity, event);
-            }
-            render_system->postupdate();
-
-            wait_update = FALSE;
-            cv_update.notify_all();
-        }
+        runThreadRender();
     }
 }
 
@@ -242,22 +228,49 @@ void ECSManager::update(BYTE* _start_ptr, ULONG _number, SEEvent* _event)
 void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
 {
     while (g_game_started) {
+        {
+            std::unique_lock<std::mutex> lck(mutex_update);
+            cv_update.notify_all();
+            cv_update.wait(lck, [] { return loop_status >= 0 && loop_status <= thread_number; });
+        }
+
         SEEvent* event = getEvent();
         update(_start_ptr, _number, event);
 
         {
             std::lock_guard<std::mutex> lck(mutex_counter);
-            number_update++;
+            loop_status++;
             //removeEvent(event->code);
         }
-        cv_render.notify_one();
+    }
+}
 
+void ECSManager::runThreadRender()
+{
+    while (g_game_started) {
         {
             std::unique_lock<std::mutex> lck(mutex_update);
-            while (wait_update)
-                cv_update.wait(lck);
-            number_update = 0;
+            cv_update.notify_all();
+            cv_update.wait(lck, [] { return loop_status >= thread_number + 1; });
         }
+        for (ULONG i = 0; i < system_counter; i++) {
+            a_system[i]->postupdate();
+        }
+
+        render_system->preupdate();
+        SEEvent* event = getEvent();
+        BYTE* tmp_ptr = getFirst();
+        while (SEEntity* entity = getEntity(tmp_ptr)) {
+            render_system->update(entity);
+            render_system->trigger(entity, event);
+        }
+        render_system->postupdate();
+
+        for (ULONG i = 0; i < system_counter; i++) {
+            a_system[i]->preupdate();
+        }
+
+        loop_status = 0;
     }
 }
 SEEvent* ECSManager::getEvent()

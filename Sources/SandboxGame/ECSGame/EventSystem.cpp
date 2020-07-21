@@ -17,11 +17,50 @@
 
 #include "EventSystem.h"
 
+extern UINT g_window_started;
 extern UINT g_game_started;
 extern UINT g_resolution_width;
 extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
+
+void EventSystem::preupdate()
+{
+    old_x = x;
+    old_y = y;
+    // get real cursor position
+    SDL_GetMouseState(&x, &y);
+
+    if (x != old_x || y != old_y) {
+        delta_x = old_x - x;
+        delta_y = old_y - y;
+        event_parameter_mouse[0] = x;
+        event_parameter_mouse[1] = y;
+        event_parameter_mouse[2] = delta_x;
+        event_parameter_mouse[3] = delta_y;
+        ECSManager::addEvent(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
+    }
+
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            g_game_started = FALSE;
+            g_window_started = FALSE;
+        }
+        if (event.type == SDL_KEYDOWN) {
+            for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
+                if (a_keybind[i].key == event.key.keysym.sym && event.key.keysym.sym != 0) {
+                    ECSManager::addEvent(a_keybind[i].event);
+                }
+            }
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            event_parameter_mouse_click[0] = x;
+            event_parameter_mouse_click[1] = y;
+            event_parameter_mouse_click[2] = event.button.button;
+            ECSManager::addEvent(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
+        }
+    }
+}
 
 void EventSystem::trigger(SEEntity* _entity, SEEvent* _event)
 {
