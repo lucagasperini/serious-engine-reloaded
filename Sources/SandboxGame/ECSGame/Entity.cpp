@@ -104,10 +104,7 @@ void load_all_game_entity()
     /*
     game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
     game_control->kb_keybind[SE_KEYBIND_FULLSCREEN] = SDLK_F1;
-    game_control->kb_keybind[SE_KEYBIND_RESOLUTION_VGA] = SDLK_F2;
-    game_control->kb_keybind[SE_KEYBIND_RESOLUTION_SVGA] = SDLK_F3;
-    game_control->kb_keybind[SE_KEYBIND_RESOLUTION_WXGA] = SDLK_F4;
-    game_control->kb_keybind[SE_KEYBIND_RESOLUTION_HD] = SDLK_F5;
+
     game_control->kb_keybind[SE_KEYBIND_DEBUG_BORDER] = SDLK_F6;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_ENTITYID] = SDLK_F7;
     game_control->kb_keybind[SE_KEYBIND_DEBUG_POSITION] = SDLK_F8;

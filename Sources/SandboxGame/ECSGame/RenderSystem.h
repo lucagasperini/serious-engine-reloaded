@@ -41,7 +41,7 @@ public:
     void update(SEEntity* entity) override;
     void postupdate();
 
-    void trigger(SEEntity* _entity, UINT _event) override {};
+    void trigger(SEEntity* _entity, SEEvent* _event) override {};
 
     void updateMousePos(component_mouse* _mouse);
     void updateCursor(component_mouse* _mouse, component_texture* _texture);

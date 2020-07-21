@@ -15,21 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_SBGAME_EVENTSYSTEM_H
-#define SER_SBGAME_EVENTSYSTEM_H
+#ifndef SER_ECS_EVENT_H
+#define SER_ECS_EVENT_H
 
-#include "Entity.h"
-#include <ECS/System.h>
+#include <Engine/Base/Types.h>
 
-class EventSystem : SESystem {
-    void preinit() override {}
-    void init(SEEntity* entity) override {}
-    void postinit() override {}
-
-    void update(SEEntity* entity) override {};
-
-    void eventWindow(component_window* _window, SEEvent* _event);
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+struct SEEvent {
+    UINT code;
+    void* parameter;
 };
 
 #endif

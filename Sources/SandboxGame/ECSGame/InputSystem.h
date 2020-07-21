@@ -33,7 +33,7 @@ public:
     void postinit() override {}
 
     void update(SEEntity* entity) override;
-    void trigger(SEEntity* _entity, UINT _event) override {};
+    void trigger(SEEntity* _entity, SEEvent* _event) override {};
 };
 
 #endif

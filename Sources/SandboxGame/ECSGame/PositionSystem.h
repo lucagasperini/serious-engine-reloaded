@@ -31,7 +31,7 @@ public:
     void updateAlign(component_position* _position, component_align* _align);
 
     void update(SEEntity* _entity) override {};
-    void trigger(SEEntity* _entity, UINT _event) override;
+    void trigger(SEEntity* _entity, SEEvent* _event) override;
 };
 
 #endif

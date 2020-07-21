@@ -28,7 +28,7 @@ public:
     virtual void postinit() = 0;
 
     virtual void update(SEEntity* entity) = 0;
-    virtual void trigger(SEEntity* _entity, UINT _event) = 0;
+    virtual void trigger(SEEntity* _entity, SEEvent* _event) = 0;
 };
 
 #endif

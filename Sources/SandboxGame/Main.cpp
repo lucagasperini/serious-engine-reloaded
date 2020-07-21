@@ -68,8 +68,12 @@ POINT g_cursor_position;
 UINT g_press_key;
 UINT g_press_button;
 
-UINT kb_keylist[SER_KEYBIND_MAX];
-UINT kb_eventlist[SER_KEYBIND_MAX];
+struct keybind {
+    ULONG key;
+    SEEvent event;
+};
+
+keybind a_keybind[SER_KEYBIND_MAX];
 
 void fetch_input()
 {
@@ -90,8 +94,8 @@ void fetch_input()
             }
             if (event.type == SDL_KEYDOWN) {
                 for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
-                    if (kb_keylist[i] == event.key.keysym.sym && event.key.keysym.sym != 0) {
-                        ECSManager::addEvent(kb_eventlist[i]);
+                    if (a_keybind[i].key == event.key.keysym.sym && event.key.keysym.sym != 0) {
+                        ECSManager::addEvent(a_keybind[i].event);
                     }
                 }
             }
@@ -104,12 +108,25 @@ void fetch_input()
 
 void load_keybind()
 {
-    memset(kb_eventlist, 0, sizeof(UINT) * SER_EVENT_MAX);
-    memset(kb_keylist, 0, sizeof(UINT) * SER_KEYBIND_MAX);
-    kb_eventlist[0] = SER_EVENT_RESOLUTION_HD;
-    kb_keylist[0] = SDLK_F5;
-    kb_eventlist[1] = SER_EVENT_FULLSCREEN;
-    kb_keylist[1] = SDLK_F1;
+    memset(a_keybind, 0, sizeof(keybind) * SER_KEYBIND_MAX);
+    a_keybind[0].event.code = SER_EVENT_FULLSCREEN_CHANGE;
+    a_keybind[0].key = SDLK_F1;
+    UINT* p_res_vga = new UINT[2] { 640, 480 };
+    a_keybind[1].event.code = SER_EVENT_RESOLUTION_CHANGE;
+    a_keybind[1].event.parameter = p_res_vga;
+    a_keybind[1].key = SDLK_F2;
+    UINT* p_res_svga = new UINT[2] { 800, 600 };
+    a_keybind[2].event.code = SER_EVENT_RESOLUTION_CHANGE;
+    a_keybind[2].event.parameter = p_res_svga;
+    a_keybind[2].key = SDLK_F3;
+    UINT* p_res_wxga = new UINT[2] { 1280, 720 };
+    a_keybind[3].event.code = SER_EVENT_RESOLUTION_CHANGE;
+    a_keybind[3].event.parameter = p_res_wxga;
+    a_keybind[3].key = SDLK_F4;
+    UINT* p_res_hd = new UINT[2] { 1920, 1080 };
+    a_keybind[4].event.code = SER_EVENT_RESOLUTION_CHANGE;
+    a_keybind[4].event.parameter = p_res_hd;
+    a_keybind[4].key = SDLK_F5;
 }
 
 int submain(char* _cmdline)
@@ -142,7 +159,7 @@ int submain(char* _cmdline)
     g_window_started = TRUE;
     splashscreen.hide();
     UINT event = 0;
-    ECSManager::addEvent(SER_EVENT_SCALE_UI);
+    ECSManager::addEvent(SER_EVENT_SCALE_UI, NULL);
 
     while (g_window_started) {
         while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {

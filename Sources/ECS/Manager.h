@@ -19,6 +19,7 @@
 #define SER_ECS_MANAGER_H
 
 #include "Entity.h"
+#include "Event.h"
 #include "System.h"
 #include <Engine/Engine.h>
 #include <condition_variable>
@@ -53,28 +54,20 @@ private:
 
     static std::thread* a_thread;
 
-    static std::mutex mutex_preupdate;
-    static std::mutex mutex_postupdate;
-
     static BYTE** a_thread_memory;
 
     static ULONG thread_number;
 
-    static UINT a_event[SER_ECS_EVENT_MAX];
+    static SEEvent a_event[SER_ECS_EVENT_MAX];
     static ULONG event_number;
 
     static std::mutex mutex_event;
 
 public:
-    static std::condition_variable cv_update;
-    static ULONG number_update;
-    static std::mutex mutex_update;
-    static BOOL wait_update_secure;
-
     static SEEntity* getEntity(ULONG _id);
     static SEEntity* getEntity(BYTE*& _iter);
     static inline BYTE* getFirst() { return a_entity; }
-    static UINT getEvent();
+    static SEEvent* getEvent();
 
     static BOOL searchEvent(UINT _event);
 
@@ -103,7 +96,8 @@ public:
 
     static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(SESystem* _system);
-    static void addEvent(UINT _event);
+    static void addEvent(UINT _code, void* _parameter);
+    static void addEvent(const SEEvent& _event);
 };
 
 #endif

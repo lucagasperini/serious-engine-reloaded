@@ -23,7 +23,7 @@ extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
 
-void EventSystem::trigger(SEEntity* _entity, UINT _event)
+void EventSystem::trigger(SEEntity* _entity, SEEvent* _event)
 {
     component_window* window = dynamic_cast<component_window*>((SEEntity*)_entity);
     if (window) {
@@ -31,23 +31,26 @@ void EventSystem::trigger(SEEntity* _entity, UINT _event)
     }
 }
 
-void EventSystem::eventWindow(component_window* _window, UINT _event)
+void EventSystem::eventWindow(component_window* _window, SEEvent* _event)
 {
-    if (_event == SER_EVENT_FULLSCREEN) {
+    if (_event->code == SER_EVENT_FULLSCREEN_CHANGE) {
         if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
             _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
         else
             _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
         g_game_started = FALSE;
     }
-    if (_event == SER_EVENT_RESOLUTION_HD) {
-        if (g_resolution_width != 1920 || g_resolution_height != 1080) {
-            g_virtual_resolution_width = g_resolution_width;
-            g_virtual_resolution_height = g_resolution_height;
-            g_resolution_width = 1920;
-            g_resolution_height = 1080;
-            g_game_started = FALSE;
-            ECSManager::addEvent(SER_EVENT_SCALE_UI);
+    if (_event->code == SER_EVENT_RESOLUTION_CHANGE) {
+        UINT* tmp_parameter = (UINT*)_event->parameter;
+        if (tmp_parameter != NULL && tmp_parameter[0] != 0 && tmp_parameter[1] != 0) {
+            if (g_resolution_width != tmp_parameter[0] || g_resolution_height != tmp_parameter[1]) {
+                g_virtual_resolution_width = g_resolution_width;
+                g_virtual_resolution_height = g_resolution_height;
+                g_resolution_width = tmp_parameter[0];
+                g_resolution_height = tmp_parameter[1];
+                g_game_started = FALSE;
+                ECSManager::addEvent(SER_EVENT_SCALE_UI, NULL);
+            }
         }
     }
 }

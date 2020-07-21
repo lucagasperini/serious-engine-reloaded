@@ -75,9 +75,9 @@ void PositionSystem::updateAlign(component_position* _position, component_align*
     }
 }
 
-void PositionSystem::trigger(SEEntity* _entity, UINT _event)
+void PositionSystem::trigger(SEEntity* _entity, SEEvent* _event)
 {
-    if (_event == SER_EVENT_SCALE_UI) {
+    if (_event->code == SER_EVENT_SCALE_UI) {
 
         component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
         component_align* align = dynamic_cast<component_align*>((SEEntity*)_entity);
