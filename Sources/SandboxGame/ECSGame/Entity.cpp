@@ -36,6 +36,7 @@
 #include "EventSystem.h"
 #include "InputSystem.h"
 #include "PositionSystem.h"
+#include "RenderSystem.h"
 #include <ECS/Manager.h>
 #include <Engine/Graphics/Font.h>
 #include <SDL.h>
@@ -64,16 +65,15 @@ void quitgame()
 
 void load_all_game_system()
 {
+    RenderSystem* render_system = new RenderSystem;
+    ECSManager::setRenderSystem((SESystem*)render_system);
     EventSystem* event_system = new EventSystem;
     ECSManager::addSystem((SESystem*)event_system);
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);
-    /*
+
     InputSystem* input_system = new InputSystem;
     ECSManager::addSystem((SESystem*)input_system);
-    ControlSystem* control_system = new ControlSystem;
-    ECSManager::addSystem((SESystem*)control_system);
-    */
 }
 
 void load_all_game_entity()

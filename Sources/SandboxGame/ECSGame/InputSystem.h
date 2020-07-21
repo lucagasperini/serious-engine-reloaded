@@ -32,8 +32,10 @@ public:
     void init(SEEntity* entity) override {}
     void postinit() override {}
 
+    void preupdate() override {};
     void update(SEEntity* entity) override;
-    void trigger(SEEntity* _entity, SEEvent* _event) override {};
+    void postupdate() override {};
+    void trigger(SEEntity* _entity, SEEvent* _event) override;
 };
 
 #endif

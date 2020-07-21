@@ -64,9 +64,10 @@
 #define SER_EVENT_CAMERA_BACK 0xC4
 #define SER_EVENT_CAMERA_UP 0xC5
 #define SER_EVENT_CAMERA_DOWN 0xC6
+#define SER_EVENT_MOUSE_MOVE 0xE0
+#define SER_EVENT_MOUSE_BUTTON 0xE1
 #define SER_EVENT_FULLSCREEN_CHANGE 0xF0
 #define SER_EVENT_RESOLUTION_CHANGE 0xF1
-#define SER_EVENT_SCALE_UI 0xF2
 
 struct component_window : component {
     CTString win_title;
@@ -126,10 +127,6 @@ struct component_text : component {
     CTString txt_str;
 };
 
-struct component_mouseclick : component {
-    ULONG mc_button = 0;
-};
-
 struct component_camera : component {
     BOOL cam_on = TRUE;
     FLOAT cam_speed = 1.0f;
@@ -139,10 +136,11 @@ struct component_camera : component {
 };
 
 struct component_mouse : component {
-    POINT mouse_cursor;
-};
-struct component_mousedelta : component {
-    POINT md_cursor;
+    int mouse_x = 0;
+    int mouse_y = 0;
+    int mouse_delta_x = 0;
+    int mouse_delta_y = 0;
+    int mouse_button = 0;
 };
 
 struct component_mousefocus : component {

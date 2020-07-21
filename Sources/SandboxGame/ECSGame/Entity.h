@@ -43,7 +43,7 @@ struct MenuButton : SEEntity,
 };
 
 struct Camera : SEEntity,
-                component_mousedelta,
+                component_mouse,
                 component_camera,
                 component_action {
 };

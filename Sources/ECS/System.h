@@ -27,7 +27,9 @@ public:
     virtual void init(SEEntity* entity) = 0;
     virtual void postinit() = 0;
 
+    virtual void preupdate() = 0;
     virtual void update(SEEntity* entity) = 0;
+    virtual void postupdate() = 0;
     virtual void trigger(SEEntity* _entity, SEEvent* _event) = 0;
 };
 

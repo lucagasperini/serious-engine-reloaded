@@ -161,17 +161,21 @@ void RenderSystem::update(SEEntity* entity)
         updateText(position, text);
 }
 
+void RenderSystem::trigger(SEEntity* _entity, SEEvent* _event)
+{
+}
+
 void RenderSystem::updateMousePos(component_mouse* _mouse)
 {
-    dp->DrawBorder(_mouse->mouse_cursor.x, _mouse->mouse_cursor.y,
+    dp->DrawBorder(_mouse->mouse_x, _mouse->mouse_y,
         32, 32, g_fb_color);
 }
 
 void RenderSystem::updateCursor(component_mouse* _mouse, component_texture* _texture)
 {
     dp->PutTexture(&_texture->tex_data,
-        PIXaabbox2D(PIX2D(_mouse->mouse_cursor.x, _mouse->mouse_cursor.y),
-            PIX2D(_mouse->mouse_cursor.x + 32, _mouse->mouse_cursor.y + 32)));
+        PIXaabbox2D(PIX2D(_mouse->mouse_x, _mouse->mouse_y),
+            PIX2D(_mouse->mouse_x + 32, _mouse->mouse_y + 32)));
 }
 
 void RenderSystem::updateTexture(component_position* _position, component_texture* _texture)

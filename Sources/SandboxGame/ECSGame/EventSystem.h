@@ -26,8 +26,10 @@ class EventSystem : SESystem {
     void init(SEEntity* entity) override {}
     void postinit() override {}
 
+    void preupdate() override {};
     void update(SEEntity* entity) override {};
-
+    void postupdate() override {};
+    void eventMouse(component_mouse* _mouse, SEEvent* _event);
     void eventWindow(component_window* _window, SEEvent* _event);
     void trigger(SEEntity* _entity, SEEvent* _event) override;
 };

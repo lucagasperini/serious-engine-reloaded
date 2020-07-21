@@ -63,6 +63,18 @@ private:
 
     static std::mutex mutex_event;
 
+    static std::mutex mutex_update;
+    static std::mutex mutex_counter;
+    static std::condition_variable cv_update;
+    static ULONG number_update;
+    static BOOL wait_update;
+
+    static SESystem* render_system;
+
+    static std::mutex mutex_render;
+    static std::condition_variable cv_render;
+    static BOOL wait_render;
+
 public:
     static SEEntity* getEntity(ULONG _id);
     static SEEntity* getEntity(BYTE*& _iter);
@@ -79,10 +91,12 @@ public:
     ECSManager();
     ~ECSManager();
 
+    static inline void setRenderSystem(SESystem* _render) { render_system = _render; };
+
     static void grow(ULONG _new);
 
     static void init(BYTE* _start_ptr);
-    static void update(BYTE* _start_ptr, ULONG _number);
+    static void update(BYTE* _start_ptr, ULONG _number, SEEvent* _event);
 
     static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }

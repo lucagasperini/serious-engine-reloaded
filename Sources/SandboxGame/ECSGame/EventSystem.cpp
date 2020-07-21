@@ -29,6 +29,30 @@ void EventSystem::trigger(SEEntity* _entity, SEEvent* _event)
     if (window) {
         eventWindow(window, _event);
     }
+    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)_entity);
+    if (mouse)
+        eventMouse(mouse, _event);
+}
+
+void EventSystem::eventMouse(component_mouse* _mouse, SEEvent* _event)
+{
+    if (_event->code == SER_EVENT_MOUSE_MOVE) {
+
+        int* mouse_status = (int*)_event->parameter;
+
+        _mouse->mouse_x = mouse_status[0];
+        _mouse->mouse_y = mouse_status[1];
+        _mouse->mouse_delta_x = mouse_status[2];
+        _mouse->mouse_delta_y = mouse_status[3];
+    }
+    if (_event->code == SER_EVENT_MOUSE_BUTTON) {
+
+        int* mouse_status = (int*)_event->parameter;
+
+        _mouse->mouse_x = mouse_status[0];
+        _mouse->mouse_y = mouse_status[1];
+        _mouse->mouse_button = mouse_status[2];
+    }
 }
 
 void EventSystem::eventWindow(component_window* _window, SEEvent* _event)
@@ -49,7 +73,6 @@ void EventSystem::eventWindow(component_window* _window, SEEvent* _event)
                 g_resolution_width = tmp_parameter[0];
                 g_resolution_height = tmp_parameter[1];
                 g_game_started = FALSE;
-                ECSManager::addEvent(SER_EVENT_SCALE_UI, NULL);
             }
         }
     }

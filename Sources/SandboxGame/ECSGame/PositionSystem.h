@@ -22,16 +22,22 @@
 #include <ECS/System.h>
 
 class PositionSystem : SESystem {
+private:
+    UINT scale_x = 0;
+    UINT scale_y = 0;
+
 public:
     void preinit() override {}
-    void init(SEEntity* entity) override {}
-    void postinit() override {}
+    void init(SEEntity* entity) override;
+    void postinit() override;
 
-    void updateScale(component_position* _position);
-    void updateAlign(component_position* _position, component_align* _align);
+    void initScale(component_position* _position);
+    void initAlign(component_position* _position, component_align* _align);
 
+    void preupdate() override {};
     void update(SEEntity* _entity) override {};
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+    void postupdate() override {};
+    void trigger(SEEntity* _entity, SEEvent* _event) override {};
 };
 
 #endif

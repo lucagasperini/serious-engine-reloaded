@@ -33,19 +33,7 @@ void InputSystem::preinit()
 
 void InputSystem::update(SEEntity* entity)
 {
-    if (old_cursor != NULL) {
-        deltacursor.x = (old_cursor->x - g_cursor_position.x);
-        deltacursor.y = (old_cursor->y - g_cursor_position.y);
-    } else {
-        old_cursor = new POINT();
-    }
-    old_cursor->x = g_cursor_position.x;
-    old_cursor->y = g_cursor_position.y;
-
-    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)entity);
-    if (mouse)
-        mouse->mouse_cursor = g_cursor_position;
-
+    /*
     component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
     component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
     if (position && mousefocus) {
@@ -58,14 +46,9 @@ void InputSystem::update(SEEntity* entity)
             mousefocus->mf_focus = FALSE;
         }
     }
+*/
+}
 
-    component_mouseclick* mouseclick = dynamic_cast<component_mouseclick*>((SEEntity*)entity);
-    if (mouseclick)
-        mouseclick->mc_button = g_press_button;
-
-    component_mousedelta* mousedelta = dynamic_cast<component_mousedelta*>((SEEntity*)entity);
-    if (mousedelta) {
-        mousedelta->md_cursor.x = deltacursor.x;
-        mousedelta->md_cursor.y = deltacursor.y;
-    }
+void InputSystem::trigger(SEEntity* _entity, SEEvent* _event)
+{
 }

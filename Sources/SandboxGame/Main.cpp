@@ -27,7 +27,6 @@
 #include <ECS/Manager.h>
 
 #include "ECSGame/Entity.h"
-#include "ECSGame/RenderSystem.h"
 
 #include <thread>
 
@@ -63,11 +62,6 @@ UINT g_virtual_resolution_height = 1080;
 BOOL g_game_started = FALSE;
 BOOL g_window_started = FALSE;
 
-UINT g_event_current = 0;
-POINT g_cursor_position;
-UINT g_press_key;
-UINT g_press_button;
-
 struct keybind {
     ULONG key;
     SEEvent event;
@@ -77,15 +71,30 @@ keybind a_keybind[SER_KEYBIND_MAX];
 
 void fetch_input()
 {
+    int x = 0;
+    int y = 0;
+    int delta_x = 0;
+    int delta_y = 0;
+    int old_x = 0;
+    int old_y = 0;
+    int* event_parameter_mouse = new int[4];
+    int* event_parameter_mouse_click = new int[3];
     SDL_Event event;
     while (g_game_started) {
-        g_press_key = 0;
+        old_x = x;
+        old_y = y;
         // get real cursor position
-        GetCursorPos(&g_cursor_position);
-        if (g_cursor_position.x > g_resolution_width)
-            g_cursor_position.x = 0;
-        if (g_cursor_position.y > g_resolution_height)
-            g_cursor_position.y = 0;
+        SDL_GetMouseState(&x, &y);
+
+        if (x != old_x || y != old_y) {
+            delta_x = old_x - x;
+            delta_y = old_y - y;
+            event_parameter_mouse[0] = x;
+            event_parameter_mouse[1] = y;
+            event_parameter_mouse[2] = delta_x;
+            event_parameter_mouse[3] = delta_y;
+            ECSManager::addEvent(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
+        }
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -100,7 +109,10 @@ void fetch_input()
                 }
             }
             if (event.type == SDL_MOUSEBUTTONDOWN) {
-                g_press_button = event.button.button;
+                event_parameter_mouse_click[0] = x;
+                event_parameter_mouse_click[1] = y;
+                event_parameter_mouse_click[2] = event.button.button;
+                ECSManager::addEvent(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
             }
         }
     }
@@ -143,7 +155,6 @@ int submain(char* _cmdline)
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     load_all_game_system();
-    RenderSystem* render_system = new RenderSystem;
     load_all_game_entity();
 
     load_keybind();
@@ -158,13 +169,9 @@ int submain(char* _cmdline)
 
     g_window_started = TRUE;
     splashscreen.hide();
-    UINT event = 0;
-    ECSManager::addEvent(SER_EVENT_SCALE_UI, NULL);
+    SEEvent* event = 0;
 
     while (g_window_started) {
-        while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
-            render_system->init(entity);
-        }
 
         g_world_data = new CWorld;
         g_world_data->Load_t(g_world_file);
@@ -180,14 +187,7 @@ int submain(char* _cmdline)
         g_game_started = TRUE;
         std::thread input_thread = std::thread(fetch_input);
         ECSManager::run();
-        while (g_game_started) {
-            render_system->preupdate();
-            tmp_ptr = ECSManager::getFirst();
-            while (SEEntity* entity = ECSManager::getEntity(tmp_ptr)) {
-                render_system->update(entity);
-            }
-            render_system->postupdate();
-        }
+
         ECSManager::quit();
         input_thread.join();
     }

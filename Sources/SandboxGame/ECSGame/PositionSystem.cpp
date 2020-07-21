@@ -23,7 +23,7 @@ extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
 extern BOOL g_event_current;
 
-void PositionSystem::updateScale(component_position* _position)
+void PositionSystem::initScale(component_position* _position)
 {
     FLOAT scaleX = (FLOAT)g_resolution_width / (FLOAT)g_virtual_resolution_width;
     FLOAT scaleY = (FLOAT)g_resolution_height / (FLOAT)g_virtual_resolution_height;
@@ -34,7 +34,7 @@ void PositionSystem::updateScale(component_position* _position)
     _position->pos_h = (FLOAT)_position->pos_h * scaleY;
 }
 
-void PositionSystem::updateAlign(component_position* _position, component_align* _align)
+void PositionSystem::initAlign(component_position* _position, component_align* _align)
 {
     ULONG center_x = g_resolution_width / 2;
     ULONG center_y = g_resolution_height / 2;
@@ -75,17 +75,22 @@ void PositionSystem::updateAlign(component_position* _position, component_align*
     }
 }
 
-void PositionSystem::trigger(SEEntity* _entity, SEEvent* _event)
+void PositionSystem::init(SEEntity* _entity)
 {
-    if (_event->code == SER_EVENT_SCALE_UI) {
-
+    if (scale_x != g_resolution_width || scale_y != g_resolution_height) {
         component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
         component_align* align = dynamic_cast<component_align*>((SEEntity*)_entity);
 
         if (position)
-            updateScale(position);
+            initScale(position);
 
         if (position && align)
-            updateAlign(position, align);
+            initAlign(position, align);
     }
+}
+
+void PositionSystem::postinit()
+{
+    scale_x = g_resolution_width;
+    scale_y = g_resolution_height;
 }
