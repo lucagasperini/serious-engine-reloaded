@@ -65,32 +65,28 @@ void EventSystem::preupdate()
 void EventSystem::trigger(SEEntity* _entity, SEEvent* _event)
 {
     component_window* window = dynamic_cast<component_window*>((SEEntity*)_entity);
-    if (window) {
+    if (window)
         eventWindow(window, _event);
-    }
-    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)_entity);
-    if (mouse)
-        eventMouse(mouse, _event);
+
+    component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
+    component_button* button = dynamic_cast<component_button*>((SEEntity*)_entity);
+    if (button && position)
+        eventButton(position, button, _event);
 }
 
-void EventSystem::eventMouse(component_mouse* _mouse, SEEvent* _event)
+void EventSystem::eventButton(component_position* _position, component_button* _button, SEEvent* _event)
 {
     if (_event->code == SER_EVENT_MOUSE_MOVE) {
-
-        int* mouse_status = (int*)_event->parameter;
-
-        _mouse->mouse_x = mouse_status[0];
-        _mouse->mouse_y = mouse_status[1];
-        _mouse->mouse_delta_x = mouse_status[2];
-        _mouse->mouse_delta_y = mouse_status[3];
-    }
-    if (_event->code == SER_EVENT_MOUSE_BUTTON) {
-
-        int* mouse_status = (int*)_event->parameter;
-
-        _mouse->mouse_x = mouse_status[0];
-        _mouse->mouse_y = mouse_status[1];
-        _mouse->mouse_button = mouse_status[2];
+        int* parameter = (int*)_event->parameter;
+        int x = parameter[0];
+        int y = parameter[1];
+        if (_position->pos_x < x && _position->pos_y < y
+            && _position->pos_x + _position->pos_w > x
+            && _position->pos_y + _position->pos_h > y) {
+            _button->focus = TRUE;
+        } else {
+            _button->focus = FALSE;
+        }
     }
 }
 

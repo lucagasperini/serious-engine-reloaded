@@ -118,41 +118,12 @@ struct component_texture : component {
     CTextureObject tex_data;
 };
 
-struct component_text : component {
-    INDEX txt_fontsize = 0;
-    INDEX txt_align = 0;
-    CFontData txt_fontdata;
-    INDEX txt_mode = 0;
-    COLOR txt_color = 0xff;
-    CTString txt_str;
-};
-
 struct component_camera : component {
     BOOL cam_on = TRUE;
     FLOAT cam_speed = 1.0f;
     FLOAT3D cam_pos;
     ANGLE3D cam_rot;
     ANGLE cam_fov = 90.0f;
-};
-
-struct component_mouse : component {
-    int mouse_x = 0;
-    int mouse_y = 0;
-    int mouse_delta_x = 0;
-    int mouse_delta_y = 0;
-    int mouse_button = 0;
-};
-
-struct component_mousefocus : component {
-    BOOL mf_focus = FALSE;
-};
-
-struct component_button : component {
-    COLOR btn_color2 = 0xff;
-};
-
-struct component_action : component {
-    void (*sea_action)() = NULL;
 };
 
 struct component_align : component {
@@ -172,6 +143,24 @@ struct component_align : component {
     2  => Top 
     */
     INDEX align_y = 64;
+};
+
+struct component_button : component {
+    INDEX fontsize = 0;
+    INDEX align = 0;
+    CFontData fontdata;
+    COLOR color = 0xff;
+    COLOR color_focus = 0xff;
+    CTString text;
+    BOOL focus = FALSE;
+};
+
+struct component_cursor : component {
+    CTextureObject texture;
+    UINT x = 0;
+    UINT y = 0;
+    UINT w = 0;
+    UINT h = 0;
 };
 
 #endif

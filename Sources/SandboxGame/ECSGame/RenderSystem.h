@@ -41,13 +41,11 @@ public:
     void update(SEEntity* entity) override;
     void postupdate();
 
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+    void trigger(SEEntity* _entity, SEEvent* _event) override {};
 
-    void updateMousePos(component_mouse* _mouse);
-    void updateCursor(component_mouse* _mouse, component_texture* _texture);
+    void updateCursor(component_cursor* _cursor);
     void updateTexture(component_position* _position, component_texture* _texture);
-    void updateText(component_position* _position, component_text* _text);
-    void updateButton(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus);
+    void updateButton(component_position* _position, component_button* _button);
     void updateBorder(component_position* _position);
     void updateId(SEEntity* _entity, component_position* _position);
     void updatePosition(component_camera* _camera);

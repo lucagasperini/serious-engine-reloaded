@@ -24,7 +24,7 @@
 struct main_window : SEEntity, component_window {
 };
 
-struct mouse_texture : SEEntity, component_mouse, component_texture {
+struct cursor : SEEntity, component_cursor {
 };
 
 struct MenuImage : SEEntity,
@@ -33,19 +33,13 @@ struct MenuImage : SEEntity,
 };
 
 struct MenuButton : SEEntity,
-                    component_text,
                     component_position,
                     component_align,
-                    component_button,
-                    //component_mouseclick,
-                    //component_mousefocus,
-                    component_action {
+                    component_button {
 };
 
 struct Camera : SEEntity,
-                component_mouse,
-                component_camera,
-                component_action {
+                component_camera {
 };
 
 #endif

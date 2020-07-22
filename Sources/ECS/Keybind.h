@@ -15,27 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_SBGAME_INPUTSYSTEM_H
-#define SER_SBGAME_INPUTSYSTEM_H
+#ifndef SER_ECS_KEYBIND_H
+#define SER_ECS_KEYBIND_H
 
-#include "Entity.h"
-#include <ECS/System.h>
-#include <Engine/Base/Types.h>
+#include "Event.h"
 
-class InputSystem : SESystem {
-public:
-    FLOAT sensibility = 0.25;
-    POINT* old_cursor = NULL;
-    POINT deltacursor;
-
-    void preinit() override;
-    void init(SEEntity* entity) override {}
-    void postinit() override {}
-
-    void preupdate() override {};
-    void update(SEEntity* entity) override;
-    void postupdate() override {};
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+struct keybind {
+    ULONG key;
+    SEEvent event;
 };
 
 #endif

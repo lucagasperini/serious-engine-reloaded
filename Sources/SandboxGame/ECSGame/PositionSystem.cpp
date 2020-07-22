@@ -94,3 +94,17 @@ void PositionSystem::postinit()
     scale_x = g_resolution_width;
     scale_y = g_resolution_height;
 }
+
+void PositionSystem::trigger(SEEntity* _entity, SEEvent* _event)
+{
+    if (_event->code == SER_EVENT_MOUSE_MOVE) {
+        int* parameter = (int*)_event->parameter;
+        int x = parameter[0];
+        int y = parameter[1];
+        component_cursor* cursor = dynamic_cast<component_cursor*>((SEEntity*)_entity);
+        if (cursor) {
+            cursor->x = x;
+            cursor->y = y;
+        }
+    }
+}

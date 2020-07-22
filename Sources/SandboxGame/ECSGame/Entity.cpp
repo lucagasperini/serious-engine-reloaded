@@ -34,7 +34,6 @@
 
 #include "Entity.h"
 #include "EventSystem.h"
-#include "InputSystem.h"
 #include "PositionSystem.h"
 #include "RenderSystem.h"
 #include <ECS/Manager.h>
@@ -98,8 +97,6 @@ void load_all_game_system()
 
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);
-    InputSystem* input_system = new InputSystem;
-    ECSManager::addSystem((SESystem*)input_system);
 }
 
 void load_all_game_entity()
@@ -153,9 +150,11 @@ void load_all_game_entity()
     camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;*/
     ECSManager::addEntity(camera, sizeof(Camera));
 
-    mouse_texture* e_mouse_texture = new mouse_texture;
-    e_mouse_texture->tex_data.SetData_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
-    ECSManager::addEntity((SEEntity*)e_mouse_texture, sizeof(mouse_texture));
+    cursor* e_cursor = new cursor;
+    e_cursor->texture.SetData_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
+    e_cursor->w = 32;
+    e_cursor->h = 32;
+    ECSManager::addEntity((SEEntity*)e_cursor, sizeof(cursor));
 
     MenuImage* logosam = new MenuImage();
     logosam->pos_x = 480;
@@ -185,112 +184,104 @@ void load_all_game_entity()
     menu_button_sp->pos_y = 300;
     menu_button_sp->pos_w = 300;
     menu_button_sp->pos_h = 50;
-    menu_button_sp->txt_align = 0;
+    menu_button_sp->align = 0;
     menu_button_sp->align_x = 0;
-    menu_button_sp->txt_fontdata = font_big;
-    menu_button_sp->txt_fontsize = 2;
-    menu_button_sp->txt_mode = 0;
-    menu_button_sp->txt_str = TRANS("SINGLE PLAYER");
-    menu_button_sp->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_sp->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_sp->fontdata = font_big;
+    menu_button_sp->fontsize = 2;
+    menu_button_sp->text = TRANS("SINGLE PLAYER");
+    menu_button_sp->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_sp->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_sp, sizeof(MenuButton));
 
     MenuButton* menu_button_net = new MenuButton;
     menu_button_net->pos_y = 375;
     menu_button_net->pos_w = 300;
     menu_button_net->pos_h = 50;
-    menu_button_net->txt_align = 0;
+    menu_button_net->align = 0;
     menu_button_net->align_x = 0;
-    menu_button_net->txt_fontdata = font_big;
-    menu_button_net->txt_fontsize = 2;
-    menu_button_net->txt_mode = 0;
-    menu_button_net->txt_str = TRANS("NETWORK");
-    menu_button_net->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_net->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_net->fontdata = font_big;
+    menu_button_net->fontsize = 2;
+    menu_button_net->text = TRANS("NETWORK");
+    menu_button_net->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_net->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_net, sizeof(MenuButton));
 
     MenuButton* menu_button_split = new MenuButton;
     menu_button_split->pos_y = 450;
     menu_button_split->pos_w = 300;
     menu_button_split->pos_h = 50;
-    menu_button_split->txt_align = 0;
+    menu_button_split->align = 0;
     menu_button_split->align_x = 0;
-    menu_button_split->txt_fontdata = font_big;
-    menu_button_split->txt_fontsize = 2;
-    menu_button_split->txt_mode = 0;
-    menu_button_split->txt_str = TRANS("SPLIT SCREEN");
-    menu_button_split->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_split->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_split->fontdata = font_big;
+    menu_button_split->fontsize = 2;
+    menu_button_split->text = TRANS("SPLIT SCREEN");
+    menu_button_split->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_split->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_split, sizeof(MenuButton));
 
     MenuButton* menu_button_demo = new MenuButton;
     menu_button_demo->pos_y = 525;
     menu_button_demo->pos_w = 300;
     menu_button_demo->pos_h = 50;
-    menu_button_demo->txt_align = 0;
+    menu_button_demo->align = 0;
     menu_button_demo->align_x = 0;
-    menu_button_demo->txt_fontdata = font_big;
-    menu_button_demo->txt_fontsize = 2;
-    menu_button_demo->txt_mode = 0;
-    menu_button_demo->txt_str = TRANS("DEMO");
-    menu_button_demo->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_demo->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_demo->fontdata = font_big;
+    menu_button_demo->fontsize = 2;
+    menu_button_demo->text = TRANS("DEMO");
+    menu_button_demo->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_demo->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_demo, sizeof(MenuButton));
 
     MenuButton* menu_button_mod = new MenuButton;
     menu_button_mod->pos_y = 600;
     menu_button_mod->pos_w = 300;
     menu_button_mod->pos_h = 50;
-    menu_button_mod->txt_align = 0;
+    menu_button_mod->align = 0;
     menu_button_mod->align_x = 0;
-    menu_button_mod->txt_fontdata = font_big;
-    menu_button_mod->txt_fontsize = 2;
-    menu_button_mod->txt_mode = 0;
-    menu_button_mod->txt_str = TRANS("MODS");
-    menu_button_mod->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_mod->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_mod->fontdata = font_big;
+    menu_button_mod->fontsize = 2;
+    menu_button_mod->text = TRANS("MODS");
+    menu_button_mod->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_mod->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_mod, sizeof(MenuButton));
 
     MenuButton* menu_button_hs = new MenuButton;
     menu_button_hs->pos_y = 675;
     menu_button_hs->pos_w = 300;
     menu_button_hs->pos_h = 50;
-    menu_button_hs->txt_align = 0;
+    menu_button_hs->align = 0;
     menu_button_hs->align_x = 0;
-    menu_button_hs->txt_fontdata = font_big;
-    menu_button_hs->txt_fontsize = 2;
-    menu_button_hs->txt_mode = 0;
-    menu_button_hs->txt_str = TRANS("HIGH SCORES");
-    menu_button_hs->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_hs->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_hs->fontdata = font_big;
+    menu_button_hs->fontsize = 2;
+    menu_button_hs->text = TRANS("HIGH SCORES");
+    menu_button_hs->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_hs->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_hs, sizeof(MenuButton));
 
     MenuButton* menu_button_opt = new MenuButton;
     menu_button_opt->pos_y = 750;
     menu_button_opt->pos_w = 300;
     menu_button_opt->pos_h = 50;
-    menu_button_opt->txt_align = 0;
+    menu_button_opt->align = 0;
     menu_button_opt->align_x = 0;
-    menu_button_opt->txt_fontdata = font_big;
-    menu_button_opt->txt_fontsize = 2;
-    menu_button_opt->txt_mode = 0;
-    menu_button_opt->txt_str = TRANS("OPTIONS");
-    menu_button_opt->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_opt->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_opt->fontdata = font_big;
+    menu_button_opt->fontsize = 2;
+    menu_button_opt->text = TRANS("OPTIONS");
+    menu_button_opt->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_opt->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_opt, sizeof(MenuButton));
 
     MenuButton* menu_button_quit = new MenuButton;
     menu_button_quit->pos_y = 825;
     menu_button_quit->pos_w = 300;
     menu_button_quit->pos_h = 50;
-    menu_button_quit->txt_align = 0;
+    menu_button_quit->align = 0;
     menu_button_quit->align_x = 0;
-    menu_button_quit->txt_fontdata = font_big;
-    menu_button_quit->txt_fontsize = 2;
-    menu_button_quit->txt_mode = 0;
-    menu_button_quit->txt_str = TRANS("QUIT");
-    menu_button_quit->sea_action = quitgame;
-    menu_button_quit->txt_color = SE_COL_ORANGE_LIGHT | 255;
-    menu_button_quit->btn_color2 = SE_COL_ORANGE_DARK | 255;
+    menu_button_quit->fontdata = font_big;
+    menu_button_quit->fontsize = 2;
+    menu_button_quit->text = TRANS("QUIT");
+    //menu_button_quit->sea_action = quitgame;
+    menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
+    menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
     ECSManager::addEntity((SEEntity*)menu_button_quit, sizeof(MenuButton));
 }

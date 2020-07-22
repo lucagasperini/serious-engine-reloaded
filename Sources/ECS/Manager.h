@@ -20,6 +20,7 @@
 
 #include "Entity.h"
 #include "Event.h"
+#include "Keybind.h"
 #include "System.h"
 #include <Engine/Engine.h>
 #include <condition_variable>

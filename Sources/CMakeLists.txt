@@ -972,7 +972,6 @@ add_executable(${SANDBOXGAME}
     SandboxGame/ECSGame/Entity.cpp
     SandboxGame/ECSGame/RenderSystem.cpp
     SandboxGame/ECSGame/PositionSystem.cpp
-    SandboxGame/ECSGame/InputSystem.cpp
     SandboxGame/ECSGame/EventSystem.cpp
 )
 

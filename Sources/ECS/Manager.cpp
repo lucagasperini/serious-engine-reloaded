@@ -262,9 +262,12 @@ void ECSManager::runThreadRender()
         BYTE* tmp_ptr = getFirst();
         while (SEEntity* entity = getEntity(tmp_ptr)) {
             render_system->update(entity);
-            render_system->trigger(entity, event);
+            if (event)
+                render_system->trigger(entity, event);
         }
         render_system->postupdate();
+        if (event)
+            removeEvent(event->code);
 
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->preupdate();

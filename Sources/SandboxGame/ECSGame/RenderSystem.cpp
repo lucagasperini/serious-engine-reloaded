@@ -146,36 +146,24 @@ void RenderSystem::update(SEEntity* entity)
     component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
     if (position && texture)
         updateTexture(position, texture);
-    component_mouse* mouse = dynamic_cast<component_mouse*>((SEEntity*)entity);
-    if (mouse && g_dbg_draw_cursor)
-        updateMousePos(mouse);
-    if (mouse && texture)
-        updateCursor(mouse, texture);
 
-    component_text* text = dynamic_cast<component_text*>((SEEntity*)entity);
-    component_mousefocus* mousefocus = dynamic_cast<component_mousefocus*>((SEEntity*)entity);
     component_button* button = dynamic_cast<component_button*>((SEEntity*)entity);
-    if (position && text && button && mousefocus)
-        updateButton(position, text, button, mousefocus);
-    else if (position && text)
-        updateText(position, text);
+    if (position && button)
+        updateButton(position, button);
+
+    component_cursor* cursor = dynamic_cast<component_cursor*>((SEEntity*)entity);
+    if (cursor)
+        updateCursor(cursor);
 }
 
-void RenderSystem::trigger(SEEntity* _entity, SEEvent* _event)
+void RenderSystem::updateCursor(component_cursor* _cursor)
 {
-}
+    if (g_dbg_draw_cursor)
+        dp->DrawBorder(_cursor->x, _cursor->y, _cursor->w, _cursor->h, g_fb_color);
 
-void RenderSystem::updateMousePos(component_mouse* _mouse)
-{
-    dp->DrawBorder(_mouse->mouse_x, _mouse->mouse_y,
-        32, 32, g_fb_color);
-}
-
-void RenderSystem::updateCursor(component_mouse* _mouse, component_texture* _texture)
-{
-    dp->PutTexture(&_texture->tex_data,
-        PIXaabbox2D(PIX2D(_mouse->mouse_x, _mouse->mouse_y),
-            PIX2D(_mouse->mouse_x + 32, _mouse->mouse_y + 32)));
+    dp->PutTexture(&_cursor->texture,
+        PIXaabbox2D(PIX2D(_cursor->x, _cursor->y),
+            PIX2D(_cursor->x + _cursor->w, _cursor->y + _cursor->h)));
 }
 
 void RenderSystem::updateTexture(component_position* _position, component_texture* _texture)
@@ -183,42 +171,27 @@ void RenderSystem::updateTexture(component_position* _position, component_textur
     dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
-void RenderSystem::updateText(component_position* _position, component_text* _text)
+void RenderSystem::updateButton(component_position* _position, component_button* _button)
 {
-    dp->SetFont(&_text->txt_fontdata);
+    dp->SetFont(&_button->fontdata);
     dp->SetTextScaling(1.0f);
     dp->SetTextAspect(1.0f);
-    dp->SetTextMode(_text->txt_mode);
-    PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
-
-    if (_text->txt_align == -1)
-        dp->PutText(_text->txt_str, box.Min()(1), box.Min()(2), _text->txt_color);
-    else if (_text->txt_align == +1)
-        dp->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), _text->txt_color);
-    else
-        dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), _text->txt_color);
-}
-
-void RenderSystem::updateButton(component_position* _position, component_text* _text, component_button* _button, component_mousefocus* _mousefocus)
-{
-    dp->SetFont(&_text->txt_fontdata);
-    dp->SetTextScaling(1.0f);
-    dp->SetTextAspect(1.0f);
-    dp->SetTextMode(_text->txt_mode);
-    PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
+    //dp->SetTextMode(_text->txt_mode);
+    PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y),
+        PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    if (_mousefocus->mf_focus)
-        col = _button->btn_color2;
+    if (_button->focus)
+        col = _button->color_focus;
     else
-        col = _text->txt_color;
+        col = _button->color;
 
-    if (_text->txt_align == -1)
-        dp->PutText(_text->txt_str, box.Min()(1), box.Min()(2), col);
-    else if (_text->txt_align == +1)
-        dp->PutTextR(_text->txt_str, box.Max()(1), box.Min()(2), col);
+    if (_button->align == -1)
+        dp->PutText(_button->text, box.Min()(1), box.Min()(2), col);
+    else if (_button->align == +1)
+        dp->PutTextR(_button->text, box.Max()(1), box.Min()(2), col);
     else
-        dp->PutTextC(_text->txt_str, box.Center()(1), box.Min()(2), col);
+        dp->PutTextC(_button->text, box.Center()(1), box.Min()(2), col);
 }
 
 void RenderSystem::updateBorder(component_position* _position)
