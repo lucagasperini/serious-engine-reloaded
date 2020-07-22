@@ -195,8 +195,10 @@ void ECSManager::run()
 
 void ECSManager::quit()
 {
-    for (ULONG i = 0; i < thread_number; i++)
+    for (ULONG i = 0; i < thread_number; i++) {
+        cv_update.notify_all();
         a_thread[i].join();
+    }
 }
 
 void ECSManager::init(BYTE* _start_ptr)
@@ -231,7 +233,9 @@ void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
         {
             std::unique_lock<std::mutex> lck(mutex_update);
             cv_update.notify_all();
-            cv_update.wait(lck, [] { return loop_status >= 0 && loop_status <= thread_number; });
+            cv_update.wait(lck, [] {
+                return (loop_status >= 0 && loop_status <= thread_number) || !g_game_started;
+            });
         }
 
         SEEvent* event = getEvent();
@@ -251,7 +255,9 @@ void ECSManager::runThreadRender()
         {
             std::unique_lock<std::mutex> lck(mutex_update);
             cv_update.notify_all();
-            cv_update.wait(lck, [] { return loop_status >= thread_number + 1; });
+            cv_update.wait(lck, [] {
+                return loop_status >= thread_number + 1 || !g_game_started;
+            });
         }
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->postupdate();
