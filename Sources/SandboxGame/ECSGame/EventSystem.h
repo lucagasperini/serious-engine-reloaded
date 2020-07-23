@@ -36,14 +36,14 @@ private:
 public:
     keybind* a_keybind;
     void preinit() override {}
-    void init(SEEntity* entity) override {}
+    void init(Entity* entity) override {}
     void postinit() override {}
 
     void preupdate() override;
-    void update(SEEntity* _entity) override;
+    void update(Entity* _entity) override;
     void postupdate() override {};
 
-    void updateButton(component_position* _position, component_button* _button);
+    void updateButton(ComponentPosition* _position, ComponentButton* _button);
 };
 
 #endif

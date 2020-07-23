@@ -40,7 +40,7 @@ void EntityManager::grow(ULONG _add)
     mem_alloc = a_entity;
 }
 
-SEEntity* EntityManager::get(BYTE*& _iter)
+Entity* EntityManager::get(BYTE*& _iter)
 {
     if (_iter >= mem_alloc) {
         _iter = a_entity;
@@ -57,23 +57,23 @@ SEEntity* EntityManager::get(BYTE*& _iter)
     ULONG* obj_size_ptr = (ULONG*)_iter;
     _iter += sizeof(ULONG);
 
-    SEEntity* return_ptr = (SEEntity*)_iter;
+    Entity* return_ptr = (Entity*)_iter;
     _iter += *obj_size_ptr;
 
     return return_ptr;
 }
 
-SEEntity* EntityManager::get(ULONG _id)
+Entity* EntityManager::get(ULONG _id)
 {
     BYTE* tmp_ptr = a_entity;
-    while (SEEntity* entity = get(tmp_ptr)) {
+    while (Entity* entity = get(tmp_ptr)) {
         if (entity->id == _id)
             return entity;
     }
     return NULL;
 }
 
-void EntityManager::add(SEEntity* _entity, ULONG _size)
+void EntityManager::add(Entity* _entity, ULONG _size)
 {
     _entity->id = entity_counter++;
 
@@ -90,7 +90,7 @@ void EntityManager::add(SEEntity* _entity, ULONG _size)
 void EntityManager::remove(ULONG _id)
 {
     BYTE* tmp_ptr = a_entity;
-    while (SEEntity* entity = get(tmp_ptr)) {
+    while (Entity* entity = get(tmp_ptr)) {
         if (entity->id == _id) {
             remove(entity);
             return;
@@ -98,7 +98,7 @@ void EntityManager::remove(ULONG _id)
     }
 }
 
-void EntityManager::remove(SEEntity* _entity)
+void EntityManager::remove(Entity* _entity)
 {
     BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
     memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));

@@ -25,9 +25,9 @@
 // 0000 0001
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x01
 
-struct SEEntity {
+struct Entity {
     ULONG id;
-    virtual ~SEEntity() {}
+    virtual ~Entity() {}
 };
 
 namespace SER::ECS {
@@ -52,14 +52,14 @@ public:
 
     void grow(ULONG _new);
 
-    SEEntity* get(ULONG _id);
-    SEEntity* get(BYTE*& _iter);
+    Entity* get(ULONG _id);
+    Entity* get(BYTE*& _iter);
     inline BYTE* ptr() { return a_entity; }
 
-    void add(SEEntity* _entity, ULONG _size);
+    void add(Entity* _entity, ULONG _size);
 
     void remove(ULONG _id);
-    void remove(SEEntity* _entity);
+    void remove(Entity* _entity);
 
     inline ULONG count() { return entity_counter; }
 };

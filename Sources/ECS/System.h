@@ -25,11 +25,11 @@ class System {
 private:
 public:
     virtual void preinit() = 0;
-    virtual void init(SEEntity* entity) = 0;
+    virtual void init(Entity* entity) = 0;
     virtual void postinit() = 0;
 
     virtual void preupdate() = 0;
-    virtual void update(SEEntity* entity) = 0;
+    virtual void update(Entity* entity) = 0;
     virtual void postupdate() = 0;
 };
 }

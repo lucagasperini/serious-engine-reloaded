@@ -38,7 +38,7 @@ std::condition_variable Manager::cv_update;
 ULONG Manager::number_update = 0;
 BOOL Manager::wait_update = TRUE;
 
-SEEvent Manager::a_event[SER_ECS_EVENT_MAX];
+Event Manager::a_event[SER_ECS_EVENT_MAX];
 ULONG Manager::event_number = 0;
 
 System* Manager::render_system;
@@ -107,14 +107,14 @@ void Manager::splitThreadMemory()
 void Manager::run()
 {
     BYTE* tmp_ptr = entity_manager->ptr();
-    while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
+    while (Entity* entity = entity_manager->get(tmp_ptr)) {
         render_system->init(entity);
     }
 
     tmp_ptr = entity_manager->ptr();
     for (ULONG i = 0; i < system_counter; i++) {
         a_system[i]->preinit();
-        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
+        while (Entity* entity = entity_manager->get(tmp_ptr)) {
             a_system[i]->init(entity);
         }
         a_system[i]->postinit();
@@ -155,7 +155,7 @@ void Manager::runThread(BYTE* _start_ptr, ULONG _number)
             });
         }
 
-        SEEntity* tmp_ptr = NULL;
+        Entity* tmp_ptr = NULL;
 
         for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
             tmp_ptr = entity_manager->get(_start_ptr);
@@ -187,7 +187,7 @@ void Manager::runThreadRender()
 
         render_system->preupdate();
         BYTE* tmp_ptr = entity_manager->ptr();
-        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
+        while (Entity* entity = entity_manager->get(tmp_ptr)) {
             render_system->update(entity);
         }
         render_system->postupdate();
@@ -210,7 +210,7 @@ void Manager::runThreadEvent()
 
         event_system->preupdate();
         BYTE* tmp_ptr = entity_manager->ptr();
-        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
+        while (Entity* entity = entity_manager->get(tmp_ptr)) {
             event_system->update(entity);
         }
         event_system->postupdate();
@@ -222,7 +222,7 @@ void Manager::runThreadEvent()
     }
 }
 
-SEEvent* Manager::getEvent()
+Event* Manager::getEvent()
 {
     if (event_number)
         return a_event;
@@ -244,7 +244,7 @@ void Manager::addEvent(UINT _code, void* _parameter)
     }
 }
 
-void Manager::addEvent(const SEEvent& _event)
+void Manager::addEvent(const Event& _event)
 {
     std::lock_guard<std::mutex> lg(mutex_event);
     if (event_number < SER_ECS_EVENT_MAX)
@@ -279,7 +279,7 @@ void Manager::removeEvent()
 void Manager::removeAllEvent()
 {
     std::lock_guard<std::mutex> lg(mutex_event);
-    memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(SEEvent));
+    memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(Event));
     event_number = 0;
 }
 

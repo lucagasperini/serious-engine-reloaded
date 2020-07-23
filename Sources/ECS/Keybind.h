@@ -22,7 +22,7 @@
 
 struct keybind {
     ULONG key;
-    SEEvent event;
+    Event event;
 };
 
 #endif

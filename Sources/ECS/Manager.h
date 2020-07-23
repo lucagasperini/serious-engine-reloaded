@@ -32,7 +32,7 @@
 
 #define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
 
-#define SER_ADD_ENTITY(_name, _entity) SER::ECS::Manager::getEntityManager()->add((SEEntity*)_name, sizeof(_entity));
+#define SER_ADD_ENTITY(_name, _entity) SER::ECS::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity));
 
 namespace SER::ECS {
 
@@ -49,7 +49,7 @@ private:
 
     static ULONG thread_number;
 
-    static SEEvent a_event[SER_ECS_EVENT_MAX];
+    static Event a_event[SER_ECS_EVENT_MAX];
     static ULONG event_number;
 
     static std::mutex mutex_event;
@@ -74,7 +74,7 @@ private:
     static EntityManager* entity_manager;
 
 public:
-    static SEEvent* getEvent();
+    static Event* getEvent();
 
     static void* searchEvent(UINT _event);
     static BOOL searchEvent(UINT _event, void* _parameter);
@@ -106,7 +106,7 @@ public:
 
     static void addSystem(System* _system);
     static void addEvent(UINT _code, void* _parameter);
-    static void addEvent(const SEEvent& _event);
+    static void addEvent(const Event& _event);
 };
 }
 #endif

@@ -61,7 +61,7 @@ void RenderSystem::postupdate()
         count_fps = 0.0f;
 }
 
-void RenderSystem::updatePosition(component_camera* _camera)
+void RenderSystem::updatePosition(ComponentCamera* _camera)
 {
     PIXaabbox2D box(PIX2D(0, 0), PIX2D(200, 100));
     //dp->SetFont(main_font_small);
@@ -86,14 +86,14 @@ void RenderSystem::updateFps()
     dp->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
-void RenderSystem::init(SEEntity* _entity)
+void RenderSystem::init(Entity* _entity)
 {
-    SER_GET_COMPONENT(window, component_window, _entity);
+    SER_GET_COMPONENT(window, ComponentWindow, _entity);
     if (window)
         initWindow(window);
 }
 
-void RenderSystem::initWindow(component_window* _window)
+void RenderSystem::initWindow(ComponentWindow* _window)
 {
     if (_window->win_pointer != NULL) {
         destroyWindow(_window);
@@ -129,15 +129,15 @@ void RenderSystem::initWindow(component_window* _window)
     }
 }
 
-void RenderSystem::update(SEEntity* _entity)
+void RenderSystem::update(Entity* _entity)
 {
-    SER_GET_COMPONENT(window, component_window, _entity);
+    SER_GET_COMPONENT(window, ComponentWindow, _entity);
     if (window)
         eventWindow(window);
-    SER_GET_COMPONENT(camera, component_camera, _entity);
+    SER_GET_COMPONENT(camera, ComponentCamera, _entity);
     if (camera)
         updateWorld(camera);
-    SER_GET_COMPONENT(position, component_position, _entity);
+    SER_GET_COMPONENT(position, ComponentPosition, _entity);
     if (g_dbg_draw_border && position)
         updateBorder(position);
     if (g_dbg_draw_id && position)
@@ -146,20 +146,20 @@ void RenderSystem::update(SEEntity* _entity)
         updatePosition(camera);
     if (g_dbg_draw_fps)
         updateFps();
-    SER_GET_COMPONENT(texture, component_texture, _entity);
+    SER_GET_COMPONENT(texture, ComponentTexture, _entity);
     if (position && texture)
         updateTexture(position, texture);
 
-    SER_GET_COMPONENT(button, component_button, _entity);
+    SER_GET_COMPONENT(button, ComponentButton, _entity);
     if (position && button)
         updateButton(position, button);
 
-    SER_GET_COMPONENT(cursor, component_cursor, _entity);
+    SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
     if (cursor)
         updateCursor(cursor);
 }
 
-void RenderSystem::updateCursor(component_cursor* _cursor)
+void RenderSystem::updateCursor(ComponentCursor* _cursor)
 {
     if (g_dbg_draw_cursor)
         dp->DrawBorder(_cursor->x, _cursor->y, _cursor->w, _cursor->h, g_fb_color);
@@ -169,12 +169,12 @@ void RenderSystem::updateCursor(component_cursor* _cursor)
             PIX2D(_cursor->x + _cursor->w, _cursor->y + _cursor->h)));
 }
 
-void RenderSystem::updateTexture(component_position* _position, component_texture* _texture)
+void RenderSystem::updateTexture(ComponentPosition* _position, ComponentTexture* _texture)
 {
     dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
-void RenderSystem::updateButton(component_position* _position, component_button* _button)
+void RenderSystem::updateButton(ComponentPosition* _position, ComponentButton* _button)
 {
     dp->SetFont(&_button->fontdata);
     dp->SetTextScaling(1.0f);
@@ -198,12 +198,12 @@ void RenderSystem::updateButton(component_position* _position, component_button*
         dp->PutTextC(_button->text, box.Center()(1), box.Min()(2), col);
 }
 
-void RenderSystem::updateBorder(component_position* _position)
+void RenderSystem::updateBorder(ComponentPosition* _position)
 {
     dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, g_fb_color);
 }
 
-void RenderSystem::updateId(SEEntity* _entity, component_position* _position)
+void RenderSystem::updateId(Entity* _entity, ComponentPosition* _position)
 {
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
     //dp->SetFont(main_font_small);
@@ -212,7 +212,7 @@ void RenderSystem::updateId(SEEntity* _entity, component_position* _position)
     dp->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
-void RenderSystem::updateWorld(component_camera* _camera)
+void RenderSystem::updateWorld(ComponentCamera* _camera)
 {
     CPlacement3D plCamera;
     plCamera.pl_PositionVector = _camera->cam_pos;
@@ -235,7 +235,7 @@ void RenderSystem::updateWorld(component_camera* _camera)
     RenderView(*g_world_data, *(CEntity*)NULL, prProjection, *dp);
 }
 
-void RenderSystem::destroyWindow(component_window* _window)
+void RenderSystem::destroyWindow(ComponentWindow* _window)
 {
     if (vp != NULL) {
         _pGfx->DestroyWindowCanvas(vp);
@@ -249,7 +249,7 @@ void RenderSystem::destroyWindow(component_window* _window)
     }
 }
 
-void RenderSystem::eventWindow(component_window* _window)
+void RenderSystem::eventWindow(ComponentWindow* _window)
 {
     if (Manager::searchEvent(SER_EVENT_FULLSCREEN_CHANGE, NULL)) {
         if (_window->win_flags & SDL_WINDOW_FULLSCREEN)

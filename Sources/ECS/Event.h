@@ -20,7 +20,7 @@
 
 #include <Engine/Base/Types.h>
 
-struct SEEvent {
+struct Event {
     UINT code;
     void* parameter;
 };

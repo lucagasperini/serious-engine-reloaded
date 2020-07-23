@@ -32,27 +32,27 @@ private:
 
 public:
     void preinit() override {}
-    void init(SEEntity* _entity) override;
+    void init(Entity* _entity) override;
     void postinit() override {}
 
-    void initWindow(component_window* _window);
+    void initWindow(ComponentWindow* _window);
 
     void preupdate();
-    void update(SEEntity* _entity) override;
+    void update(Entity* _entity) override;
     void postupdate();
 
-    void updateCursor(component_cursor* _cursor);
-    void updateTexture(component_position* _position, component_texture* _texture);
-    void updateButton(component_position* _position, component_button* _button);
-    void updateBorder(component_position* _position);
-    void updateId(SEEntity* _entity, component_position* _position);
-    void updatePosition(component_camera* _camera);
+    void updateCursor(ComponentCursor* _cursor);
+    void updateTexture(ComponentPosition* _position, ComponentTexture* _texture);
+    void updateButton(ComponentPosition* _position, ComponentButton* _button);
+    void updateBorder(ComponentPosition* _position);
+    void updateId(Entity* _entity, ComponentPosition* _position);
+    void updatePosition(ComponentCamera* _camera);
     void updateFps();
-    void updateWorld(component_camera* _camera);
+    void updateWorld(ComponentCamera* _camera);
 
-    void destroyWindow(component_window* _window);
+    void destroyWindow(ComponentWindow* _window);
 
-    void eventWindow(component_window* _window);
+    void eventWindow(ComponentWindow* _window);
 };
 
 #endif

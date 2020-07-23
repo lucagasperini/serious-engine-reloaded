@@ -25,7 +25,7 @@ extern BOOL g_event_current;
 
 using namespace SER::ECS;
 
-void PositionSystem::initScale(component_position* _position)
+void PositionSystem::initScale(ComponentPosition* _position)
 {
     FLOAT scaleX = (FLOAT)g_resolution_width / (FLOAT)g_virtual_resolution_width;
     FLOAT scaleY = (FLOAT)g_resolution_height / (FLOAT)g_virtual_resolution_height;
@@ -36,7 +36,7 @@ void PositionSystem::initScale(component_position* _position)
     _position->pos_h = (FLOAT)_position->pos_h * scaleY;
 }
 
-void PositionSystem::initAlign(component_position* _position, component_align* _align)
+void PositionSystem::initAlign(ComponentPosition* _position, ComponentAlign* _align)
 {
     ULONG center_x = g_resolution_width / 2;
     ULONG center_y = g_resolution_height / 2;
@@ -77,11 +77,11 @@ void PositionSystem::initAlign(component_position* _position, component_align* _
     }
 }
 
-void PositionSystem::init(SEEntity* _entity)
+void PositionSystem::init(Entity* _entity)
 {
     if (scale_x != g_resolution_width || scale_y != g_resolution_height) {
-        SER_GET_COMPONENT(position, component_position, _entity);
-        SER_GET_COMPONENT(align, component_align, _entity);
+        SER_GET_COMPONENT(position, ComponentPosition, _entity);
+        SER_GET_COMPONENT(align, ComponentAlign, _entity);
 
         if (position)
             initScale(position);
@@ -97,14 +97,14 @@ void PositionSystem::postinit()
     scale_y = g_resolution_height;
 }
 
-void PositionSystem::update(SEEntity* _entity)
+void PositionSystem::update(Entity* _entity)
 {
-    SER_GET_COMPONENT(cursor, component_cursor, _entity);
+    SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
     if (cursor)
         updateCursor(cursor);
 }
 
-void PositionSystem::updateCursor(component_cursor* _cursor)
+void PositionSystem::updateCursor(ComponentCursor* _cursor)
 {
     if (int* arg = (int*)Manager::searchEvent(SER_EVENT_MOUSE_MOVE)) {
         _cursor->x = arg[0];

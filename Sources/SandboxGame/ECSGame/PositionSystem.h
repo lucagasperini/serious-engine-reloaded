@@ -28,17 +28,17 @@ private:
 
 public:
     void preinit() override {}
-    void init(SEEntity* entity) override;
+    void init(Entity* entity) override;
     void postinit() override;
 
-    void initScale(component_position* _position);
-    void initAlign(component_position* _position, component_align* _align);
+    void initScale(ComponentPosition* _position);
+    void initAlign(ComponentPosition* _position, ComponentAlign* _align);
 
     void preupdate() override {};
-    void update(SEEntity* _entity) override;
+    void update(Entity* _entity) override;
     void postupdate() override {};
 
-    void updateCursor(component_cursor* _cursor);
+    void updateCursor(ComponentCursor* _cursor);
 };
 
 #endif

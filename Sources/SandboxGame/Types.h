@@ -76,7 +76,7 @@ typedef uint32_t COLOR;
     Fundamental types:              Upper Case              (INT, CHAR, UBYTE, etc...)
     Fundamental types with context: Upper Case              (INDEX, PIX, COLOR, etc...)
     Class Names:                    Pascal Case             (SEMainWindow, RenderSystem, Manager, etc...)
-    Struct Names:                   Lower Case              (component_position, component_keyboard, component_camera, etc...)
+    Struct Names:                   Pascal Case             (ComponentPosition, Entity, ComponentCamera, etc...)
     Function Names:                 Lower Case              (main, init, resolution_change, etc...)
     Method Names:                   Camel Case              (getX, addEntity, setDrawPort, etc...)
     Variables Names:                Lower Case              (result, manager, world_start_position, etc...)
@@ -117,7 +117,7 @@ typedef uint32_t COLOR;
     Dont use Fixme, Todo, Bug, Hack as block comment, use multiple inline if needed.
     Never use block comment as inline comment!
     Namespace must be short.
-    Struct are only container for other data, try to avoid define non Fundamental types.
+    Struct are only container for other data.
     When define a pointer of a variable, place the "*" char on type name, not the variable name (example : VOID* myptr).
     Float numbers end with "f" char and a number after point (example : 1.0f).
     Try to stay on 80 char row length (Except for comment).

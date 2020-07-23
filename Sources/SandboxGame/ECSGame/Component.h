@@ -70,7 +70,7 @@
 #define SER_EVENT_FULLSCREEN_CHANGE 0xF0
 #define SER_EVENT_RESOLUTION_CHANGE 0xF1
 
-struct component_window : component {
+struct ComponentWindow : component {
     CTString win_title;
     void* win_pointer = NULL;
     /* List of Gfx API for Serious Engine:
@@ -108,18 +108,18 @@ struct component_window : component {
     DisplayDepth win_depth = DisplayDepth::DD_32BIT;
 };
 
-struct component_position : component {
+struct ComponentPosition : component {
     UINT pos_x = 0;
     UINT pos_y = 0;
     UINT pos_w = 0;
     UINT pos_h = 0;
 };
 
-struct component_texture : component {
+struct ComponentTexture : component {
     CTextureObject tex_data;
 };
 
-struct component_camera : component {
+struct ComponentCamera : component {
     BOOL cam_on = TRUE;
     FLOAT cam_speed = 1.0f;
     FLOAT3D cam_pos;
@@ -127,7 +127,7 @@ struct component_camera : component {
     ANGLE cam_fov = 90.0f;
 };
 
-struct component_align : component {
+struct ComponentAlign : component {
     /*
     -2 => Left
     -1 => Center Left
@@ -146,17 +146,16 @@ struct component_align : component {
     INDEX align_y = 64;
 };
 
-struct component_button : component {
+struct ComponentButton : component {
     INDEX fontsize = 0;
     INDEX align = 0;
     CFontData fontdata;
     COLOR color = 0xff;
     COLOR color_focus = 0xff;
     CTString text;
-    BOOL focus = FALSE;
 };
 
-struct component_cursor : component {
+struct ComponentCursor : component {
     CTextureObject texture;
     UINT x = 0;
     UINT y = 0;
