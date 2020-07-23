@@ -21,7 +21,6 @@
 using namespace SER;
 
 extern BOOL g_game_started;
-extern UINT g_event_current;
 
 ULONG Manager::system_counter = 0;
 System* Manager::a_system[SER_ECS_SYSTEM_MAX];
@@ -34,15 +33,9 @@ std::mutex Manager::mutex_update;
 std::mutex Manager::mutex_counter;
 std::mutex Manager::mutex_end_frame;
 std::condition_variable Manager::cv_update;
-ULONG Manager::number_update = 0;
-BOOL Manager::wait_update = TRUE;
 
 System* Manager::render_system;
 System* Manager::event_system;
-
-std::mutex Manager::mutex_render;
-std::condition_variable Manager::cv_render;
-BOOL Manager::wait_render = TRUE;
 
 ULONG Manager::loop_status = 0;
 BOOL Manager::is_end_frame = FALSE;

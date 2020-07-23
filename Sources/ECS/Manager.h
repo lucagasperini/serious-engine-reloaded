@@ -52,15 +52,9 @@ private:
     static std::mutex mutex_counter;
     static std::mutex mutex_end_frame;
     static std::condition_variable cv_update;
-    static ULONG number_update;
-    static BOOL wait_update;
 
     static System* render_system;
     static System* event_system;
-
-    static std::mutex mutex_render;
-    static std::condition_variable cv_render;
-    static BOOL wait_render;
 
     static ULONG loop_status;
     static BOOL is_end_frame;
