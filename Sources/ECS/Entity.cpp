@@ -22,7 +22,7 @@ using namespace SER;
 EntityManager::EntityManager()
 {
     mem_entity_max = 0;
-    entity_counter = 0;
+    counter = 0;
 }
 
 EntityManager::~EntityManager()
@@ -75,7 +75,7 @@ Entity* EntityManager::get(ULONG _id)
 
 void EntityManager::add(Entity* _entity, ULONG _size)
 {
-    _entity->id = entity_counter++;
+    _entity->id = counter++;
 
     memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
     mem_alloc += sizeof(BYTE);

@@ -32,9 +32,9 @@ struct Event {
 class EventManager {
 private:
     Event a_event[SER_ECS_EVENT_MAX];
-    ULONG event_number;
+    ULONG counter;
 
-    std::mutex mutex_event;
+    std::mutex mutex;
 
 public:
     EventManager();
@@ -52,7 +52,7 @@ public:
     void remove();
     void removeAll();
 
-    inline ULONG count() { return event_number; }
+    inline ULONG count() { return counter; }
 };
 
 }

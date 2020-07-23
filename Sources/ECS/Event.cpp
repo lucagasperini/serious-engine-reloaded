@@ -22,7 +22,7 @@ using namespace SER;
 EventManager::EventManager()
 {
     memset(a_event, 0, sizeof(Event) * SER_ECS_EVENT_MAX);
-    event_number = 0;
+    counter = 0;
 }
 
 EventManager::~EventManager()
@@ -31,68 +31,68 @@ EventManager::~EventManager()
 
 void EventManager::add(UINT _code, void* _parameter)
 {
-    std::lock_guard<std::mutex> lg(mutex_event);
-    for (ULONG i = 0; i < event_number; i++) {
+    std::lock_guard<std::mutex> lg(mutex);
+    for (ULONG i = 0; i < counter; i++) {
         if (a_event[i].code == _code) {
             a_event[i].parameter = _parameter;
             return;
         }
     }
-    if (event_number < SER_ECS_EVENT_MAX) {
-        a_event[event_number].code = _code;
-        a_event[event_number++].parameter = _parameter;
+    if (counter < SER_ECS_EVENT_MAX) {
+        a_event[counter].code = _code;
+        a_event[counter++].parameter = _parameter;
     }
 }
 
 void EventManager::add(const Event& _event)
 {
-    std::lock_guard<std::mutex> lg(mutex_event);
-    if (event_number < SER_ECS_EVENT_MAX)
-        a_event[event_number++] = _event;
+    std::lock_guard<std::mutex> lg(mutex);
+    if (counter < SER_ECS_EVENT_MAX)
+        a_event[counter++] = _event;
 }
 
 Event* EventManager::get()
 {
-    if (event_number)
+    if (counter)
         return a_event;
     return NULL;
 }
 
 void EventManager::remove(UINT _event)
 {
-    if (event_number <= 0)
+    if (counter <= 0)
         return;
-    for (ULONG i = 0; i < event_number; i++) {
+    for (ULONG i = 0; i < counter; i++) {
         if (a_event[i].code == _event) {
-            std::lock_guard<std::mutex> lg(mutex_event);
+            std::lock_guard<std::mutex> lg(mutex);
             a_event[i].code = a_event[i + 1].code;
             a_event[i].parameter = a_event[i + 1].parameter;
-            event_number--;
+            counter--;
         }
     }
 }
 
 void EventManager::remove()
 {
-    if (event_number > 0) {
-        std::lock_guard<std::mutex> lg(mutex_event);
-        for (ULONG i = 0; i < event_number; i++)
+    if (counter > 0) {
+        std::lock_guard<std::mutex> lg(mutex);
+        for (ULONG i = 0; i < counter; i++)
             a_event[i] = a_event[i + 1];
 
-        event_number--;
+        counter--;
     }
 }
 
 void EventManager::removeAll()
 {
-    std::lock_guard<std::mutex> lg(mutex_event);
+    std::lock_guard<std::mutex> lg(mutex);
     memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(Event));
-    event_number = 0;
+    counter = 0;
 }
 
 void* EventManager::search(UINT _event)
 {
-    for (ULONG i = 0; i < event_number; i++)
+    for (ULONG i = 0; i < counter; i++)
         if (a_event[i].code == _event)
             return a_event[i].parameter;
     return NULL;
@@ -100,7 +100,7 @@ void* EventManager::search(UINT _event)
 
 BOOL EventManager::search(UINT _event, void* _parameter)
 {
-    for (ULONG i = 0; i < event_number; i++)
+    for (ULONG i = 0; i < counter; i++)
         if (a_event[i].code == _event && a_event[i].parameter == _parameter)
             return TRUE;
     return FALSE;

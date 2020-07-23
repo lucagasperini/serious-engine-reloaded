@@ -33,7 +33,7 @@ struct Entity {
 
 class EntityManager {
 private:
-    ULONG entity_counter;
+    ULONG counter;
     // Starting pointer for entity buffer
     BYTE* a_entity;
     // Maximum space on the buffer in byte
@@ -60,7 +60,7 @@ public:
     void remove(ULONG _id);
     void remove(Entity* _entity);
 
-    inline ULONG count() { return entity_counter; }
+    inline ULONG count() { return counter; }
 };
 
 }
