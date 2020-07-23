@@ -28,11 +28,10 @@
 #include <thread>
 
 #define SER_ECS_SYSTEM_MAX 256
-#define SER_ECS_EVENT_MAX 256
 
 #define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
 
-#define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity));
+#define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity))
 
 namespace SER {
 
@@ -48,11 +47,6 @@ private:
     static BYTE** a_thread_memory;
 
     static ULONG thread_number;
-
-    static Event a_event[SER_ECS_EVENT_MAX];
-    static ULONG event_number;
-
-    static std::mutex mutex_event;
 
     static std::mutex mutex_update;
     static std::mutex mutex_counter;
@@ -72,21 +66,15 @@ private:
     static BOOL is_end_frame;
 
     static EntityManager* entity_manager;
+    static EventManager* event_manager;
 
 public:
-    static Event* getEvent();
-
-    static void* searchEvent(UINT _event);
-    static BOOL searchEvent(UINT _event, void* _parameter);
-
-    static void removeEvent(UINT _event);
-    static void removeEvent();
-    static void removeAllEvent();
-
     Manager();
     ~Manager();
 
     static inline EntityManager* getEntityManager() { return entity_manager; }
+    static inline EventManager* getEventManager() { return event_manager; }
+
     static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(System* _event_system) { event_system = _event_system; };
 
@@ -105,8 +93,6 @@ public:
     static void runThreadEvent();
 
     static void addSystem(System* _system);
-    static void addEvent(UINT _code, void* _parameter);
-    static void addEvent(const Event& _event);
 };
 }
 #endif

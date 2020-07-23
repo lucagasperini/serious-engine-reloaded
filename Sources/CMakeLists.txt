@@ -958,6 +958,7 @@ set(ECSLIB "ser-ecs${DEBUGSUFFIX}")
 add_library(${ECSLIB} SHARED
     ECS/Manager.cpp
     ECS/Entity.cpp
+    ECS/Event.cpp
 )
 target_link_libraries(${ECSLIB} ${SENGINELIB})
 

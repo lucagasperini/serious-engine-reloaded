@@ -29,7 +29,6 @@ std::thread* Manager::a_thread = NULL;
 std::thread Manager::thread_event;
 BYTE** Manager::a_thread_memory = NULL;
 ULONG Manager::thread_number = 0;
-std::mutex Manager::mutex_event;
 
 std::mutex Manager::mutex_update;
 std::mutex Manager::mutex_counter;
@@ -37,9 +36,6 @@ std::mutex Manager::mutex_end_frame;
 std::condition_variable Manager::cv_update;
 ULONG Manager::number_update = 0;
 BOOL Manager::wait_update = TRUE;
-
-Event Manager::a_event[SER_ECS_EVENT_MAX];
-ULONG Manager::event_number = 0;
 
 System* Manager::render_system;
 System* Manager::event_system;
@@ -52,6 +48,7 @@ ULONG Manager::loop_status = 0;
 BOOL Manager::is_end_frame = FALSE;
 
 EntityManager* Manager::entity_manager;
+EventManager* Manager::event_manager;
 
 Manager::Manager()
 {
@@ -67,6 +64,7 @@ void Manager::init(ULONG _entity_space, ULONG _event_space)
 {
     entity_manager = new EntityManager;
     entity_manager->grow(_entity_space);
+    event_manager = new EventManager;
     system_counter = 0;
 }
 
@@ -214,87 +212,10 @@ void Manager::runThreadEvent()
             event_system->update(entity);
         }
         event_system->postupdate();
-        if (is_end_frame && event_number > 0) {
+        if (is_end_frame && event_manager->count() > 0) {
             //removeAllEvent();
             std::lock_guard<std::mutex> lg(mutex_end_frame);
             is_end_frame = FALSE;
         }
     }
-}
-
-Event* Manager::getEvent()
-{
-    if (event_number)
-        return a_event;
-    return NULL;
-}
-
-void Manager::addEvent(UINT _code, void* _parameter)
-{
-    std::lock_guard<std::mutex> lg(mutex_event);
-    for (ULONG i = 0; i < event_number; i++) {
-        if (a_event[i].code == _code) {
-            a_event[i].parameter = _parameter;
-            return;
-        }
-    }
-    if (event_number < SER_ECS_EVENT_MAX) {
-        a_event[event_number].code = _code;
-        a_event[event_number++].parameter = _parameter;
-    }
-}
-
-void Manager::addEvent(const Event& _event)
-{
-    std::lock_guard<std::mutex> lg(mutex_event);
-    if (event_number < SER_ECS_EVENT_MAX)
-        a_event[event_number++] = _event;
-}
-
-void Manager::removeEvent(UINT _event)
-{
-    if (event_number <= 0)
-        return;
-    for (ULONG i = 0; i < event_number; i++) {
-        if (a_event[i].code == _event) {
-            std::lock_guard<std::mutex> lg(mutex_event);
-            a_event[i].code = a_event[i + 1].code;
-            a_event[i].parameter = a_event[i + 1].parameter;
-            event_number--;
-        }
-    }
-}
-
-void Manager::removeEvent()
-{
-    if (event_number > 0) {
-        std::lock_guard<std::mutex> lg(mutex_event);
-        for (ULONG i = 0; i < event_number; i++)
-            a_event[i] = a_event[i + 1];
-
-        event_number--;
-    }
-}
-
-void Manager::removeAllEvent()
-{
-    std::lock_guard<std::mutex> lg(mutex_event);
-    memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(Event));
-    event_number = 0;
-}
-
-void* Manager::searchEvent(UINT _event)
-{
-    for (ULONG i = 0; i < event_number; i++)
-        if (a_event[i].code == _event)
-            return a_event[i].parameter;
-    return NULL;
-}
-
-BOOL Manager::searchEvent(UINT _event, void* _parameter)
-{
-    for (ULONG i = 0; i < event_number; i++)
-        if (a_event[i].code == _event && a_event[i].parameter == _parameter)
-            return TRUE;
-    return FALSE;
 }

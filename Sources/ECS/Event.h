@@ -19,11 +19,40 @@
 #define SER_ECS_EVENT_H
 
 #include <Engine/Base/Types.h>
+#include <mutex>
+#define SER_ECS_EVENT_MAX 256
+
 namespace SER {
 
 struct Event {
     UINT code;
     void* parameter;
+};
+
+class EventManager {
+private:
+    Event a_event[SER_ECS_EVENT_MAX];
+    ULONG event_number;
+
+    std::mutex mutex_event;
+
+public:
+    EventManager();
+    ~EventManager();
+
+    void add(UINT _code, void* _parameter);
+    void add(const Event& _event);
+
+    Event* get();
+
+    void* search(UINT _event);
+    BOOL search(UINT _event, void* _parameter);
+
+    void remove(UINT _event);
+    void remove();
+    void removeAll();
+
+    inline ULONG count() { return event_number; }
 };
 
 }
