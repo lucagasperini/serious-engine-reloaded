@@ -105,7 +105,7 @@ typedef uint32_t COLOR;
     Static Matrix:                  sm_ + Lower Case        (sm_matrix, sm_object, sm_mode, etc...)
     Array Argument Names:           _ + a_ + Lower Case     (_a_array, _a_object, _a_mode, etc...)
     Matrix Argument Names:          _ + m_ + Lower Case     (_m_matrix, _m_object, _m_mode, etc...)
-    Namespace:                      Lower Case              (ser, etc...)
+    Namespace:                      Upper Case              (SER, ECS, etc...)
     Component Member Names:         <Context>_ + Lower Case (cam_rot, kb_keybind, txt_fontsize, etc...)              
 
     Other cool RULES:
