@@ -18,6 +18,8 @@
 #include "RenderSystem.h"
 #include <ECS/Manager.h>
 
+using namespace SER::ECS;
+
 //TODO: Create a structure to manage fonts.
 //extern CFontData* main_font_small;
 //extern CFontData* main_font_medium;
@@ -184,8 +186,8 @@ void RenderSystem::updateButton(component_position* _position, component_button*
         PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    if (ECSManager::searchEvent(SER_EVENT_BUTTON_ONFOCUS, _button)) {
-        ECSManager::removeEvent(SER_EVENT_BUTTON_ONFOCUS);
+    if (Manager::searchEvent(SER_EVENT_BUTTON_ONFOCUS, _button)) {
+        Manager::removeEvent(SER_EVENT_BUTTON_ONFOCUS);
         col = _button->color_focus;
     } else {
         col = _button->color;
@@ -251,15 +253,15 @@ void RenderSystem::destroyWindow(component_window* _window)
 
 void RenderSystem::eventWindow(component_window* _window)
 {
-    if (ECSManager::searchEvent(SER_EVENT_FULLSCREEN_CHANGE, NULL)) {
+    if (Manager::searchEvent(SER_EVENT_FULLSCREEN_CHANGE, NULL)) {
         if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
             _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
         else
             _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
         g_game_started = FALSE;
-        ECSManager::removeEvent(SER_EVENT_FULLSCREEN_CHANGE);
+        Manager::removeEvent(SER_EVENT_FULLSCREEN_CHANGE);
     }
-    if (UINT* arg = (UINT*)ECSManager::searchEvent(SER_EVENT_RESOLUTION_CHANGE)) {
+    if (UINT* arg = (UINT*)Manager::searchEvent(SER_EVENT_RESOLUTION_CHANGE)) {
         if (arg[0] != 0 && arg[1] != 0) {
             if (g_resolution_width != arg[0] || g_resolution_height != arg[1]) {
                 g_virtual_resolution_width = g_resolution_width;
@@ -269,6 +271,6 @@ void RenderSystem::eventWindow(component_window* _window)
                 g_game_started = FALSE;
             }
         }
-        ECSManager::removeEvent(SER_EVENT_RESOLUTION_CHANGE);
+        Manager::removeEvent(SER_EVENT_RESOLUTION_CHANGE);
     }
 }

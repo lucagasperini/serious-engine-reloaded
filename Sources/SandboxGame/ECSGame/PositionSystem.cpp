@@ -23,6 +23,8 @@ extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
 extern BOOL g_event_current;
 
+using namespace SER::ECS;
+
 void PositionSystem::initScale(component_position* _position)
 {
     FLOAT scaleX = (FLOAT)g_resolution_width / (FLOAT)g_virtual_resolution_width;
@@ -105,7 +107,7 @@ void PositionSystem::update(SEEntity* _entity)
 
 void PositionSystem::updateCursor(component_cursor* _cursor)
 {
-    if (int* arg = (int*)ECSManager::searchEvent(SER_EVENT_MOUSE_MOVE)) {
+    if (int* arg = (int*)Manager::searchEvent(SER_EVENT_MOUSE_MOVE)) {
         _cursor->x = arg[0];
         _cursor->y = arg[1];
     }

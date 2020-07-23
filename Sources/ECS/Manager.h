@@ -35,7 +35,9 @@
 // 0000 0001
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x01
 
-class ECSManager {
+namespace SER::ECS {
+
+class Manager {
 private:
     static ULONG entity_counter;
     // Starting pointer for entity buffer
@@ -97,8 +99,8 @@ public:
     static void removeEvent();
     static void removeAllEvent();
 
-    ECSManager();
-    ~ECSManager();
+    Manager();
+    ~Manager();
 
     static inline void setRenderSystem(SESystem* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(SESystem* _event_system) { event_system = _event_system; };
@@ -125,5 +127,5 @@ public:
     static void addEvent(UINT _code, void* _parameter);
     static void addEvent(const SEEvent& _event);
 };
-
+}
 #endif

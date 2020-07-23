@@ -81,8 +81,8 @@ int submain(char* _cmdline)
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
-    ECSManager::setThreadNumber(number_thread);
-    ECSManager::splitThreadMemory();
+    SER::ECS::Manager::setThreadNumber(number_thread);
+    SER::ECS::Manager::splitThreadMemory();
 
     g_window_started = TRUE;
 
@@ -99,9 +99,9 @@ int submain(char* _cmdline)
 
         // start of game loop
         g_game_started = TRUE;
-        ECSManager::run();
+        SER::ECS::Manager::run();
 
-        ECSManager::quit();
+        SER::ECS::Manager::quit();
     }
     return TRUE;
 }

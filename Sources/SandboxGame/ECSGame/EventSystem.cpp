@@ -24,6 +24,8 @@ extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
 
+using namespace SER::ECS;
+
 void EventSystem::preupdate()
 {
     old_x = x;
@@ -38,7 +40,7 @@ void EventSystem::preupdate()
         event_parameter_mouse[1] = y;
         event_parameter_mouse[2] = delta_x;
         event_parameter_mouse[3] = delta_y;
-        ECSManager::addEvent(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
+        Manager::addEvent(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
     }
 
     while (SDL_PollEvent(&event)) {
@@ -49,7 +51,7 @@ void EventSystem::preupdate()
         if (event.type == SDL_KEYDOWN) {
             for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
                 if (a_keybind[i].key == event.key.keysym.sym && event.key.keysym.sym != 0) {
-                    ECSManager::addEvent(a_keybind[i].event);
+                    Manager::addEvent(a_keybind[i].event);
                 }
             }
         }
@@ -57,7 +59,7 @@ void EventSystem::preupdate()
             event_parameter_mouse_click[0] = x;
             event_parameter_mouse_click[1] = y;
             event_parameter_mouse_click[2] = event.button.button;
-            ECSManager::addEvent(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
+            Manager::addEvent(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
         }
     }
 }
@@ -75,6 +77,6 @@ void EventSystem::updateButton(component_position* _position, component_button* 
     if (_position->pos_x < x && _position->pos_y < y
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
-        ECSManager::addEvent(SER_EVENT_BUTTON_ONFOCUS, _button);
+        Manager::addEvent(SER_EVENT_BUTTON_ONFOCUS, _button);
     }
 }

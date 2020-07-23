@@ -18,49 +18,51 @@
 #include "Manager.h"
 #include <cmath>
 
+using namespace SER::ECS;
+
 extern BOOL g_game_started;
 extern UINT g_event_current;
 
-ULONG ECSManager::entity_counter = 0;
-BYTE* ECSManager::a_entity = NULL;
-ULONG ECSManager::mem_entity_max = 0;
-BYTE* ECSManager::mem_alloc = NULL;
-ULONG ECSManager::system_counter = 0;
-SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
-std::thread* ECSManager::a_thread = NULL;
-std::thread ECSManager::thread_event;
-BYTE** ECSManager::a_thread_memory = NULL;
-ULONG ECSManager::thread_number = 0;
-std::mutex ECSManager::mutex_event;
+ULONG Manager::entity_counter = 0;
+BYTE* Manager::a_entity = NULL;
+ULONG Manager::mem_entity_max = 0;
+BYTE* Manager::mem_alloc = NULL;
+ULONG Manager::system_counter = 0;
+SESystem* Manager::a_system[SER_ECS_SYSTEM_MAX];
+std::thread* Manager::a_thread = NULL;
+std::thread Manager::thread_event;
+BYTE** Manager::a_thread_memory = NULL;
+ULONG Manager::thread_number = 0;
+std::mutex Manager::mutex_event;
 
-std::mutex ECSManager::mutex_update;
-std::mutex ECSManager::mutex_counter;
-std::mutex ECSManager::mutex_end_frame;
-std::condition_variable ECSManager::cv_update;
-ULONG ECSManager::number_update = 0;
-BOOL ECSManager::wait_update = TRUE;
+std::mutex Manager::mutex_update;
+std::mutex Manager::mutex_counter;
+std::mutex Manager::mutex_end_frame;
+std::condition_variable Manager::cv_update;
+ULONG Manager::number_update = 0;
+BOOL Manager::wait_update = TRUE;
 
-SEEvent ECSManager::a_event[SER_ECS_EVENT_MAX];
-ULONG ECSManager::event_number = 0;
+SEEvent Manager::a_event[SER_ECS_EVENT_MAX];
+ULONG Manager::event_number = 0;
 
-SESystem* ECSManager::render_system;
-SESystem* ECSManager::event_system;
+SESystem* Manager::render_system;
+SESystem* Manager::event_system;
 
-std::mutex ECSManager::mutex_render;
-std::condition_variable ECSManager::cv_render;
-BOOL ECSManager::wait_render = TRUE;
+std::mutex Manager::mutex_render;
+std::condition_variable Manager::cv_render;
+BOOL Manager::wait_render = TRUE;
 
-ULONG ECSManager::loop_status = 0;
-BOOL ECSManager::is_end_frame = FALSE;
+ULONG Manager::loop_status = 0;
+BOOL Manager::is_end_frame = FALSE;
 
-ECSManager::ECSManager()
+Manager::Manager()
 {
     mem_entity_max = 0;
     entity_counter = 0;
     system_counter = 0;
 }
 
-ECSManager::~ECSManager()
+Manager::~Manager()
 {
     //delete a_system;
     //a_system = NULL;
@@ -68,12 +70,12 @@ ECSManager::~ECSManager()
     a_entity = NULL;
 }
 
-void ECSManager::addSystem(SESystem* _system)
+void Manager::addSystem(SESystem* _system)
 {
     a_system[system_counter++] = _system;
 }
 
-void ECSManager::grow(ULONG _add)
+void Manager::grow(ULONG _add)
 {
     mem_entity_max += _add;
     a_entity = (BYTE*)malloc(mem_entity_max);
@@ -82,7 +84,7 @@ void ECSManager::grow(ULONG _add)
     mem_alloc = a_entity;
 }
 
-void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
+void Manager::addEntity(SEEntity* _entity, ULONG _size)
 {
     _entity->id = entity_counter++;
 
@@ -96,7 +98,7 @@ void ECSManager::addEntity(SEEntity* _entity, ULONG _size)
     mem_alloc += _size;
 }
 
-SEEntity* ECSManager::getEntity(BYTE*& _iter)
+SEEntity* Manager::getEntity(BYTE*& _iter)
 {
     if (_iter >= mem_alloc) {
         _iter = a_entity;
@@ -119,7 +121,7 @@ SEEntity* ECSManager::getEntity(BYTE*& _iter)
     return return_ptr;
 }
 
-SEEntity* ECSManager::getEntity(ULONG _id)
+SEEntity* Manager::getEntity(ULONG _id)
 {
     BYTE* tmp_ptr = a_entity;
     while (SEEntity* entity = getEntity(tmp_ptr)) {
@@ -129,7 +131,7 @@ SEEntity* ECSManager::getEntity(ULONG _id)
     return NULL;
 }
 
-void ECSManager::removeEntity(ULONG _id)
+void Manager::removeEntity(ULONG _id)
 {
     BYTE* tmp_ptr = a_entity;
     while (SEEntity* entity = getEntity(tmp_ptr)) {
@@ -140,13 +142,13 @@ void ECSManager::removeEntity(ULONG _id)
     }
 }
 
-void ECSManager::removeEntity(SEEntity* _entity)
+void Manager::removeEntity(SEEntity* _entity)
 {
     BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
     memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
 }
 
-void ECSManager::setThreadNumber(ULONG _thread_number)
+void Manager::setThreadNumber(ULONG _thread_number)
 {
     if (a_thread)
         delete[] a_thread;
@@ -158,7 +160,7 @@ void ECSManager::setThreadNumber(ULONG _thread_number)
     a_thread_memory = new BYTE*[thread_number];
 }
 
-void ECSManager::splitThreadMemory()
+void Manager::splitThreadMemory()
 {
     if (thread_number <= 0)
         return;
@@ -175,7 +177,7 @@ void ECSManager::splitThreadMemory()
     }
 }
 
-void ECSManager::run()
+void Manager::run()
 {
     BYTE* tmp_ptr = a_entity;
     while (SEEntity* entity = getEntity(tmp_ptr)) {
@@ -198,7 +200,7 @@ void ECSManager::run()
     }
 }
 
-void ECSManager::quit()
+void Manager::quit()
 {
     thread_event.join();
     for (ULONG i = 0; i < thread_number; i++) {
@@ -207,7 +209,7 @@ void ECSManager::quit()
     }
 }
 
-void ECSManager::init(BYTE* _start_ptr)
+void Manager::init(BYTE* _start_ptr)
 {
     SEEntity* tmp_ptr = NULL;
     for (ULONG i = 0; i < system_counter; i++) {
@@ -219,7 +221,7 @@ void ECSManager::init(BYTE* _start_ptr)
     }
 }
 
-void ECSManager::update(BYTE* _start_ptr, ULONG _number)
+void Manager::update(BYTE* _start_ptr, ULONG _number)
 {
     SEEntity* tmp_ptr = NULL;
 
@@ -231,7 +233,7 @@ void ECSManager::update(BYTE* _start_ptr, ULONG _number)
     }
 }
 
-void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
+void Manager::runThread(BYTE* _start_ptr, ULONG _number)
 {
     while (g_game_started) {
         {
@@ -251,7 +253,7 @@ void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
     }
 }
 
-void ECSManager::runThreadRender()
+void Manager::runThreadRender()
 {
     while (g_game_started) {
         {
@@ -284,7 +286,7 @@ void ECSManager::runThreadRender()
     }
 }
 
-void ECSManager::runThreadEvent()
+void Manager::runThreadEvent()
 {
     while (g_game_started) {
 
@@ -302,14 +304,14 @@ void ECSManager::runThreadEvent()
     }
 }
 
-SEEvent* ECSManager::getEvent()
+SEEvent* Manager::getEvent()
 {
     if (event_number)
         return a_event;
     return NULL;
 }
 
-void ECSManager::addEvent(UINT _code, void* _parameter)
+void Manager::addEvent(UINT _code, void* _parameter)
 {
     std::lock_guard<std::mutex> lg(mutex_event);
     for (ULONG i = 0; i < event_number; i++) {
@@ -324,14 +326,14 @@ void ECSManager::addEvent(UINT _code, void* _parameter)
     }
 }
 
-void ECSManager::addEvent(const SEEvent& _event)
+void Manager::addEvent(const SEEvent& _event)
 {
     std::lock_guard<std::mutex> lg(mutex_event);
     if (event_number < SER_ECS_EVENT_MAX)
         a_event[event_number++] = _event;
 }
 
-void ECSManager::removeEvent(UINT _event)
+void Manager::removeEvent(UINT _event)
 {
     if (event_number <= 0)
         return;
@@ -345,7 +347,7 @@ void ECSManager::removeEvent(UINT _event)
     }
 }
 
-void ECSManager::removeEvent()
+void Manager::removeEvent()
 {
     if (event_number > 0) {
         std::lock_guard<std::mutex> lg(mutex_event);
@@ -356,14 +358,14 @@ void ECSManager::removeEvent()
     }
 }
 
-void ECSManager::removeAllEvent()
+void Manager::removeAllEvent()
 {
     std::lock_guard<std::mutex> lg(mutex_event);
     memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(SEEvent));
     event_number = 0;
 }
 
-void* ECSManager::searchEvent(UINT _event)
+void* Manager::searchEvent(UINT _event)
 {
     for (ULONG i = 0; i < event_number; i++)
         if (a_event[i].code == _event)
@@ -371,7 +373,7 @@ void* ECSManager::searchEvent(UINT _event)
     return NULL;
 }
 
-BOOL ECSManager::searchEvent(UINT _event, void* _parameter)
+BOOL Manager::searchEvent(UINT _event, void* _parameter)
 {
     for (ULONG i = 0; i < event_number; i++)
         if (a_event[i].code == _event && a_event[i].parameter == _parameter)

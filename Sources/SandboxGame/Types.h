@@ -75,7 +75,7 @@ typedef uint32_t COLOR;
 
     Fundamental types:              Upper Case              (INT, CHAR, UBYTE, etc...)
     Fundamental types with context: Upper Case              (INDEX, PIX, COLOR, etc...)
-    Class Names:                    Pascal Case             (SEMainWindow, RenderSystem, ECSManager, etc...)
+    Class Names:                    Pascal Case             (SEMainWindow, RenderSystem, Manager, etc...)
     Struct Names:                   Lower Case              (component_position, component_keyboard, component_camera, etc...)
     Function Names:                 Lower Case              (main, init, resolution_change, etc...)
     Method Names:                   Camel Case              (getX, addEntity, setDrawPort, etc...)
