@@ -21,7 +21,7 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class EventSystem : SER::ECS::System {
+class EventSystem : SER::System {
 private:
     int x = 0;
     int y = 0;
@@ -34,13 +34,13 @@ private:
     SDL_Event event;
 
 public:
-    keybind* a_keybind;
+    SER::Keybind* a_keybind;
     void preinit() override {}
-    void init(Entity* entity) override {}
+    void init(SER::Entity* entity) override {}
     void postinit() override {}
 
     void preupdate() override;
-    void update(Entity* _entity) override;
+    void update(SER::Entity* _entity) override;
     void postupdate() override {};
 
     void updateButton(ComponentPosition* _position, ComponentButton* _button);

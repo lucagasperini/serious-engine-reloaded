@@ -18,7 +18,7 @@
 #include "RenderSystem.h"
 #include <ECS/Manager.h>
 
-using namespace SER::ECS;
+using namespace SER;
 
 //TODO: Create a structure to manage fonts.
 //extern CFontData* main_font_small;

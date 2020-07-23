@@ -57,7 +57,7 @@
 #define SE_WINDOW_RECOVERY_W 640
 #define SE_WINDOW_RECOVERY_H 480
 
-using namespace SER::ECS;
+using namespace SER;
 
 void quitgame()
 {
@@ -69,8 +69,8 @@ void load_all_game_system()
     RenderSystem* render_system = new RenderSystem;
     Manager::setRenderSystem((System*)render_system);
 
-    keybind* a_keybind = new keybind[SER_KEYBIND_MAX];
-    memset(a_keybind, 0, sizeof(keybind) * SER_KEYBIND_MAX);
+    Keybind* a_keybind = new Keybind[SER_KEYBIND_MAX];
+    memset(a_keybind, 0, sizeof(Keybind) * SER_KEYBIND_MAX);
     a_keybind[0].event.code = SER_EVENT_FULLSCREEN_CHANGE;
     a_keybind[0].key = SDLK_F1;
     a_keybind[0].event.parameter = NULL;

@@ -19,10 +19,12 @@
 #define SER_ECS_EVENT_H
 
 #include <Engine/Base/Types.h>
+namespace SER {
 
 struct Event {
     UINT code;
     void* parameter;
 };
 
+}
 #endif

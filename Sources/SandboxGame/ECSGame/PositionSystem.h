@@ -21,21 +21,21 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class PositionSystem : SER::ECS::System {
+class PositionSystem : SER::System {
 private:
     UINT scale_x = 0;
     UINT scale_y = 0;
 
 public:
     void preinit() override {}
-    void init(Entity* entity) override;
+    void init(SER::Entity* entity) override;
     void postinit() override;
 
     void initScale(ComponentPosition* _position);
     void initAlign(ComponentPosition* _position, ComponentAlign* _align);
 
     void preupdate() override {};
-    void update(Entity* _entity) override;
+    void update(SER::Entity* _entity) override;
     void postupdate() override {};
 
     void updateCursor(ComponentCursor* _cursor);

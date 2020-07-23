@@ -17,7 +17,7 @@
 
 #include "Entity.h"
 
-using namespace SER::ECS;
+using namespace SER;
 
 EntityManager::EntityManager()
 {

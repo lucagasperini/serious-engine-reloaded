@@ -21,24 +21,24 @@
 #include "Component.h"
 #include <ECS/Manager.h>
 
-struct MainWindow : Entity, ComponentWindow {
+struct MainWindow : SER::Entity, ComponentWindow {
 };
 
-struct Cursor : Entity, ComponentCursor {
+struct Cursor : SER::Entity, ComponentCursor {
 };
 
-struct MenuImage : Entity,
+struct MenuImage : SER::Entity,
                    ComponentTexture,
                    ComponentPosition {
 };
 
-struct MenuButton : Entity,
+struct MenuButton : SER::Entity,
                     ComponentPosition,
                     ComponentAlign,
                     ComponentButton {
 };
 
-struct Camera : Entity,
+struct Camera : SER::Entity,
                 ComponentCamera {
 };
 

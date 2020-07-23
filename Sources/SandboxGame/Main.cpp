@@ -76,7 +76,7 @@ int submain(char* _cmdline)
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     // Add space for 1 MB + 1 MB
-    SER::ECS::Manager::init(1048576, 1048576);
+    SER::Manager::init(1048576, 1048576);
 
     load_all_game_system();
     load_all_game_entity();
@@ -84,8 +84,8 @@ int submain(char* _cmdline)
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
-    SER::ECS::Manager::setThreadNumber(number_thread);
-    SER::ECS::Manager::splitThreadMemory();
+    SER::Manager::setThreadNumber(number_thread);
+    SER::Manager::splitThreadMemory();
 
     g_window_started = TRUE;
 
@@ -102,9 +102,9 @@ int submain(char* _cmdline)
 
         // start of game loop
         g_game_started = TRUE;
-        SER::ECS::Manager::run();
+        SER::Manager::run();
 
-        SER::ECS::Manager::quit();
+        SER::Manager::quit();
     }
     return TRUE;
 }

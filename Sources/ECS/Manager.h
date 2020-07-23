@@ -32,9 +32,9 @@
 
 #define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
 
-#define SER_ADD_ENTITY(_name, _entity) SER::ECS::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity));
+#define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity));
 
-namespace SER::ECS {
+namespace SER {
 
 class Manager {
 private:

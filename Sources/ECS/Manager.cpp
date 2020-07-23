@@ -18,7 +18,7 @@
 #include "Manager.h"
 #include <cmath>
 
-using namespace SER::ECS;
+using namespace SER;
 
 extern BOOL g_game_started;
 extern UINT g_event_current;

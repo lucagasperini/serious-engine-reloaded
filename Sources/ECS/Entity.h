@@ -25,12 +25,11 @@
 // 0000 0001
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x01
 
+namespace SER {
 struct Entity {
     ULONG id;
     virtual ~Entity() {}
 };
-
-namespace SER::ECS {
 
 class EntityManager {
 private:

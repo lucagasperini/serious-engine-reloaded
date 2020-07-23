@@ -24,7 +24,7 @@ extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
 
-using namespace SER::ECS;
+using namespace SER;
 
 void EventSystem::preupdate()
 {

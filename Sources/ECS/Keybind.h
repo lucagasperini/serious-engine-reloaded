@@ -19,10 +19,11 @@
 #define SER_ECS_KEYBIND_H
 
 #include "Event.h"
-
-struct keybind {
+namespace SER {
+struct Keybind {
     ULONG key;
     Event event;
 };
+}
 
 #endif

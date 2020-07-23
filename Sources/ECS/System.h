@@ -20,7 +20,7 @@
 
 #include "Entity.h"
 
-namespace SER::ECS {
+namespace SER {
 class System {
 private:
 public:
