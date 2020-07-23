@@ -35,6 +35,8 @@
 // 0000 0001
 #define SER_ECS_ENTITY_FLAG_ALLOC 0x01
 
+#define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
+
 namespace SER::ECS {
 
 class Manager {
@@ -53,7 +55,7 @@ private:
 
     static ULONG system_counter;
 
-    static SESystem* a_system[SER_ECS_SYSTEM_MAX];
+    static System* a_system[SER_ECS_SYSTEM_MAX];
 
     static std::thread* a_thread;
     static std::thread thread_event;
@@ -74,8 +76,8 @@ private:
     static ULONG number_update;
     static BOOL wait_update;
 
-    static SESystem* render_system;
-    static SESystem* event_system;
+    static System* render_system;
+    static System* event_system;
 
     static std::mutex mutex_render;
     static std::condition_variable cv_render;
@@ -102,8 +104,8 @@ public:
     Manager();
     ~Manager();
 
-    static inline void setRenderSystem(SESystem* _render_system) { render_system = _render_system; };
-    static inline void setEventSystem(SESystem* _event_system) { event_system = _event_system; };
+    static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
+    static inline void setEventSystem(System* _event_system) { event_system = _event_system; };
 
     static void grow(ULONG _new);
 
@@ -123,7 +125,7 @@ public:
     static void runThreadEvent();
 
     static void addEntity(SEEntity* _entity, ULONG _size);
-    static void addSystem(SESystem* _system);
+    static void addSystem(System* _system);
     static void addEvent(UINT _code, void* _parameter);
     static void addEvent(const SEEvent& _event);
 };

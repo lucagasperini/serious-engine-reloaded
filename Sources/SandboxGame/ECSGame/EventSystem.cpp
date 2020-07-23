@@ -66,8 +66,9 @@ void EventSystem::preupdate()
 
 void EventSystem::update(SEEntity* _entity)
 {
-    component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
-    component_button* button = dynamic_cast<component_button*>((SEEntity*)_entity);
+    SER_GET_COMPONENT(position, component_position, _entity);
+    SER_GET_COMPONENT(button, component_button, _entity);
+
     if (button && position)
         updateButton(position, button);
 }

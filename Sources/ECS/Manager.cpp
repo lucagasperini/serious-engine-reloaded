@@ -28,7 +28,7 @@ BYTE* Manager::a_entity = NULL;
 ULONG Manager::mem_entity_max = 0;
 BYTE* Manager::mem_alloc = NULL;
 ULONG Manager::system_counter = 0;
-SESystem* Manager::a_system[SER_ECS_SYSTEM_MAX];
+System* Manager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* Manager::a_thread = NULL;
 std::thread Manager::thread_event;
 BYTE** Manager::a_thread_memory = NULL;
@@ -45,8 +45,8 @@ BOOL Manager::wait_update = TRUE;
 SEEvent Manager::a_event[SER_ECS_EVENT_MAX];
 ULONG Manager::event_number = 0;
 
-SESystem* Manager::render_system;
-SESystem* Manager::event_system;
+System* Manager::render_system;
+System* Manager::event_system;
 
 std::mutex Manager::mutex_render;
 std::condition_variable Manager::cv_render;
@@ -70,7 +70,7 @@ Manager::~Manager()
     a_entity = NULL;
 }
 
-void Manager::addSystem(SESystem* _system)
+void Manager::addSystem(System* _system)
 {
     a_system[system_counter++] = _system;
 }

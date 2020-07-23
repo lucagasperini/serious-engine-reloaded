@@ -80,8 +80,8 @@ void PositionSystem::initAlign(component_position* _position, component_align* _
 void PositionSystem::init(SEEntity* _entity)
 {
     if (scale_x != g_resolution_width || scale_y != g_resolution_height) {
-        component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
-        component_align* align = dynamic_cast<component_align*>((SEEntity*)_entity);
+        SER_GET_COMPONENT(position, component_position, _entity);
+        SER_GET_COMPONENT(align, component_align, _entity);
 
         if (position)
             initScale(position);
@@ -99,8 +99,7 @@ void PositionSystem::postinit()
 
 void PositionSystem::update(SEEntity* _entity)
 {
-
-    component_cursor* cursor = dynamic_cast<component_cursor*>((SEEntity*)_entity);
+    SER_GET_COMPONENT(cursor, component_cursor, _entity);
     if (cursor)
         updateCursor(cursor);
 }

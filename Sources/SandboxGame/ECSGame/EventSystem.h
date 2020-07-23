@@ -21,7 +21,7 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class EventSystem : SESystem {
+class EventSystem : SER::ECS::System {
 private:
     int x = 0;
     int y = 0;

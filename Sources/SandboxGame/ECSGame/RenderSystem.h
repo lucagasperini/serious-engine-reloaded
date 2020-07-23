@@ -21,7 +21,7 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class RenderSystem : SESystem {
+class RenderSystem : SER::ECS::System {
 private:
     int64_t tloop1;
     int64_t tloop2;
@@ -32,13 +32,13 @@ private:
 
 public:
     void preinit() override {}
-    void init(SEEntity* entity) override;
+    void init(SEEntity* _entity) override;
     void postinit() override {}
 
     void initWindow(component_window* _window);
 
     void preupdate();
-    void update(SEEntity* entity) override;
+    void update(SEEntity* _entity) override;
     void postupdate();
 
     void updateCursor(component_cursor* _cursor);

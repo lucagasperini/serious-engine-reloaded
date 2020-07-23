@@ -22,6 +22,7 @@
 
 struct SEEntity {
     ULONG id;
+    virtual ~SEEntity() {}
 };
 
 #endif

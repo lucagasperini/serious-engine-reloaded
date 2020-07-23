@@ -20,7 +20,8 @@
 
 #include "Entity.h"
 
-class SESystem {
+namespace SER::ECS {
+class System {
 private:
 public:
     virtual void preinit() = 0;
@@ -31,5 +32,6 @@ public:
     virtual void update(SEEntity* entity) = 0;
     virtual void postupdate() = 0;
 };
+}
 
 #endif

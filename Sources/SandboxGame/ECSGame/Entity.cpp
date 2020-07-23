@@ -67,7 +67,7 @@ void quitgame()
 void load_all_game_system()
 {
     RenderSystem* render_system = new RenderSystem;
-    Manager::setRenderSystem((SESystem*)render_system);
+    Manager::setRenderSystem((System*)render_system);
 
     keybind* a_keybind = new keybind[SER_KEYBIND_MAX];
     memset(a_keybind, 0, sizeof(keybind) * SER_KEYBIND_MAX);
@@ -93,10 +93,10 @@ void load_all_game_system()
 
     EventSystem* event_system = new EventSystem;
     event_system->a_keybind = a_keybind;
-    Manager::setEventSystem((SESystem*)event_system);
+    Manager::setEventSystem((System*)event_system);
 
     PositionSystem* position_system = new PositionSystem;
-    Manager::addSystem((SESystem*)position_system);
+    Manager::addSystem((System*)position_system);
 }
 
 void load_all_game_entity()

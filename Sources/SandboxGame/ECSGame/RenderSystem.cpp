@@ -86,9 +86,9 @@ void RenderSystem::updateFps()
     dp->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
-void RenderSystem::init(SEEntity* entity)
+void RenderSystem::init(SEEntity* _entity)
 {
-    component_window* window = dynamic_cast<component_window*>((SEEntity*)entity);
+    SER_GET_COMPONENT(window, component_window, _entity);
     if (window)
         initWindow(window);
 }
@@ -129,34 +129,32 @@ void RenderSystem::initWindow(component_window* _window)
     }
 }
 
-void RenderSystem::update(SEEntity* entity)
+void RenderSystem::update(SEEntity* _entity)
 {
-    component_window* window = dynamic_cast<component_window*>((SEEntity*)entity);
+    SER_GET_COMPONENT(window, component_window, _entity);
     if (window)
         eventWindow(window);
-    component_camera* camera = dynamic_cast<component_camera*>((SEEntity*)entity);
+    SER_GET_COMPONENT(camera, component_camera, _entity);
     if (camera)
         updateWorld(camera);
-
-    component_position* position = dynamic_cast<component_position*>((SEEntity*)entity);
+    SER_GET_COMPONENT(position, component_position, _entity);
     if (g_dbg_draw_border && position)
         updateBorder(position);
     if (g_dbg_draw_id && position)
-        updateId(entity, position);
+        updateId(_entity, position);
     if (g_dbg_draw_position && camera)
         updatePosition(camera);
     if (g_dbg_draw_fps)
         updateFps();
-
-    component_texture* texture = dynamic_cast<component_texture*>((SEEntity*)entity);
+    SER_GET_COMPONENT(texture, component_texture, _entity);
     if (position && texture)
         updateTexture(position, texture);
 
-    component_button* button = dynamic_cast<component_button*>((SEEntity*)entity);
+    SER_GET_COMPONENT(button, component_button, _entity);
     if (position && button)
         updateButton(position, button);
 
-    component_cursor* cursor = dynamic_cast<component_cursor*>((SEEntity*)entity);
+    SER_GET_COMPONENT(cursor, component_cursor, _entity);
     if (cursor)
         updateCursor(cursor);
 }
