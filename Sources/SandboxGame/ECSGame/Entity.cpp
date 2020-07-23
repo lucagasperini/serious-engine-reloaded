@@ -101,10 +101,6 @@ void load_all_game_system()
 
 void load_all_game_entity()
 {
-
-    // Add space for 1 MB
-    Manager::grow(1048576);
-
     CFontData font_small;
     CFontData font_medium;
     CFontData font_big;
@@ -116,13 +112,13 @@ void load_all_game_entity()
     font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
-    main_window* entity_window = new main_window;
-    entity_window->win_title = "Serious Engine Sandbox Game";
-    entity_window->win_api = GfxAPIType::GAT_OGL;
-    entity_window->win_adapter = 0;
-    entity_window->win_depth = DisplayDepth::DD_32BIT;
-    entity_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
-    Manager::addEntity((SEEntity*)entity_window, sizeof(main_window));
+    main_window* e_window = new main_window;
+    e_window->win_title = "Serious Engine Sandbox Game";
+    e_window->win_api = GfxAPIType::GAT_OGL;
+    e_window->win_adapter = 0;
+    e_window->win_depth = DisplayDepth::DD_32BIT;
+    e_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
+    SER_ADD_ENTITY(e_window, main_window);
 
     /*
     game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
@@ -135,11 +131,11 @@ void load_all_game_entity()
     game_control->kb_keybind[SE_KEYBIND_DEBUG_CURSOR] = SDLK_F10;
     */
 
-    Camera* camera = new Camera();
-    camera->cam_fov = 90.0f;
-    camera->cam_pos = world_start_position;
-    camera->cam_rot = world_start_rotation;
-    camera->cam_speed = 1.0f; /*
+    camera* e_camera = new camera();
+    e_camera->cam_fov = 90.0f;
+    e_camera->cam_pos = world_start_position;
+    e_camera->cam_rot = world_start_rotation;
+    e_camera->cam_speed = 1.0f; /*
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F12;
     camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;
@@ -148,39 +144,39 @@ void load_all_game_entity()
     camera->kb_keybind[SE_KEYBIND_CAMERA_BACK] = SDLK_DOWN;
     camera->kb_keybind[SE_KEYBIND_CAMERA_UP] = SDLK_SPACE;
     camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;*/
-    Manager::addEntity(camera, sizeof(Camera));
+    SER_ADD_ENTITY(e_camera, camera);
 
     cursor* e_cursor = new cursor;
     e_cursor->texture.SetData_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
     e_cursor->w = 32;
     e_cursor->h = 32;
-    Manager::addEntity((SEEntity*)e_cursor, sizeof(cursor));
+    SER_ADD_ENTITY(e_cursor, cursor);
 
-    MenuImage* logosam = new MenuImage();
+    menu_image* logosam = new menu_image();
     logosam->pos_x = 480;
     logosam->pos_y = 10;
     logosam->pos_w = 1024;
     logosam->pos_h = 256;
     logosam->tex_data.SetData_t(CTFILENAME("Textures\\Logo\\logo.tex"));
-    Manager::addEntity((SEEntity*)logosam, sizeof(MenuImage));
+    SER_ADD_ENTITY(logosam, menu_image);
 
-    MenuImage* logoct = new MenuImage();
+    menu_image* logoct = new menu_image();
     logoct->pos_x = 16;
     logoct->pos_y = 864;
     logoct->pos_w = 200;
     logoct->pos_h = 200;
     logoct->tex_data.SetData_t(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-    Manager::addEntity((SEEntity*)logoct, sizeof(MenuImage));
+    SER_ADD_ENTITY(logoct, menu_image);
 
-    MenuImage* logose = new MenuImage();
+    menu_image* logose = new menu_image();
     logose->pos_x = 1704;
     logose->pos_y = 864;
     logose->pos_w = 200;
     logose->pos_h = 200;
     logose->tex_data.SetData_t(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-    Manager::addEntity((SEEntity*)logose, sizeof(MenuImage));
+    SER_ADD_ENTITY(logose, menu_image);
 
-    MenuButton* menu_button_sp = new MenuButton;
+    menu_button* menu_button_sp = new menu_button;
     menu_button_sp->pos_y = 300;
     menu_button_sp->pos_w = 300;
     menu_button_sp->pos_h = 50;
@@ -191,9 +187,9 @@ void load_all_game_entity()
     menu_button_sp->text = TRANS("SINGLE PLAYER");
     menu_button_sp->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_sp->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_sp, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_sp, menu_button);
 
-    MenuButton* menu_button_net = new MenuButton;
+    menu_button* menu_button_net = new menu_button;
     menu_button_net->pos_y = 375;
     menu_button_net->pos_w = 300;
     menu_button_net->pos_h = 50;
@@ -204,9 +200,9 @@ void load_all_game_entity()
     menu_button_net->text = TRANS("NETWORK");
     menu_button_net->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_net->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_net, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_net, menu_button);
 
-    MenuButton* menu_button_split = new MenuButton;
+    menu_button* menu_button_split = new menu_button;
     menu_button_split->pos_y = 450;
     menu_button_split->pos_w = 300;
     menu_button_split->pos_h = 50;
@@ -217,9 +213,9 @@ void load_all_game_entity()
     menu_button_split->text = TRANS("SPLIT SCREEN");
     menu_button_split->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_split->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_split, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_split, menu_button);
 
-    MenuButton* menu_button_demo = new MenuButton;
+    menu_button* menu_button_demo = new menu_button;
     menu_button_demo->pos_y = 525;
     menu_button_demo->pos_w = 300;
     menu_button_demo->pos_h = 50;
@@ -230,9 +226,9 @@ void load_all_game_entity()
     menu_button_demo->text = TRANS("DEMO");
     menu_button_demo->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_demo->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_demo, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_demo, menu_button);
 
-    MenuButton* menu_button_mod = new MenuButton;
+    menu_button* menu_button_mod = new menu_button;
     menu_button_mod->pos_y = 600;
     menu_button_mod->pos_w = 300;
     menu_button_mod->pos_h = 50;
@@ -243,9 +239,9 @@ void load_all_game_entity()
     menu_button_mod->text = TRANS("MODS");
     menu_button_mod->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_mod->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_mod, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_mod, menu_button);
 
-    MenuButton* menu_button_hs = new MenuButton;
+    menu_button* menu_button_hs = new menu_button;
     menu_button_hs->pos_y = 675;
     menu_button_hs->pos_w = 300;
     menu_button_hs->pos_h = 50;
@@ -256,9 +252,9 @@ void load_all_game_entity()
     menu_button_hs->text = TRANS("HIGH SCORES");
     menu_button_hs->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_hs->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_hs, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_hs, menu_button);
 
-    MenuButton* menu_button_opt = new MenuButton;
+    menu_button* menu_button_opt = new menu_button;
     menu_button_opt->pos_y = 750;
     menu_button_opt->pos_w = 300;
     menu_button_opt->pos_h = 50;
@@ -269,9 +265,9 @@ void load_all_game_entity()
     menu_button_opt->text = TRANS("OPTIONS");
     menu_button_opt->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_opt->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_opt, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_opt, menu_button);
 
-    MenuButton* menu_button_quit = new MenuButton;
+    menu_button* menu_button_quit = new menu_button;
     menu_button_quit->pos_y = 825;
     menu_button_quit->pos_w = 300;
     menu_button_quit->pos_h = 50;
@@ -283,5 +279,5 @@ void load_all_game_entity()
     //menu_button_quit->sea_action = quitgame;
     menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
-    Manager::addEntity((SEEntity*)menu_button_quit, sizeof(MenuButton));
+    SER_ADD_ENTITY(menu_button_quit, menu_button);
 }

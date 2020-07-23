@@ -957,6 +957,7 @@ set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 set(ECSLIB "ser-ecs${DEBUGSUFFIX}")
 add_library(${ECSLIB} SHARED
     ECS/Manager.cpp
+    ECS/Entity.cpp
 )
 target_link_libraries(${ECSLIB} ${SENGINELIB})
 

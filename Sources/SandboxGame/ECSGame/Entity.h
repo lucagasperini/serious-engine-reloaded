@@ -27,18 +27,18 @@ struct main_window : SEEntity, component_window {
 struct cursor : SEEntity, component_cursor {
 };
 
-struct MenuImage : SEEntity,
-                   component_texture,
-                   component_position {
+struct menu_image : SEEntity,
+                    component_texture,
+                    component_position {
 };
 
-struct MenuButton : SEEntity,
-                    component_position,
-                    component_align,
-                    component_button {
+struct menu_button : SEEntity,
+                     component_position,
+                     component_align,
+                     component_button {
 };
 
-struct Camera : SEEntity,
+struct camera : SEEntity,
                 component_camera {
 };
 

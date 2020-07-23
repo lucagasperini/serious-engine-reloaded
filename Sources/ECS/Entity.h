@@ -20,9 +20,49 @@
 
 #include <Engine/Base/Types.h>
 
+// 0000 0000
+#define SER_ECS_ENTITY_FLAG_FREE 0x00
+// 0000 0001
+#define SER_ECS_ENTITY_FLAG_ALLOC 0x01
+
 struct SEEntity {
     ULONG id;
     virtual ~SEEntity() {}
 };
 
+namespace SER::ECS {
+
+class EntityManager {
+private:
+    ULONG entity_counter;
+    // Starting pointer for entity buffer
+    BYTE* a_entity;
+    // Maximum space on the buffer in byte
+    // Start to 0 and grow by addspace
+    // Where: addspace is the size to add in the buffer
+    ULONG mem_entity_max;
+    // Pointer for allocations
+    // Start at a_entity and jump for sizeof(ULONG) + objsize
+    // Where: objsize is the size of an entity
+    BYTE* mem_alloc;
+
+public:
+    EntityManager();
+    ~EntityManager();
+
+    void grow(ULONG _new);
+
+    SEEntity* get(ULONG _id);
+    SEEntity* get(BYTE*& _iter);
+    inline BYTE* ptr() { return a_entity; }
+
+    void add(SEEntity* _entity, ULONG _size);
+
+    void remove(ULONG _id);
+    void remove(SEEntity* _entity);
+
+    inline ULONG count() { return entity_counter; }
+};
+
+}
 #endif

@@ -23,10 +23,6 @@ using namespace SER::ECS;
 extern BOOL g_game_started;
 extern UINT g_event_current;
 
-ULONG Manager::entity_counter = 0;
-BYTE* Manager::a_entity = NULL;
-ULONG Manager::mem_entity_max = 0;
-BYTE* Manager::mem_alloc = NULL;
 ULONG Manager::system_counter = 0;
 System* Manager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* Manager::a_thread = NULL;
@@ -55,97 +51,28 @@ BOOL Manager::wait_render = TRUE;
 ULONG Manager::loop_status = 0;
 BOOL Manager::is_end_frame = FALSE;
 
+EntityManager* Manager::entity_manager;
+
 Manager::Manager()
 {
-    mem_entity_max = 0;
-    entity_counter = 0;
-    system_counter = 0;
 }
 
 Manager::~Manager()
 {
     //delete a_system;
     //a_system = NULL;
-    delete a_entity;
-    a_entity = NULL;
+}
+
+void Manager::init(ULONG _entity_space, ULONG _event_space)
+{
+    entity_manager = new EntityManager;
+    entity_manager->grow(_entity_space);
+    system_counter = 0;
 }
 
 void Manager::addSystem(System* _system)
 {
     a_system[system_counter++] = _system;
-}
-
-void Manager::grow(ULONG _add)
-{
-    mem_entity_max += _add;
-    a_entity = (BYTE*)malloc(mem_entity_max);
-    memset(a_entity, 0, mem_entity_max);
-
-    mem_alloc = a_entity;
-}
-
-void Manager::addEntity(SEEntity* _entity, ULONG _size)
-{
-    _entity->id = entity_counter++;
-
-    memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
-    mem_alloc += sizeof(BYTE);
-
-    memcpy(mem_alloc, &_size, sizeof(ULONG));
-    mem_alloc += sizeof(ULONG);
-
-    memcpy(mem_alloc, _entity, _size);
-    mem_alloc += _size;
-}
-
-SEEntity* Manager::getEntity(BYTE*& _iter)
-{
-    if (_iter >= mem_alloc) {
-        _iter = a_entity;
-        return NULL;
-    }
-
-    if (*_iter ^ SER_ECS_ENTITY_FLAG_ALLOC) {
-        _iter += *((ULONG*)_iter + sizeof(BYTE)) + sizeof(BYTE);
-        return getEntity(_iter);
-    }
-
-    _iter += sizeof(BYTE);
-
-    ULONG* obj_size_ptr = (ULONG*)_iter;
-    _iter += sizeof(ULONG);
-
-    SEEntity* return_ptr = (SEEntity*)_iter;
-    _iter += *obj_size_ptr;
-
-    return return_ptr;
-}
-
-SEEntity* Manager::getEntity(ULONG _id)
-{
-    BYTE* tmp_ptr = a_entity;
-    while (SEEntity* entity = getEntity(tmp_ptr)) {
-        if (entity->id == _id)
-            return entity;
-    }
-    return NULL;
-}
-
-void Manager::removeEntity(ULONG _id)
-{
-    BYTE* tmp_ptr = a_entity;
-    while (SEEntity* entity = getEntity(tmp_ptr)) {
-        if (entity->id == _id) {
-            removeEntity(entity);
-            return;
-        }
-    }
-}
-
-void Manager::removeEntity(SEEntity* _entity)
-{
-    BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
-    memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
 }
 
 void Manager::setThreadNumber(ULONG _thread_number)
@@ -165,13 +92,13 @@ void Manager::splitThreadMemory()
     if (thread_number <= 0)
         return;
 
-    BYTE* tmp_ptr = a_entity;
-    ULONG entity_thread = entity_counter / thread_number;
+    BYTE* tmp_ptr = entity_manager->ptr();
+    ULONG entity_thread = entity_manager->count() / thread_number;
 
-    a_thread_memory[0] = a_entity;
+    a_thread_memory[0] = entity_manager->ptr();
     for (ULONG n_thread = 1; n_thread < thread_number; n_thread++) {
         for (ULONG n_entity = 0; n_entity < entity_thread; n_entity++) {
-            getEntity(tmp_ptr);
+            entity_manager->get(tmp_ptr);
         }
         a_thread_memory[n_thread] = tmp_ptr;
     }
@@ -179,19 +106,27 @@ void Manager::splitThreadMemory()
 
 void Manager::run()
 {
-    BYTE* tmp_ptr = a_entity;
-    while (SEEntity* entity = getEntity(tmp_ptr)) {
+    BYTE* tmp_ptr = entity_manager->ptr();
+    while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
         render_system->init(entity);
     }
-    init(a_entity);
+
+    tmp_ptr = entity_manager->ptr();
+    for (ULONG i = 0; i < system_counter; i++) {
+        a_system[i]->preinit();
+        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
+            a_system[i]->init(entity);
+        }
+        a_system[i]->postinit();
+    }
 
     if (thread_number > 0) {
 
-        ULONG entity_thread = entity_counter / thread_number;
+        ULONG entity_thread = entity_manager->count() / thread_number;
 
         for (ULONG i = 0; i < thread_number; i++) {
             if (i == thread_number - 1)
-                entity_thread = entity_counter - (entity_thread * (thread_number - 1));
+                entity_thread = entity_manager->count() - (entity_thread * (thread_number - 1));
 
             a_thread[i] = std::thread(runThread, a_thread_memory[i], entity_thread);
         }
@@ -209,30 +144,6 @@ void Manager::quit()
     }
 }
 
-void Manager::init(BYTE* _start_ptr)
-{
-    SEEntity* tmp_ptr = NULL;
-    for (ULONG i = 0; i < system_counter; i++) {
-        a_system[i]->preinit();
-        while (tmp_ptr = getEntity(_start_ptr)) {
-            a_system[i]->init(tmp_ptr);
-        }
-        a_system[i]->postinit();
-    }
-}
-
-void Manager::update(BYTE* _start_ptr, ULONG _number)
-{
-    SEEntity* tmp_ptr = NULL;
-
-    for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
-        tmp_ptr = getEntity(_start_ptr);
-        for (ULONG i = 0; i < system_counter; i++) {
-            a_system[i]->update(tmp_ptr);
-        }
-    }
-}
-
 void Manager::runThread(BYTE* _start_ptr, ULONG _number)
 {
     while (g_game_started) {
@@ -244,7 +155,14 @@ void Manager::runThread(BYTE* _start_ptr, ULONG _number)
             });
         }
 
-        update(_start_ptr, _number);
+        SEEntity* tmp_ptr = NULL;
+
+        for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
+            tmp_ptr = entity_manager->get(_start_ptr);
+            for (ULONG i = 0; i < system_counter; i++) {
+                a_system[i]->update(tmp_ptr);
+            }
+        }
 
         {
             std::lock_guard<std::mutex> lck(mutex_counter);
@@ -268,8 +186,8 @@ void Manager::runThreadRender()
         }
 
         render_system->preupdate();
-        BYTE* tmp_ptr = getFirst();
-        while (SEEntity* entity = getEntity(tmp_ptr)) {
+        BYTE* tmp_ptr = entity_manager->ptr();
+        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
             render_system->update(entity);
         }
         render_system->postupdate();
@@ -291,8 +209,8 @@ void Manager::runThreadEvent()
     while (g_game_started) {
 
         event_system->preupdate();
-        BYTE* tmp_ptr = getFirst();
-        while (SEEntity* entity = getEntity(tmp_ptr)) {
+        BYTE* tmp_ptr = entity_manager->ptr();
+        while (SEEntity* entity = entity_manager->get(tmp_ptr)) {
             event_system->update(entity);
         }
         event_system->postupdate();

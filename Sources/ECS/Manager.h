@@ -30,29 +30,14 @@
 #define SER_ECS_SYSTEM_MAX 256
 #define SER_ECS_EVENT_MAX 256
 
-// 0000 0000
-#define SER_ECS_ENTITY_FLAG_FREE 0x00
-// 0000 0001
-#define SER_ECS_ENTITY_FLAG_ALLOC 0x01
-
 #define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
+
+#define SER_ADD_ENTITY(_name, _entity) SER::ECS::Manager::getEntityManager()->add((SEEntity*)_name, sizeof(_entity));
 
 namespace SER::ECS {
 
 class Manager {
 private:
-    static ULONG entity_counter;
-    // Starting pointer for entity buffer
-    static BYTE* a_entity;
-    // Maximum space on the buffer in byte
-    // Start to 0 and grow by addspace
-    // Where: addspace is the size to add in the buffer
-    static ULONG mem_entity_max;
-    // Pointer for allocations
-    // Start at a_entity and jump for sizeof(ULONG) + objsize
-    // Where: objsize is the size of an entity
-    static BYTE* mem_alloc;
-
     static ULONG system_counter;
 
     static System* a_system[SER_ECS_SYSTEM_MAX];
@@ -86,17 +71,14 @@ private:
     static ULONG loop_status;
     static BOOL is_end_frame;
 
+    static EntityManager* entity_manager;
+
 public:
-    static SEEntity* getEntity(ULONG _id);
-    static SEEntity* getEntity(BYTE*& _iter);
-    static inline BYTE* getFirst() { return a_entity; }
     static SEEvent* getEvent();
 
     static void* searchEvent(UINT _event);
     static BOOL searchEvent(UINT _event, void* _parameter);
 
-    static void removeEntity(ULONG _id);
-    static void removeEntity(SEEntity* _entity);
     static void removeEvent(UINT _event);
     static void removeEvent();
     static void removeAllEvent();
@@ -104,13 +86,11 @@ public:
     Manager();
     ~Manager();
 
+    static inline EntityManager* getEntityManager() { return entity_manager; }
     static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(System* _event_system) { event_system = _event_system; };
 
-    static void grow(ULONG _new);
-
-    static void init(BYTE* _start_ptr);
-    static void update(BYTE* _start_ptr, ULONG _number);
+    static void init(ULONG _entity_space, ULONG _event_space);
 
     static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }
@@ -124,7 +104,6 @@ public:
     static void runThreadRender();
     static void runThreadEvent();
 
-    static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(System* _system);
     static void addEvent(UINT _code, void* _parameter);
     static void addEvent(const SEEvent& _event);
