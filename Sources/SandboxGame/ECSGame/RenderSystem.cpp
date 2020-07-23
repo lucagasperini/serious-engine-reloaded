@@ -129,6 +129,9 @@ void RenderSystem::initWindow(component_window* _window)
 
 void RenderSystem::update(SEEntity* entity)
 {
+    component_window* window = dynamic_cast<component_window*>((SEEntity*)entity);
+    if (window)
+        eventWindow(window);
     component_camera* camera = dynamic_cast<component_camera*>((SEEntity*)entity);
     if (camera)
         updateWorld(camera);
@@ -181,11 +184,12 @@ void RenderSystem::updateButton(component_position* _position, component_button*
         PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    if (_button->focus)
+    if (ECSManager::searchEvent(SER_EVENT_BUTTON_ONFOCUS, _button)) {
+        ECSManager::removeEvent(SER_EVENT_BUTTON_ONFOCUS);
         col = _button->color_focus;
-    else
+    } else {
         col = _button->color;
-
+    }
     if (_button->align == -1)
         dp->PutText(_button->text, box.Min()(1), box.Min()(2), col);
     else if (_button->align == +1)
@@ -242,5 +246,29 @@ void RenderSystem::destroyWindow(component_window* _window)
         // destroy it
         SDL_DestroyWindow((SDL_Window*)_window->win_pointer);
         _window->win_pointer = NULL;
+    }
+}
+
+void RenderSystem::eventWindow(component_window* _window)
+{
+    if (ECSManager::searchEvent(SER_EVENT_FULLSCREEN_CHANGE, NULL)) {
+        if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
+            _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
+        else
+            _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
+        g_game_started = FALSE;
+        ECSManager::removeEvent(SER_EVENT_FULLSCREEN_CHANGE);
+    }
+    if (UINT* arg = (UINT*)ECSManager::searchEvent(SER_EVENT_RESOLUTION_CHANGE)) {
+        if (arg[0] != 0 && arg[1] != 0) {
+            if (g_resolution_width != arg[0] || g_resolution_height != arg[1]) {
+                g_virtual_resolution_width = g_resolution_width;
+                g_virtual_resolution_height = g_resolution_height;
+                g_resolution_width = arg[0];
+                g_resolution_height = arg[1];
+                g_game_started = FALSE;
+            }
+        }
+        ECSManager::removeEvent(SER_EVENT_RESOLUTION_CHANGE);
     }
 }

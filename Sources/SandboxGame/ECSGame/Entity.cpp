@@ -57,18 +57,21 @@
 #define SE_WINDOW_RECOVERY_W 640
 #define SE_WINDOW_RECOVERY_H 480
 
-keybind* a_keybind = new keybind[SER_KEYBIND_MAX];
-
 void quitgame()
 {
     //g_game_started = FALSE;
 }
 
-void load_keybind()
+void load_all_game_system()
 {
+    RenderSystem* render_system = new RenderSystem;
+    ECSManager::setRenderSystem((SESystem*)render_system);
+
+    keybind* a_keybind = new keybind[SER_KEYBIND_MAX];
     memset(a_keybind, 0, sizeof(keybind) * SER_KEYBIND_MAX);
     a_keybind[0].event.code = SER_EVENT_FULLSCREEN_CHANGE;
     a_keybind[0].key = SDLK_F1;
+    a_keybind[0].event.parameter = NULL;
     UINT* p_res_vga = new UINT[2] { 640, 480 };
     a_keybind[1].event.code = SER_EVENT_RESOLUTION_CHANGE;
     a_keybind[1].event.parameter = p_res_vga;
@@ -85,15 +88,10 @@ void load_keybind()
     a_keybind[4].event.code = SER_EVENT_RESOLUTION_CHANGE;
     a_keybind[4].event.parameter = p_res_hd;
     a_keybind[4].key = SDLK_F5;
-}
 
-void load_all_game_system()
-{
-    RenderSystem* render_system = new RenderSystem;
-    ECSManager::setRenderSystem((SESystem*)render_system);
     EventSystem* event_system = new EventSystem;
     event_system->a_keybind = a_keybind;
-    ECSManager::addSystem((SESystem*)event_system);
+    ECSManager::setEventSystem((SESystem*)event_system);
 
     PositionSystem* position_system = new PositionSystem;
     ECSManager::addSystem((SESystem*)position_system);

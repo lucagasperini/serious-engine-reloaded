@@ -62,53 +62,19 @@ void EventSystem::preupdate()
     }
 }
 
-void EventSystem::trigger(SEEntity* _entity, SEEvent* _event)
+void EventSystem::update(SEEntity* _entity)
 {
-    component_window* window = dynamic_cast<component_window*>((SEEntity*)_entity);
-    if (window)
-        eventWindow(window, _event);
-
     component_position* position = dynamic_cast<component_position*>((SEEntity*)_entity);
     component_button* button = dynamic_cast<component_button*>((SEEntity*)_entity);
     if (button && position)
-        eventButton(position, button, _event);
+        updateButton(position, button);
 }
 
-void EventSystem::eventButton(component_position* _position, component_button* _button, SEEvent* _event)
+void EventSystem::updateButton(component_position* _position, component_button* _button)
 {
-    if (_event->code == SER_EVENT_MOUSE_MOVE) {
-        int* parameter = (int*)_event->parameter;
-        int x = parameter[0];
-        int y = parameter[1];
-        if (_position->pos_x < x && _position->pos_y < y
-            && _position->pos_x + _position->pos_w > x
-            && _position->pos_y + _position->pos_h > y) {
-            _button->focus = TRUE;
-        } else {
-            _button->focus = FALSE;
-        }
-    }
-}
-
-void EventSystem::eventWindow(component_window* _window, SEEvent* _event)
-{
-    if (_event->code == SER_EVENT_FULLSCREEN_CHANGE) {
-        if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
-            _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
-        else
-            _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
-        g_game_started = FALSE;
-    }
-    if (_event->code == SER_EVENT_RESOLUTION_CHANGE) {
-        UINT* tmp_parameter = (UINT*)_event->parameter;
-        if (tmp_parameter != NULL && tmp_parameter[0] != 0 && tmp_parameter[1] != 0) {
-            if (g_resolution_width != tmp_parameter[0] || g_resolution_height != tmp_parameter[1]) {
-                g_virtual_resolution_width = g_resolution_width;
-                g_virtual_resolution_height = g_resolution_height;
-                g_resolution_width = tmp_parameter[0];
-                g_resolution_height = tmp_parameter[1];
-                g_game_started = FALSE;
-            }
-        }
+    if (_position->pos_x < x && _position->pos_y < y
+        && _position->pos_x + _position->pos_w > x
+        && _position->pos_y + _position->pos_h > y) {
+        ECSManager::addEvent(SER_EVENT_BUTTON_ONFOCUS, _button);
     }
 }

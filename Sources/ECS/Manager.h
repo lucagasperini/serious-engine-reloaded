@@ -54,6 +54,7 @@ private:
     static SESystem* a_system[SER_ECS_SYSTEM_MAX];
 
     static std::thread* a_thread;
+    static std::thread thread_event;
 
     static BYTE** a_thread_memory;
 
@@ -66,17 +67,20 @@ private:
 
     static std::mutex mutex_update;
     static std::mutex mutex_counter;
+    static std::mutex mutex_end_frame;
     static std::condition_variable cv_update;
     static ULONG number_update;
     static BOOL wait_update;
 
     static SESystem* render_system;
+    static SESystem* event_system;
 
     static std::mutex mutex_render;
     static std::condition_variable cv_render;
     static BOOL wait_render;
 
     static ULONG loop_status;
+    static BOOL is_end_frame;
 
 public:
     static SEEntity* getEntity(ULONG _id);
@@ -84,22 +88,25 @@ public:
     static inline BYTE* getFirst() { return a_entity; }
     static SEEvent* getEvent();
 
-    static BOOL searchEvent(UINT _event);
+    static void* searchEvent(UINT _event);
+    static BOOL searchEvent(UINT _event, void* _parameter);
 
     static void removeEntity(ULONG _id);
     static void removeEntity(SEEntity* _entity);
     static void removeEvent(UINT _event);
     static void removeEvent();
+    static void removeAllEvent();
 
     ECSManager();
     ~ECSManager();
 
     static inline void setRenderSystem(SESystem* _render_system) { render_system = _render_system; };
+    static inline void setEventSystem(SESystem* _event_system) { event_system = _event_system; };
 
     static void grow(ULONG _new);
 
     static void init(BYTE* _start_ptr);
-    static void update(BYTE* _start_ptr, ULONG _number, SEEvent* _event);
+    static void update(BYTE* _start_ptr, ULONG _number);
 
     static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }
@@ -111,6 +118,7 @@ public:
 
     static void runThread(BYTE* _start_ptr, ULONG _number);
     static void runThreadRender();
+    static void runThreadEvent();
 
     static void addEntity(SEEntity* _entity, ULONG _size);
     static void addSystem(SESystem* _system);

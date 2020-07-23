@@ -40,12 +40,10 @@ public:
     void postinit() override {}
 
     void preupdate() override;
-    void update(SEEntity* entity) override {};
+    void update(SEEntity* _entity) override;
     void postupdate() override {};
 
-    void eventWindow(component_window* _window, SEEvent* _event);
-    void eventButton(component_position* _position, component_button* _button, SEEvent* _event);
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+    void updateButton(component_position* _position, component_button* _button);
 };
 
 #endif

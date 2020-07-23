@@ -41,8 +41,6 @@ public:
     void update(SEEntity* entity) override;
     void postupdate();
 
-    void trigger(SEEntity* _entity, SEEvent* _event) override {};
-
     void updateCursor(component_cursor* _cursor);
     void updateTexture(component_position* _position, component_texture* _texture);
     void updateButton(component_position* _position, component_button* _button);
@@ -53,6 +51,8 @@ public:
     void updateWorld(component_camera* _camera);
 
     void destroyWindow(component_window* _window);
+
+    void eventWindow(component_window* _window);
 };
 
 #endif

@@ -78,29 +78,24 @@ int submain(char* _cmdline)
     load_all_game_system();
     load_all_game_entity();
 
+    int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+
     ULONG number_thread = 1;
     ECSManager::setThreadNumber(number_thread);
     ECSManager::splitThreadMemory();
 
-    int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-
-    BYTE* tmp_ptr = ECSManager::getFirst();
-
     g_window_started = TRUE;
+
+    g_world_data = new CWorld;
+    g_world_data->Load_t(g_world_file);
+
+    int64_t t2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
+    printf("Loading time t1: %ld\n", t1 - t0);
+    printf("Loading time t2: %ld\n", t2 - t1);
+
     splashscreen.hide();
-    SEEvent* event = 0;
 
     while (g_window_started) {
-
-        g_world_data = new CWorld;
-        g_world_data->Load_t(g_world_file);
-
-        int64_t t2 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
-        printf("Loading time t1: %ld\n", t1 - t0);
-        printf("Loading time t2: %ld\n", t2 - t1);
-        int64_t tloop1;
-        int64_t tloop2;
-        int64_t ticks = 0;
 
         // start of game loop
         g_game_started = TRUE;

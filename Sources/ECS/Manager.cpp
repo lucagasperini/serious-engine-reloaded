@@ -28,12 +28,14 @@ BYTE* ECSManager::mem_alloc = NULL;
 ULONG ECSManager::system_counter = 0;
 SESystem* ECSManager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* ECSManager::a_thread = NULL;
+std::thread ECSManager::thread_event;
 BYTE** ECSManager::a_thread_memory = NULL;
 ULONG ECSManager::thread_number = 0;
 std::mutex ECSManager::mutex_event;
 
 std::mutex ECSManager::mutex_update;
 std::mutex ECSManager::mutex_counter;
+std::mutex ECSManager::mutex_end_frame;
 std::condition_variable ECSManager::cv_update;
 ULONG ECSManager::number_update = 0;
 BOOL ECSManager::wait_update = TRUE;
@@ -42,12 +44,14 @@ SEEvent ECSManager::a_event[SER_ECS_EVENT_MAX];
 ULONG ECSManager::event_number = 0;
 
 SESystem* ECSManager::render_system;
+SESystem* ECSManager::event_system;
 
 std::mutex ECSManager::mutex_render;
 std::condition_variable ECSManager::cv_render;
 BOOL ECSManager::wait_render = TRUE;
 
 ULONG ECSManager::loop_status = 0;
+BOOL ECSManager::is_end_frame = FALSE;
 
 ECSManager::ECSManager()
 {
@@ -189,12 +193,14 @@ void ECSManager::run()
 
             a_thread[i] = std::thread(runThread, a_thread_memory[i], entity_thread);
         }
+        thread_event = std::thread(runThreadEvent);
         runThreadRender();
     }
 }
 
 void ECSManager::quit()
 {
+    thread_event.join();
     for (ULONG i = 0; i < thread_number; i++) {
         cv_update.notify_all();
         a_thread[i].join();
@@ -213,7 +219,7 @@ void ECSManager::init(BYTE* _start_ptr)
     }
 }
 
-void ECSManager::update(BYTE* _start_ptr, ULONG _number, SEEvent* _event)
+void ECSManager::update(BYTE* _start_ptr, ULONG _number)
 {
     SEEntity* tmp_ptr = NULL;
 
@@ -221,8 +227,6 @@ void ECSManager::update(BYTE* _start_ptr, ULONG _number, SEEvent* _event)
         tmp_ptr = getEntity(_start_ptr);
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->update(tmp_ptr);
-            if (_event)
-                a_system[i]->trigger(tmp_ptr, _event);
         }
     }
 }
@@ -238,13 +242,11 @@ void ECSManager::runThread(BYTE* _start_ptr, ULONG _number)
             });
         }
 
-        SEEvent* event = getEvent();
-        update(_start_ptr, _number, event);
+        update(_start_ptr, _number);
 
         {
             std::lock_guard<std::mutex> lck(mutex_counter);
             loop_status++;
-            //removeEvent(event->code);
         }
     }
 }
@@ -264,24 +266,42 @@ void ECSManager::runThreadRender()
         }
 
         render_system->preupdate();
-        SEEvent* event = getEvent();
         BYTE* tmp_ptr = getFirst();
         while (SEEntity* entity = getEntity(tmp_ptr)) {
             render_system->update(entity);
-            if (event)
-                render_system->trigger(entity, event);
         }
         render_system->postupdate();
-        if (event)
-            removeEvent(event->code);
 
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->preupdate();
         }
 
         loop_status = 0;
+        {
+            std::lock_guard<std::mutex> lg(mutex_end_frame);
+            is_end_frame = TRUE;
+        }
     }
 }
+
+void ECSManager::runThreadEvent()
+{
+    while (g_game_started) {
+
+        event_system->preupdate();
+        BYTE* tmp_ptr = getFirst();
+        while (SEEntity* entity = getEntity(tmp_ptr)) {
+            event_system->update(entity);
+        }
+        event_system->postupdate();
+        if (is_end_frame && event_number > 0) {
+            //removeAllEvent();
+            std::lock_guard<std::mutex> lg(mutex_end_frame);
+            is_end_frame = FALSE;
+        }
+    }
+}
+
 SEEvent* ECSManager::getEvent()
 {
     if (event_number)
@@ -292,6 +312,12 @@ SEEvent* ECSManager::getEvent()
 void ECSManager::addEvent(UINT _code, void* _parameter)
 {
     std::lock_guard<std::mutex> lg(mutex_event);
+    for (ULONG i = 0; i < event_number; i++) {
+        if (a_event[i].code == _code) {
+            a_event[i].parameter = _parameter;
+            return;
+        }
+    }
     if (event_number < SER_ECS_EVENT_MAX) {
         a_event[event_number].code = _code;
         a_event[event_number++].parameter = _parameter;
@@ -330,10 +356,25 @@ void ECSManager::removeEvent()
     }
 }
 
-BOOL ECSManager::searchEvent(UINT _event)
+void ECSManager::removeAllEvent()
+{
+    std::lock_guard<std::mutex> lg(mutex_event);
+    memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(SEEvent));
+    event_number = 0;
+}
+
+void* ECSManager::searchEvent(UINT _event)
 {
     for (ULONG i = 0; i < event_number; i++)
         if (a_event[i].code == _event)
+            return a_event[i].parameter;
+    return NULL;
+}
+
+BOOL ECSManager::searchEvent(UINT _event, void* _parameter)
+{
+    for (ULONG i = 0; i < event_number; i++)
+        if (a_event[i].code == _event && a_event[i].parameter == _parameter)
             return TRUE;
     return FALSE;
 }

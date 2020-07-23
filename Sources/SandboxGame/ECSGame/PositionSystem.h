@@ -35,9 +35,10 @@ public:
     void initAlign(component_position* _position, component_align* _align);
 
     void preupdate() override {};
-    void update(SEEntity* _entity) override {};
+    void update(SEEntity* _entity) override;
     void postupdate() override {};
-    void trigger(SEEntity* _entity, SEEvent* _event) override;
+
+    void updateCursor(component_cursor* _cursor);
 };
 
 #endif
