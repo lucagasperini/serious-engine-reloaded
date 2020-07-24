@@ -252,7 +252,7 @@ void RenderSystem::destroyWindow(ComponentWindow* _window)
 
 void RenderSystem::eventWindow(ComponentWindow* _window)
 {
-    if (Manager::getEventManager()->get(SER_EVENT_FULLSCREEN_CHANGE)->arg) {
+    if (SER_GET_EVENT_ARG(arg, void, SER_EVENT_FULLSCREEN_CHANGE)) {
         if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
             _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
         else
@@ -260,7 +260,7 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
         g_game_started = FALSE;
         Manager::getEventManager()->remove(SER_EVENT_FULLSCREEN_CHANGE);
     }
-    if (UINT* arg = (UINT*)Manager::getEventManager()->get(SER_EVENT_RESOLUTION_CHANGE)->arg) {
+    if (SER_GET_EVENT_ARG(arg, UINT, SER_EVENT_RESOLUTION_CHANGE)) {
         if (arg[0] != 0 && arg[1] != 0) {
             if (g_resolution_width != arg[0] || g_resolution_height != arg[1]) {
                 g_virtual_resolution_width = g_resolution_width;

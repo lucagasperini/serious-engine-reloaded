@@ -68,7 +68,7 @@ void load_all_game_system()
 {
     RenderSystem* render_system = new RenderSystem;
     Manager::setRenderSystem((System*)render_system);
-
+    /*
     Manager::getKeybindManager()->add(SER_EVENT_FULLSCREEN_CHANGE, SDLK_F1);
     Event ev_res_vga = { sizeof(UINT) * 2, new UINT[2] { 640, 480 } };
     Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F2, ev_res_vga);
@@ -78,7 +78,7 @@ void load_all_game_system()
     Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F4, ev_res_wxga);
     Event ev_res_hd = { sizeof(UINT) * 2, new UINT[2] { 1920, 1080 } };
     Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F5, ev_res_hd);
-
+*/
     EventSystem* event_system = new EventSystem;
     Manager::setEventSystem((System*)event_system);
 

@@ -31,7 +31,7 @@ struct Event {
 
 class EventManager {
 private:
-    Event* a_event[SER_ECS_EVENT_MAX];
+    Event* a_event;
     ULONG counter;
 
     std::mutex mutex;
@@ -40,14 +40,11 @@ public:
     EventManager();
     ~EventManager();
 
-    void add(UINT _code, int _arg);
-    void add(UINT _code, BYTE _arg);
-    void add(UINT _code, ULONG _arg);
     void add(UINT _code, void* _arg, ULONG _size);
     void add(UINT _code, const Event& _event);
     void add(UINT _code);
 
-    Event* get(UINT _code);
+    Event get(UINT _code);
     void* getArg(UINT _code);
 
     void remove(UINT _code);
