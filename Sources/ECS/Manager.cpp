@@ -42,6 +42,7 @@ BOOL Manager::is_end_frame = FALSE;
 
 EntityManager* Manager::entity_manager;
 EventManager* Manager::event_manager;
+KeybindManager* Manager::keybind_manager;
 
 Manager::Manager()
 {
@@ -58,6 +59,7 @@ void Manager::init(ULONG _entity_space, ULONG _event_space)
     entity_manager = new EntityManager;
     entity_manager->grow(_entity_space);
     event_manager = new EventManager;
+    keybind_manager = new KeybindManager;
     system_counter = 0;
 }
 

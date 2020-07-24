@@ -106,7 +106,7 @@ void PositionSystem::update(Entity* _entity)
 
 void PositionSystem::updateCursor(ComponentCursor* _cursor)
 {
-    if (int* arg = (int*)Manager::getEventManager()->search(SER_EVENT_MOUSE_MOVE)) {
+    if (SER_GET_EVENT_ARG(arg, int, SER_EVENT_MOUSE_MOVE)) {
         _cursor->x = arg[0];
         _cursor->y = arg[1];
     }

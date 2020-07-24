@@ -27,9 +27,6 @@
 #include <Engine/Math/Projection.h>
 #include <Engine/Math/Vector.h>
 
-#define SER_KEYBIND_MAX 1024
-#define SER_EVENT_MAX 1024
-
 #define SE_KEYBIND_NULL 0x00
 #define SE_KEYBIND_EXIT 0x01
 #define SE_KEYBIND_DEBUG_BORDER 0xD0

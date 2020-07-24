@@ -33,6 +33,7 @@
 
 #define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity))
 
+#define SER_GET_EVENT_ARG(_name, _type, _event) _type* _name = (_type*)Manager::getEventManager()->getArg(_event)
 namespace SER {
 
 class Manager {
@@ -61,6 +62,7 @@ private:
 
     static EntityManager* entity_manager;
     static EventManager* event_manager;
+    static KeybindManager* keybind_manager;
 
 public:
     Manager();
@@ -68,6 +70,7 @@ public:
 
     static inline EntityManager* getEntityManager() { return entity_manager; }
     static inline EventManager* getEventManager() { return event_manager; }
+    static inline KeybindManager* getKeybindManager() { return keybind_manager; }
 
     static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(System* _event_system) { event_system = _event_system; };

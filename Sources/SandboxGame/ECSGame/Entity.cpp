@@ -69,30 +69,17 @@ void load_all_game_system()
     RenderSystem* render_system = new RenderSystem;
     Manager::setRenderSystem((System*)render_system);
 
-    Keybind* a_keybind = new Keybind[SER_KEYBIND_MAX];
-    memset(a_keybind, 0, sizeof(Keybind) * SER_KEYBIND_MAX);
-    a_keybind[0].event.code = SER_EVENT_FULLSCREEN_CHANGE;
-    a_keybind[0].key = SDLK_F1;
-    a_keybind[0].event.parameter = NULL;
-    UINT* p_res_vga = new UINT[2] { 640, 480 };
-    a_keybind[1].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[1].event.parameter = p_res_vga;
-    a_keybind[1].key = SDLK_F2;
-    UINT* p_res_svga = new UINT[2] { 800, 600 };
-    a_keybind[2].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[2].event.parameter = p_res_svga;
-    a_keybind[2].key = SDLK_F3;
-    UINT* p_res_wxga = new UINT[2] { 1280, 720 };
-    a_keybind[3].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[3].event.parameter = p_res_wxga;
-    a_keybind[3].key = SDLK_F4;
-    UINT* p_res_hd = new UINT[2] { 1920, 1080 };
-    a_keybind[4].event.code = SER_EVENT_RESOLUTION_CHANGE;
-    a_keybind[4].event.parameter = p_res_hd;
-    a_keybind[4].key = SDLK_F5;
+    Manager::getKeybindManager()->add(SER_EVENT_FULLSCREEN_CHANGE, SDLK_F1);
+    Event ev_res_vga = { sizeof(UINT) * 2, new UINT[2] { 640, 480 } };
+    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F2, ev_res_vga);
+    Event ev_res_svga = { sizeof(UINT) * 2, new UINT[2] { 800, 600 } };
+    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F3, ev_res_svga);
+    Event ev_res_wxga = { sizeof(UINT) * 2, new UINT[2] { 1280, 720 } };
+    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F4, ev_res_wxga);
+    Event ev_res_hd = { sizeof(UINT) * 2, new UINT[2] { 1920, 1080 } };
+    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F5, ev_res_hd);
 
     EventSystem* event_system = new EventSystem;
-    event_system->a_keybind = a_keybind;
     Manager::setEventSystem((System*)event_system);
 
     PositionSystem* position_system = new PositionSystem;

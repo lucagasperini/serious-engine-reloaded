@@ -40,7 +40,7 @@ void EventSystem::preupdate()
         event_parameter_mouse[1] = y;
         event_parameter_mouse[2] = delta_x;
         event_parameter_mouse[3] = delta_y;
-        Manager::getEventManager()->add(SER_EVENT_MOUSE_MOVE, event_parameter_mouse);
+        Manager::getEventManager()->add(SER_EVENT_MOUSE_MOVE, event_parameter_mouse, sizeof(int) * 4);
     }
 
     while (SDL_PollEvent(&event)) {
@@ -49,17 +49,15 @@ void EventSystem::preupdate()
             g_window_started = FALSE;
         }
         if (event.type == SDL_KEYDOWN) {
-            for (UINT i = 0; i < SER_KEYBIND_MAX; i++) {
-                if (a_keybind[i].key == event.key.keysym.sym && event.key.keysym.sym != 0) {
-                    Manager::getEventManager()->add(a_keybind[i].event);
-                }
+            if (Keybind* keybind = Manager::getKeybindManager()->get(event.key.keysym.sym)) {
+                Manager::getEventManager()->add(keybind->code, keybind->event);
             }
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             event_parameter_mouse_click[0] = x;
             event_parameter_mouse_click[1] = y;
             event_parameter_mouse_click[2] = event.button.button;
-            Manager::getEventManager()->add(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click);
+            Manager::getEventManager()->add(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click, sizeof(int) * 3);
         }
     }
 }
@@ -78,6 +76,6 @@ void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _b
     if (_position->pos_x < x && _position->pos_y < y
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
-        Manager::getEventManager()->add(SER_EVENT_BUTTON_ONFOCUS, _button);
+        Manager::getEventManager()->add(SER_EVENT_BUTTON_ONFOCUS, _button, sizeof(ComponentButton));
     }
 }

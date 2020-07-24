@@ -34,7 +34,6 @@ private:
     SDL_Event event;
 
 public:
-    SER::Keybind* a_keybind;
     void preinit() override {}
     void init(SER::Entity* entity) override {}
     void postinit() override {}

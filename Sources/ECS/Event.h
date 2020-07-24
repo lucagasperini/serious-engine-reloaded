@@ -25,13 +25,13 @@
 namespace SER {
 
 struct Event {
-    UINT code;
-    void* parameter;
+    ULONG size;
+    void* arg;
 };
 
 class EventManager {
 private:
-    Event a_event[SER_ECS_EVENT_MAX];
+    Event* a_event[SER_ECS_EVENT_MAX];
     ULONG counter;
 
     std::mutex mutex;
@@ -40,16 +40,17 @@ public:
     EventManager();
     ~EventManager();
 
-    void add(UINT _code, void* _parameter);
-    void add(const Event& _event);
+    void add(UINT _code, int _arg);
+    void add(UINT _code, BYTE _arg);
+    void add(UINT _code, ULONG _arg);
+    void add(UINT _code, void* _arg, ULONG _size);
+    void add(UINT _code, const Event& _event);
+    void add(UINT _code);
 
-    Event* get();
+    Event* get(UINT _code);
+    void* getArg(UINT _code);
 
-    void* search(UINT _event);
-    BOOL search(UINT _event, void* _parameter);
-
-    void remove(UINT _event);
-    void remove();
+    void remove(UINT _code);
     void removeAll();
 
     inline ULONG count() { return counter; }

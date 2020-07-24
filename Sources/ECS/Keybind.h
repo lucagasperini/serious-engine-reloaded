@@ -19,10 +19,29 @@
 #define SER_ECS_KEYBIND_H
 
 #include "Event.h"
+#define SER_ECS_KEYBIND_MAX 256
+
 namespace SER {
 struct Keybind {
     ULONG key;
+    UINT code;
     Event event;
+};
+
+class KeybindManager {
+private:
+    UINT counter;
+    Keybind a_keybind[SER_ECS_KEYBIND_MAX];
+
+public:
+    KeybindManager();
+    ~KeybindManager();
+
+    void add(UINT _code, ULONG _key);
+    void add(UINT _code, ULONG _key, Event& _size);
+    void add(UINT _code, ULONG _key, void* _arg, UINT _size);
+
+    Keybind* get(ULONG _key);
 };
 }
 
