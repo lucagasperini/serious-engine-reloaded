@@ -88,6 +88,7 @@ void RenderSystem::updateFps()
 
 void RenderSystem::init(Entity* _entity)
 {
+    System::init(_entity);
     SER_GET_COMPONENT(window, ComponentWindow, _entity);
     if (window)
         initWindow(window);
@@ -131,6 +132,7 @@ void RenderSystem::initWindow(ComponentWindow* _window)
 
 void RenderSystem::update(Entity* _entity)
 {
+    System::update(_entity);
     SER_GET_COMPONENT(window, ComponentWindow, _entity);
     if (window)
         eventWindow(window);
@@ -184,9 +186,9 @@ void RenderSystem::updateButton(ComponentPosition* _position, ComponentButton* _
         PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    SER_GET_EVENT_ARG(focus, ComponentButton, SER_EVENT_BUTTON_ONFOCUS);
-    if (focus) {
-        Manager::getEventManager()->remove(SER_EVENT_BUTTON_ONFOCUS);
+    SER_GET_EVENT_ARG(focus, ULONG, SER_EVENT_BUTTON_ONFOCUS);
+    if (focus && *focus == this_entity->id) {
+        SER_REMOVE_EVENT(SER_EVENT_BUTTON_ONFOCUS);
         col = _button->color_focus;
     } else {
         col = _button->color;
@@ -258,7 +260,7 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
         else
             _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
         g_game_started = FALSE;
-        Manager::getEventManager()->remove(SER_EVENT_FULLSCREEN_CHANGE);
+        SER_REMOVE_EVENT(SER_EVENT_FULLSCREEN_CHANGE);
     }
     if (SER_GET_EVENT_ARG(arg, UINT, SER_EVENT_RESOLUTION_CHANGE)) {
         if (arg[0] != 0 && arg[1] != 0) {
@@ -270,6 +272,6 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
                 g_game_started = FALSE;
             }
         }
-        Manager::getEventManager()->remove(SER_EVENT_RESOLUTION_CHANGE);
+        SER_REMOVE_EVENT(SER_EVENT_RESOLUTION_CHANGE);
     }
 }

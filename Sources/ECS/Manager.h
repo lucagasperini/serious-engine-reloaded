@@ -32,7 +32,16 @@
 
 #define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity))
 
+#define SER_ADD_EVENT_NOARG(_event) Manager::getEventManager()->add(_event)
+
+#define SER_ADD_EVENT(_event, _arg, _type) Manager::getEventManager()->add(_event, _arg, sizeof(_type))
+
+#define SER_ADD_EVENT_ARRAY(_event, _arg, _type, _number) Manager::getEventManager()->add(_event, _arg, sizeof(_type) * _number)
+
 #define SER_GET_EVENT_ARG(_name, _type, _event) _type* _name = (_type*)Manager::getEventManager()->get(_event)
+
+#define SER_REMOVE_EVENT(_event) Manager::getEventManager()->remove(_event)
+
 namespace SER {
 
 class Manager {

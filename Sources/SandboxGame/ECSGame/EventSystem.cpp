@@ -47,7 +47,7 @@ void EventSystem::preupdate()
         event_parameter_mouse[1] = y;
         event_parameter_mouse[2] = delta_x;
         event_parameter_mouse[3] = delta_y;
-        Manager::getEventManager()->add(SER_EVENT_MOUSE_MOVE, event_parameter_mouse, sizeof(int) * 4);
+        SER_ADD_EVENT_ARRAY(SER_EVENT_MOUSE_MOVE, event_parameter_mouse, int, 4);
     }
 
     while (SDL_PollEvent(&event)) {
@@ -65,13 +65,14 @@ void EventSystem::preupdate()
             event_parameter_mouse_click[0] = x;
             event_parameter_mouse_click[1] = y;
             event_parameter_mouse_click[2] = event.button.button;
-            Manager::getEventManager()->add(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click, sizeof(int) * 3);
+            SER_ADD_EVENT_ARRAY(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click, int, 3);
         }
     }
 }
 
 void EventSystem::update(Entity* _entity)
 {
+    System::update(_entity);
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
     SER_GET_COMPONENT(button, ComponentButton, _entity);
 
@@ -84,6 +85,6 @@ void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _b
     if (_position->pos_x < x && _position->pos_y < y
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
-        //Manager::getEventManager()->add(SER_EVENT_BUTTON_ONFOCUS, _button, sizeof(ComponentButton));
+        SER_ADD_EVENT(SER_EVENT_BUTTON_ONFOCUS, &this_entity->id, ULONG);
     }
 }

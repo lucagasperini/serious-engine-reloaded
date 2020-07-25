@@ -30,7 +30,7 @@ struct EventKeybind {
     ULONG size;
 };
 
-class EventSystem : SER::System {
+class EventSystem : public SER::System {
 private:
     int x = 0;
     int y = 0;
@@ -48,7 +48,7 @@ private:
 public:
     void addKeybind(const EventKeybind& _keybind);
     void preinit() override {}
-    void init(SER::Entity* entity) override {}
+    void init(SER::Entity* _entity) override { System::init(_entity); }
     void postinit() override {}
 
     void preupdate() override;

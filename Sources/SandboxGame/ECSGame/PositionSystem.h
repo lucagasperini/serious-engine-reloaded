@@ -21,7 +21,7 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class PositionSystem : SER::System {
+class PositionSystem : public SER::System {
 private:
     UINT scale_x = 0;
     UINT scale_y = 0;

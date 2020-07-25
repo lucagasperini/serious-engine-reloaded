@@ -21,7 +21,7 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
-class RenderSystem : SER::System {
+class RenderSystem : public SER::System {
 private:
     int64_t tloop1;
     int64_t tloop2;

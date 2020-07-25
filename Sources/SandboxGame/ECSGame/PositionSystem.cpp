@@ -79,6 +79,7 @@ void PositionSystem::initAlign(ComponentPosition* _position, ComponentAlign* _al
 
 void PositionSystem::init(Entity* _entity)
 {
+    System::init(_entity);
     if (scale_x != g_resolution_width || scale_y != g_resolution_height) {
         SER_GET_COMPONENT(position, ComponentPosition, _entity);
         SER_GET_COMPONENT(align, ComponentAlign, _entity);
@@ -99,6 +100,7 @@ void PositionSystem::postinit()
 
 void PositionSystem::update(Entity* _entity)
 {
+    System::update(_entity);
     SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
     if (cursor)
         updateCursor(cursor);

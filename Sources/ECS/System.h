@@ -22,14 +22,16 @@
 
 namespace SER {
 class System {
-private:
+protected:
+    Entity* this_entity;
+
 public:
     virtual void preinit() = 0;
-    virtual void init(Entity* entity) = 0;
+    virtual void init(Entity* entity) { this_entity = entity; };
     virtual void postinit() = 0;
 
     virtual void preupdate() = 0;
-    virtual void update(Entity* entity) = 0;
+    virtual void update(Entity* entity) { this_entity = entity; };
     virtual void postupdate() = 0;
 };
 }
