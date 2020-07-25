@@ -84,11 +84,11 @@ void load_all_game_system()
     UINT list_resolution[][2] = { { 640, 480 }, { 800, 600 }, { 1280, 720 }, { 1920, 1080 } };
 
     EventSystem* event_system = new EventSystem;
-    KEYBIND_ADD_NOARG(kb_fullscreen, SDLK_F1, SER_EVENT_FULLSCREEN_CHANGE)
-    KEYBIND_ADD_ARRAY(kb_res_vga, SDLK_F2, SER_EVENT_RESOLUTION_CHANGE, list_resolution[0], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_svga, SDLK_F3, SER_EVENT_RESOLUTION_CHANGE, list_resolution[1], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_wxga, SDLK_F4, SER_EVENT_RESOLUTION_CHANGE, list_resolution[2], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_hd, SDLK_F5, SER_EVENT_RESOLUTION_CHANGE, list_resolution[3], UINT, 2)
+    KEYBIND_ADD_NOARG(kb_fullscreen, SDLK_F1, EC_FULLSCREEN_CHANGE)
+    KEYBIND_ADD_ARRAY(kb_res_vga, SDLK_F2, EC_RESOLUTION_CHANGE, list_resolution[0], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_svga, SDLK_F3, EC_RESOLUTION_CHANGE, list_resolution[1], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_wxga, SDLK_F4, EC_RESOLUTION_CHANGE, list_resolution[2], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_hd, SDLK_F5, EC_RESOLUTION_CHANGE, list_resolution[3], UINT, 2)
 
     Manager::setEventSystem((System*)event_system);
 

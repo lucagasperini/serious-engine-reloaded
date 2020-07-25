@@ -47,7 +47,7 @@ void EventSystem::preupdate()
         event_parameter_mouse[1] = y;
         event_parameter_mouse[2] = delta_x;
         event_parameter_mouse[3] = delta_y;
-        SER_ADD_EVENT_ARRAY(SER_EVENT_MOUSE_MOVE, event_parameter_mouse, int, 4);
+        SER_ADD_EVENT_ARRAY(EC_MOUSE_MOVE, event_parameter_mouse, int, 4);
     }
 
     while (SDL_PollEvent(&event)) {
@@ -65,7 +65,7 @@ void EventSystem::preupdate()
             event_parameter_mouse_click[0] = x;
             event_parameter_mouse_click[1] = y;
             event_parameter_mouse_click[2] = event.button.button;
-            SER_ADD_EVENT_ARRAY(SER_EVENT_MOUSE_BUTTON, event_parameter_mouse_click, int, 3);
+            SER_ADD_EVENT_ARRAY(EC_MOUSE_BUTTON, event_parameter_mouse_click, int, 3);
         }
     }
 }
@@ -90,14 +90,14 @@ void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _b
     if (_position->pos_x < x && _position->pos_y < y
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
-        SER_ADD_EVENT(SER_EVENT_BUTTON_ONFOCUS, &this_entity->id, ULONG);
+        SER_ADD_EVENT(EC_BUTTON_ONFOCUS, &this_entity->id, ULONG);
     }
 }
 
 void EventSystem::updateCursor(ComponentCursor* _cursor)
 {
     //This is safe if none can write on cursor when this event exist.
-    if (SER_GET_EVENT_ARG(arg, int, SER_EVENT_MOUSE_MOVE)) {
+    if (SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE)) {
         _cursor->x = arg[0];
         _cursor->y = arg[1];
     }

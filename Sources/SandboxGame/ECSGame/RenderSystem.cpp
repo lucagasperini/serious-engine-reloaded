@@ -186,9 +186,9 @@ void RenderSystem::updateButton(ComponentPosition* _position, ComponentButton* _
         PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
 
     COLOR col;
-    SER_GET_EVENT_ARG(focus, ULONG, SER_EVENT_BUTTON_ONFOCUS);
+    SER_GET_EVENT_ARG(focus, ULONG, EC_BUTTON_ONFOCUS);
     if (focus && *focus == this_entity->id) {
-        SER_REMOVE_EVENT(SER_EVENT_BUTTON_ONFOCUS);
+        SER_REMOVE_EVENT(EC_BUTTON_ONFOCUS);
         col = _button->color_focus;
     } else {
         col = _button->color;
@@ -254,15 +254,15 @@ void RenderSystem::destroyWindow(ComponentWindow* _window)
 
 void RenderSystem::eventWindow(ComponentWindow* _window)
 {
-    if (SER_GET_EVENT_ARG(arg, void, SER_EVENT_FULLSCREEN_CHANGE)) {
+    if (SER_GET_EVENT_ARG(arg, void, EC_FULLSCREEN_CHANGE)) {
         if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
             _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
         else
             _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
         g_game_started = FALSE;
-        SER_REMOVE_EVENT(SER_EVENT_FULLSCREEN_CHANGE);
+        SER_REMOVE_EVENT(EC_FULLSCREEN_CHANGE);
     }
-    if (SER_GET_EVENT_ARG(arg, UINT, SER_EVENT_RESOLUTION_CHANGE)) {
+    if (SER_GET_EVENT_ARG(arg, UINT, EC_RESOLUTION_CHANGE)) {
         if (arg[0] != 0 && arg[1] != 0) {
             if (g_resolution_width != arg[0] || g_resolution_height != arg[1]) {
                 g_virtual_resolution_width = g_resolution_width;
@@ -272,6 +272,6 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
                 g_game_started = FALSE;
             }
         }
-        SER_REMOVE_EVENT(SER_EVENT_RESOLUTION_CHANGE);
+        SER_REMOVE_EVENT(EC_RESOLUTION_CHANGE);
     }
 }
