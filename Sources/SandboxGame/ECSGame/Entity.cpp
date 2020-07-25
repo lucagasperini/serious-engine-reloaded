@@ -57,6 +57,18 @@
 #define SE_WINDOW_RECOVERY_W 640
 #define SE_WINDOW_RECOVERY_H 480
 
+#define KEYBIND_ADD_NOARG(_name, _key, _event)                                     \
+    EventKeybind _name = EventKeybind { _event, _key, new BYTE(0), sizeof(BYTE) }; \
+    event_system->addKeybind(_name);
+
+#define KEYBIND_ADD(_name, _key, _event, _arg, _type)                        \
+    EventKeybind _name = EventKeybind { _event, _key, _arg, sizeof(_type) }; \
+    event_system->addKeybind(_name);
+
+#define KEYBIND_ADD_ARRAY(_name, _key, _event, _arg, _type, _number)                   \
+    EventKeybind _name = EventKeybind { _event, _key, _arg, sizeof(_type) * _number }; \
+    event_system->addKeybind(_name);
+
 using namespace SER;
 
 void quitgame()
@@ -68,18 +80,16 @@ void load_all_game_system()
 {
     RenderSystem* render_system = new RenderSystem;
     Manager::setRenderSystem((System*)render_system);
-    /*
-    Manager::getKeybindManager()->add(SER_EVENT_FULLSCREEN_CHANGE, SDLK_F1);
-    Event ev_res_vga = { sizeof(UINT) * 2, new UINT[2] { 640, 480 } };
-    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F2, ev_res_vga);
-    Event ev_res_svga = { sizeof(UINT) * 2, new UINT[2] { 800, 600 } };
-    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F3, ev_res_svga);
-    Event ev_res_wxga = { sizeof(UINT) * 2, new UINT[2] { 1280, 720 } };
-    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F4, ev_res_wxga);
-    Event ev_res_hd = { sizeof(UINT) * 2, new UINT[2] { 1920, 1080 } };
-    Manager::getKeybindManager()->add(SER_EVENT_RESOLUTION_CHANGE, SDLK_F5, ev_res_hd);
-*/
+
+    UINT list_resolution[][2] = { { 640, 480 }, { 800, 600 }, { 1280, 720 }, { 1920, 1080 } };
+
     EventSystem* event_system = new EventSystem;
+    KEYBIND_ADD_NOARG(kb_fullscreen, SDLK_F1, SER_EVENT_FULLSCREEN_CHANGE)
+    KEYBIND_ADD_ARRAY(kb_res_vga, SDLK_F2, SER_EVENT_RESOLUTION_CHANGE, list_resolution[0], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_svga, SDLK_F3, SER_EVENT_RESOLUTION_CHANGE, list_resolution[1], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_wxga, SDLK_F4, SER_EVENT_RESOLUTION_CHANGE, list_resolution[2], UINT, 2)
+    KEYBIND_ADD_ARRAY(kb_res_hd, SDLK_F5, SER_EVENT_RESOLUTION_CHANGE, list_resolution[3], UINT, 2)
+
     Manager::setEventSystem((System*)event_system);
 
     PositionSystem* position_system = new PositionSystem;
@@ -132,12 +142,6 @@ void load_all_game_entity()
     camera->kb_keybind[SE_KEYBIND_CAMERA_UP] = SDLK_SPACE;
     camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;*/
     SER_ADD_ENTITY(e_camera, Camera);
-
-    Cursor* e_cursor = new Cursor;
-    e_cursor->texture.SetData_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
-    e_cursor->w = 32;
-    e_cursor->h = 32;
-    SER_ADD_ENTITY(e_cursor, Cursor);
 
     MenuImage* logosam = new MenuImage();
     logosam->pos_x = 480;
@@ -267,4 +271,10 @@ void load_all_game_entity()
     menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
     SER_ADD_ENTITY(menu_button_quit, MenuButton);
+
+    Cursor* e_cursor = new Cursor;
+    e_cursor->texture.SetData_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
+    e_cursor->w = 32;
+    e_cursor->h = 32;
+    SER_ADD_ENTITY(e_cursor, Cursor);
 }

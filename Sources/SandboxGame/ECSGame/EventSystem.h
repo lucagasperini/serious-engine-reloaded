@@ -21,6 +21,15 @@
 #include "Entity.h"
 #include <ECS/System.h>
 
+#define SER_KEYBIND_MAX 256
+
+struct EventKeybind {
+    UINT code;
+    ULONG key;
+    void* arg;
+    ULONG size;
+};
+
 class EventSystem : SER::System {
 private:
     int x = 0;
@@ -33,7 +42,11 @@ private:
     int* event_parameter_mouse_click = new int[3];
     SDL_Event event;
 
+    EventKeybind a_keybind[SER_KEYBIND_MAX];
+    ULONG keybind_counter = 0;
+
 public:
+    void addKeybind(const EventKeybind& _keybind);
     void preinit() override {}
     void init(SER::Entity* entity) override {}
     void postinit() override {}

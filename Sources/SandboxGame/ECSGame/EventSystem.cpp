@@ -26,6 +26,13 @@ extern UINT g_virtual_resolution_height;
 
 using namespace SER;
 
+void EventSystem::addKeybind(const EventKeybind& _keybind)
+{
+    BYTE* mem_tmp = new BYTE[_keybind.size];
+    memcpy(mem_tmp, _keybind.arg, _keybind.size);
+    a_keybind[keybind_counter++] = EventKeybind { _keybind.code, _keybind.key, mem_tmp, _keybind.size };
+}
+
 void EventSystem::preupdate()
 {
     old_x = x;
@@ -48,10 +55,11 @@ void EventSystem::preupdate()
             g_game_started = FALSE;
             g_window_started = FALSE;
         }
-        if (event.type == SDL_KEYDOWN) {
-            if (Keybind* keybind = Manager::getKeybindManager()->get(event.key.keysym.sym)) {
-                Manager::getEventManager()->add(keybind->code, keybind->event);
-            }
+        if (event.type == SDL_KEYDOWN && event.key.keysym.sym) {
+            for (UINT i = 0; i < keybind_counter; i++)
+                if (a_keybind[i].key == event.key.keysym.sym) {
+                    Manager::getEventManager()->add(a_keybind[i].code, a_keybind[i].arg, a_keybind[i].size);
+                }
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             event_parameter_mouse_click[0] = x;
@@ -76,6 +84,6 @@ void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _b
     if (_position->pos_x < x && _position->pos_y < y
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
-        Manager::getEventManager()->add(SER_EVENT_BUTTON_ONFOCUS, _button, sizeof(ComponentButton));
+        //Manager::getEventManager()->add(SER_EVENT_BUTTON_ONFOCUS, _button, sizeof(ComponentButton));
     }
 }

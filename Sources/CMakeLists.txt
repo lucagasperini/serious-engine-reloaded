@@ -959,7 +959,6 @@ add_library(${ECSLIB} SHARED
     ECS/Manager.cpp
     ECS/Entity.cpp
     ECS/Event.cpp
-    ECS/Keybind.cpp
 )
 target_link_libraries(${ECSLIB} ${SENGINELIB})
 
