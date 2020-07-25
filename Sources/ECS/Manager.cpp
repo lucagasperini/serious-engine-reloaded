@@ -206,7 +206,7 @@ void Manager::runThreadEvent()
         }
         event_system->postupdate();
         if (is_end_frame && event_manager->count() > 0) {
-            //removeAllEvent();
+            event_manager->removeAll();
             std::lock_guard<std::mutex> lg(mutex_end_frame);
             is_end_frame = FALSE;
         }
