@@ -101,15 +101,4 @@ void PositionSystem::postinit()
 void PositionSystem::update(Entity* _entity)
 {
     System::update(_entity);
-    SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
-    if (cursor)
-        updateCursor(cursor);
-}
-
-void PositionSystem::updateCursor(ComponentCursor* _cursor)
-{
-    if (SER_GET_EVENT_ARG(arg, int, SER_EVENT_MOUSE_MOVE)) {
-        _cursor->x = arg[0];
-        _cursor->y = arg[1];
-    }
 }

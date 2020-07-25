@@ -55,6 +55,7 @@ public:
     void update(SER::Entity* _entity) override;
     void postupdate() override {};
 
+    void updateCursor(ComponentCursor* _cursor);
     void updateButton(ComponentPosition* _position, ComponentButton* _button);
 };
 

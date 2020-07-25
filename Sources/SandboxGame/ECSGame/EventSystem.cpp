@@ -73,6 +73,11 @@ void EventSystem::preupdate()
 void EventSystem::update(Entity* _entity)
 {
     System::update(_entity);
+
+    SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
+    if (cursor)
+        updateCursor(cursor);
+
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
     SER_GET_COMPONENT(button, ComponentButton, _entity);
 
@@ -86,5 +91,14 @@ void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _b
         && _position->pos_x + _position->pos_w > x
         && _position->pos_y + _position->pos_h > y) {
         SER_ADD_EVENT(SER_EVENT_BUTTON_ONFOCUS, &this_entity->id, ULONG);
+    }
+}
+
+void EventSystem::updateCursor(ComponentCursor* _cursor)
+{
+    //This is safe if none can write on cursor when this event exist.
+    if (SER_GET_EVENT_ARG(arg, int, SER_EVENT_MOUSE_MOVE)) {
+        _cursor->x = arg[0];
+        _cursor->y = arg[1];
     }
 }
