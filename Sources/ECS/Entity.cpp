@@ -21,6 +21,8 @@ using namespace SER;
 
 EntityManager::EntityManager()
 {
+    a_entity = NULL;
+    mem_alloc = NULL;
     mem_entity_max = 0;
     counter = 0;
 }
@@ -34,12 +36,14 @@ EntityManager::~EntityManager()
     mem_alloc = NULL;
 }
 
+//TODO: Add a runtime grow with memory copy
 void EntityManager::grow(ULONG _add)
 {
     mem_entity_max += _add;
     a_entity = (BYTE*)malloc(mem_entity_max);
     memset(a_entity, 0, mem_entity_max);
 
+    counter = 0;
     mem_alloc = a_entity;
 }
 

@@ -22,48 +22,69 @@ using namespace SER;
 
 EventManager::EventManager()
 {
-    memset(a_event, 0, sizeof(BYTE*) * SER_ECS_EVENT_MAX);
+    a_event = NULL;
     counter = 0;
+    event_number = 0;
+    mem_size = 0;
 }
 
 EventManager::~EventManager()
 {
-    for (UINT i = 0; i < SER_ECS_EVENT_MAX; i++)
+    for (UINT i = 0; i < event_number; i++)
         if (a_event[i])
             delete[] a_event[i];
     delete[] a_event;
-    //a_event = NULL;
+    a_event = NULL;
+
+    mem_size = 0;
+    event_number = 0;
+    counter = 0;
+}
+
+//TODO: Add a runtime grow with memory copy with realloc
+void EventManager::grow(ULONG _add)
+{
+    event_number += _add;
+    mem_size += event_number * sizeof(BYTE*);
+    a_event = (BYTE**)calloc(event_number, sizeof(BYTE*));
     counter = 0;
 }
 
 void EventManager::add(UINT _code, void* _arg, ULONG _size)
 {
-    ASSERT(_code < SER_ECS_EVENT_MAX);
+    ASSERT(_code < event_number);
     std::lock_guard<std::mutex> lg(mutex);
-    a_event[_code] = new BYTE[_size];
-    memcpy(a_event[_code], _arg, _size);
-    counter++;
-}
 
-void EventManager::add(UINT _code)
-{
-    ASSERT(_code < SER_ECS_EVENT_MAX);
-    std::lock_guard<std::mutex> lg(mutex);
-    a_event[_code] = new BYTE(0);
+    BYTE* tmp_ptr = NULL;
+    if (!a_event[_code]) {
+        tmp_ptr = (BYTE*)malloc(sizeof(UINT) + _size);
+    } else {
+        tmp_ptr = a_event[_code];
+    }
+    memcpy(tmp_ptr, &_size, sizeof(UINT));
+    memcpy(tmp_ptr + sizeof(UINT), _arg, _size);
+
+    mem_size += _size;
+    a_event[_code] = tmp_ptr;
     counter++;
 }
 
 void* EventManager::get(UINT _code)
 {
-    ASSERT(_code < SER_ECS_EVENT_MAX);
-    return a_event[_code];
+    ASSERT(_code < event_number);
+    if (a_event[_code])
+        return a_event[_code] + sizeof(UINT);
+    return NULL;
 }
 
 void EventManager::remove(UINT _code)
 {
-    ASSERT(_code < SER_ECS_EVENT_MAX);
+    ASSERT(_code < event_number);
+    ASSERT(a_event[_code]);
     std::lock_guard<std::mutex> lg(mutex);
-    delete a_event[_code];
+    UINT* tmp_ptr_size = (UINT*)a_event[_code];
+    mem_size -= *tmp_ptr_size;
+    free(a_event[_code]);
     a_event[_code] = NULL;
     counter--;
 }
@@ -71,10 +92,13 @@ void EventManager::remove(UINT _code)
 void EventManager::removeAll()
 {
     std::lock_guard<std::mutex> lg(mutex);
-    for (UINT i = 0; i < SER_ECS_EVENT_MAX; i++)
-        if (a_event[i])
-            delete[] a_event[i];
-
-    memset(a_event, 0, SER_ECS_EVENT_MAX * sizeof(BYTE*));
+    BYTE* tmp_ptr = NULL;
+    for (UINT i = 0; i < event_number; i++) {
+        tmp_ptr = a_event[i];
+        if (tmp_ptr)
+            free(tmp_ptr);
+    }
+    mem_size = event_number * sizeof(BYTE*);
+    memset(a_event, 0, mem_size);
     counter = 0;
 }

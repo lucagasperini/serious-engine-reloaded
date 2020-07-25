@@ -81,7 +81,7 @@ public:
     static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(System* _event_system) { event_system = _event_system; };
 
-    static void init(ULONG _entity_space, ULONG _event_space);
+    static void init(ULONG _entity_space, ULONG _event_limit);
 
     static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }

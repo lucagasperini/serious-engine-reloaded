@@ -53,11 +53,12 @@ Manager::~Manager()
     //a_system = NULL;
 }
 
-void Manager::init(ULONG _entity_space, ULONG _event_space)
+void Manager::init(ULONG _entity_space, ULONG _event_limit)
 {
     entity_manager = new EntityManager;
     entity_manager->grow(_entity_space);
     event_manager = new EventManager;
+    event_manager->grow(_event_limit);
     system_counter = 0;
 }
 

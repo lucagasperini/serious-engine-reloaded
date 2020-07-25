@@ -26,8 +26,10 @@ namespace SER {
 
 class EventManager {
 private:
-    BYTE* a_event[SER_ECS_EVENT_MAX];
+    BYTE** a_event;
     ULONG counter;
+    ULONG event_number;
+    ULONG mem_size;
 
     std::mutex mutex;
 
@@ -35,8 +37,10 @@ public:
     EventManager();
     ~EventManager();
 
+    void grow(ULONG _new);
+
     void add(UINT _code, void* _arg, ULONG _size);
-    void add(UINT _code);
+    inline void add(UINT _code) { add(_code, new BYTE(0), sizeof(BYTE)); }
 
     void* get(UINT _code);
 
