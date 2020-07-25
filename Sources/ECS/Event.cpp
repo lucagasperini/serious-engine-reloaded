@@ -28,7 +28,12 @@ EventManager::EventManager()
 
 EventManager::~EventManager()
 {
-    removeAll();
+    for (UINT i = 0; i < SER_ECS_EVENT_MAX; i++)
+        if (a_event[i])
+            delete[] a_event[i];
+    delete[] a_event;
+    //a_event = NULL;
+    counter = 0;
 }
 
 void EventManager::add(UINT _code, void* _arg, ULONG _size)

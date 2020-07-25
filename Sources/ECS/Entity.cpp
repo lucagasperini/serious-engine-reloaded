@@ -27,8 +27,11 @@ EntityManager::EntityManager()
 
 EntityManager::~EntityManager()
 {
-    delete a_entity;
+    delete[] a_entity;
     a_entity = NULL;
+    counter = 0;
+    mem_entity_max = 0;
+    mem_alloc = NULL;
 }
 
 void EntityManager::grow(ULONG _add)
