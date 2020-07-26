@@ -80,13 +80,14 @@ void* EventManager::get(UINT _code)
 void EventManager::remove(UINT _code)
 {
     ASSERT(_code < event_number);
-    ASSERT(a_event[_code]);
-    std::lock_guard<std::mutex> lg(mutex);
-    UINT* tmp_ptr_size = (UINT*)a_event[_code];
-    mem_size -= *tmp_ptr_size;
-    free(a_event[_code]);
-    a_event[_code] = NULL;
-    counter--;
+    if (a_event[_code]) {
+        std::lock_guard<std::mutex> lg(mutex);
+        UINT* tmp_ptr_size = (UINT*)a_event[_code];
+        mem_size -= *tmp_ptr_size;
+        free(a_event[_code]);
+        a_event[_code] = NULL;
+        counter--;
+    }
 }
 
 void EventManager::removeAll()

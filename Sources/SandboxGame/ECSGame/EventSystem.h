@@ -38,8 +38,7 @@ private:
     int delta_y = 0;
     int old_x = 0;
     int old_y = 0;
-    int* event_parameter_mouse = new int[4];
-    int* event_parameter_mouse_click = new int[3];
+
     SDL_Event event;
 
     EventKeybind a_keybind[SER_KEYBIND_MAX];
@@ -57,6 +56,7 @@ public:
 
     void updateCursor(ComponentCursor* _cursor);
     void updateButton(ComponentPosition* _position, ComponentButton* _button);
+    void updateCamera(ComponentCamera* _camera);
 };
 
 #endif

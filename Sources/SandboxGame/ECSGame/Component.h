@@ -48,6 +48,7 @@ enum EventCode {
     EC_FULLSCREEN_CHANGE = 0xF0,
     EC_RESOLUTION_CHANGE = 0xF1,
 };
+
 struct ComponentWindow : component {
     CTString win_title;
     void* win_pointer = NULL;

@@ -21,7 +21,6 @@ extern UINT g_resolution_width;
 extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
-extern BOOL g_event_current;
 
 using namespace SER;
 

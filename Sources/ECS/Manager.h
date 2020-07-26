@@ -40,6 +40,8 @@
 
 #define SER_GET_EVENT_ARG(_name, _type, _event) _type* _name = (_type*)Manager::getEventManager()->get(_event)
 
+#define SER_GET_EVENT(_event) Manager::getEventManager()->get(_event)
+
 #define SER_REMOVE_EVENT(_event) Manager::getEventManager()->remove(_event)
 
 namespace SER {

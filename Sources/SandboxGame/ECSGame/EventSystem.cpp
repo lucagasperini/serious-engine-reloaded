@@ -40,15 +40,12 @@ void EventSystem::preupdate()
     // get real cursor position
     SDL_GetMouseState(&x, &y);
 
-    if (x != old_x || y != old_y) {
-        delta_x = old_x - x;
-        delta_y = old_y - y;
-        event_parameter_mouse[0] = x;
-        event_parameter_mouse[1] = y;
-        event_parameter_mouse[2] = delta_x;
-        event_parameter_mouse[3] = delta_y;
-        SER_ADD_EVENT_ARRAY(EC_MOUSE_MOVE, event_parameter_mouse, int, 4);
-    }
+    delta_x = old_x - x;
+    delta_y = old_y - y;
+
+    int event_parameter_mouse[4] = { x, y, delta_x, delta_y };
+
+    SER_ADD_EVENT_ARRAY(EC_MOUSE_MOVE, event_parameter_mouse, int, 4);
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
@@ -56,15 +53,14 @@ void EventSystem::preupdate()
             g_window_started = FALSE;
         }
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym) {
-            for (UINT i = 0; i < keybind_counter; i++)
+            for (UINT i = 0; i < keybind_counter; i++) {
                 if (a_keybind[i].key == event.key.keysym.sym) {
                     Manager::getEventManager()->add(a_keybind[i].code, a_keybind[i].arg, a_keybind[i].size);
                 }
+            }
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
-            event_parameter_mouse_click[0] = x;
-            event_parameter_mouse_click[1] = y;
-            event_parameter_mouse_click[2] = event.button.button;
+            int event_parameter_mouse_click[3] = { x, y, event.button.button };
             SER_ADD_EVENT_ARRAY(EC_MOUSE_BUTTON, event_parameter_mouse_click, int, 3);
         }
     }
@@ -77,6 +73,10 @@ void EventSystem::update(Entity* _entity)
     SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
     if (cursor)
         updateCursor(cursor);
+
+    SER_GET_COMPONENT(camera, ComponentCamera, _entity);
+    if (camera)
+        updateCamera(camera);
 
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
     SER_GET_COMPONENT(button, ComponentButton, _entity);
@@ -100,5 +100,55 @@ void EventSystem::updateCursor(ComponentCursor* _cursor)
     if (SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE)) {
         _cursor->x = arg[0];
         _cursor->y = arg[1];
+    }
+}
+
+void EventSystem::updateCamera(ComponentCamera* _camera)
+{
+    if (SER_GET_EVENT(EC_CAMERA_RIGHT)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+
+        SER_REMOVE_EVENT(EC_CAMERA_RIGHT);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_LEFT)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) - _camera->cam_speed,
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_LEFT);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_FORWARD)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3) + _camera->cam_speed);
+        SER_REMOVE_EVENT(EC_CAMERA_FORWARD);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_BACK)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3) - _camera->cam_speed);
+        SER_REMOVE_EVENT(EC_CAMERA_BACK);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_UP)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_UP);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_DOWN)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2) - _camera->cam_speed,
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_DOWN);
+    }
+    if (SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE)) {
+        FLOAT x = _camera->cam_rot(1);
+        FLOAT y = _camera->cam_rot(2);
+        printf("X: %f\nY: %f", (FLOAT)delta_x, (FLOAT)delta_y);
+        x += ((FLOAT)delta_x) * _camera->cam_speed / g_resolution_width * 360;
+        y += ((FLOAT)delta_y) * _camera->cam_speed / g_resolution_height * 360;
+
+        _camera->cam_rot = ANGLE3D(x, y, 0.0f);
     }
 }

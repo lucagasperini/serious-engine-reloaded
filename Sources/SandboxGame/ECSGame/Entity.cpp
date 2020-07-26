@@ -57,17 +57,14 @@
 #define SE_WINDOW_RECOVERY_W 640
 #define SE_WINDOW_RECOVERY_H 480
 
-#define KEYBIND_ADD_NOARG(_name, _key, _event)                                     \
-    EventKeybind _name = EventKeybind { _event, _key, new BYTE(0), sizeof(BYTE) }; \
-    event_system->addKeybind(_name);
+#define KEYBIND_ADD_NOARG(_key, _event) \
+    event_system->addKeybind(EventKeybind { _event, _key, new BYTE(0), sizeof(BYTE) })
 
-#define KEYBIND_ADD(_name, _key, _event, _arg, _type)                        \
-    EventKeybind _name = EventKeybind { _event, _key, _arg, sizeof(_type) }; \
-    event_system->addKeybind(_name);
+#define KEYBIND_ADD(_key, _event, _arg, _type) \
+    event_system->addKeybind(EventKeybind { _event, _key, _arg, sizeof(_type) })
 
-#define KEYBIND_ADD_ARRAY(_name, _key, _event, _arg, _type, _number)                   \
-    EventKeybind _name = EventKeybind { _event, _key, _arg, sizeof(_type) * _number }; \
-    event_system->addKeybind(_name);
+#define KEYBIND_ADD_ARRAY(_key, _event, _arg, _type, _number) \
+    event_system->addKeybind(EventKeybind { _event, _key, _arg, sizeof(_type) * _number })
 
 using namespace SER;
 
@@ -84,11 +81,15 @@ void load_all_game_system()
     UINT list_resolution[][2] = { { 640, 480 }, { 800, 600 }, { 1280, 720 }, { 1920, 1080 } };
 
     EventSystem* event_system = new EventSystem;
-    KEYBIND_ADD_NOARG(kb_fullscreen, SDLK_F1, EC_FULLSCREEN_CHANGE)
-    KEYBIND_ADD_ARRAY(kb_res_vga, SDLK_F2, EC_RESOLUTION_CHANGE, list_resolution[0], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_svga, SDLK_F3, EC_RESOLUTION_CHANGE, list_resolution[1], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_wxga, SDLK_F4, EC_RESOLUTION_CHANGE, list_resolution[2], UINT, 2)
-    KEYBIND_ADD_ARRAY(kb_res_hd, SDLK_F5, EC_RESOLUTION_CHANGE, list_resolution[3], UINT, 2)
+    KEYBIND_ADD_NOARG(SDLK_F1, EC_FULLSCREEN_CHANGE);
+    KEYBIND_ADD_ARRAY(SDLK_F2, EC_RESOLUTION_CHANGE, list_resolution[0], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F3, EC_RESOLUTION_CHANGE, list_resolution[1], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F4, EC_RESOLUTION_CHANGE, list_resolution[2], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F5, EC_RESOLUTION_CHANGE, list_resolution[3], UINT, 2);
+    KEYBIND_ADD_NOARG(SDLK_a, EC_CAMERA_RIGHT);
+    KEYBIND_ADD_NOARG(SDLK_d, EC_CAMERA_LEFT);
+    KEYBIND_ADD_NOARG(SDLK_w, EC_CAMERA_FORWARD);
+    KEYBIND_ADD_NOARG(SDLK_s, EC_CAMERA_BACK);
 
     Manager::setEventSystem((System*)event_system);
 
