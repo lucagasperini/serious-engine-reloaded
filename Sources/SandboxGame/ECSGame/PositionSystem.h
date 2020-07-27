@@ -37,6 +37,9 @@ public:
     void preupdate() override {};
     void update(SER::Entity* _entity) override;
     void postupdate() override {};
+
+    void updateCursor(ComponentCursor* _cursor);
+    void updateCamera(ComponentCamera* _camera);
 };
 
 #endif

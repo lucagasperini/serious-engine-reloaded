@@ -59,11 +59,6 @@ private:
 
     static ULONG thread_number;
 
-    static std::mutex mutex_update;
-    static std::mutex mutex_counter;
-    static std::mutex mutex_end_frame;
-    static std::condition_variable cv_update;
-
     static System* render_system;
     static System* event_system;
 

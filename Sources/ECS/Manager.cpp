@@ -29,11 +29,6 @@ std::thread Manager::thread_event;
 BYTE** Manager::a_thread_memory = NULL;
 ULONG Manager::thread_number = 0;
 
-std::mutex Manager::mutex_update;
-std::mutex Manager::mutex_counter;
-std::mutex Manager::mutex_end_frame;
-std::condition_variable Manager::cv_update;
-
 System* Manager::render_system;
 System* Manager::event_system;
 
@@ -113,7 +108,7 @@ void Manager::run()
     }
 
     if (thread_number > 0) {
-
+        loop_status = thread_number + 2;
         ULONG entity_thread = entity_manager->count() / thread_number;
 
         for (ULONG i = 0; i < thread_number; i++) {
@@ -131,34 +126,20 @@ void Manager::quit()
 {
     thread_event.join();
     for (ULONG i = 0; i < thread_number; i++) {
-        cv_update.notify_all();
         a_thread[i].join();
     }
 }
 
 void Manager::runThread(BYTE* _start_ptr, ULONG _number)
 {
+    Entity* tmp_ptr = NULL;
     while (g_game_started) {
-        {
-            std::unique_lock<std::mutex> lck(mutex_update);
-            cv_update.notify_all();
-            cv_update.wait(lck, [] {
-                return (loop_status >= 0 && loop_status <= thread_number) || !g_game_started;
-            });
-        }
-
-        Entity* tmp_ptr = NULL;
 
         for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
             tmp_ptr = entity_manager->get(_start_ptr);
             for (ULONG i = 0; i < system_counter; i++) {
                 a_system[i]->update(tmp_ptr);
             }
-        }
-
-        {
-            std::lock_guard<std::mutex> lck(mutex_counter);
-            loop_status++;
         }
     }
 }
@@ -167,11 +148,6 @@ void Manager::runThreadRender()
 {
     while (g_game_started) {
         {
-            std::unique_lock<std::mutex> lck(mutex_update);
-            cv_update.notify_all();
-            cv_update.wait(lck, [] {
-                return loop_status >= thread_number + 1 || !g_game_started;
-            });
         }
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->postupdate();
@@ -183,16 +159,6 @@ void Manager::runThreadRender()
             render_system->update(entity);
         }
         render_system->postupdate();
-
-        for (ULONG i = 0; i < system_counter; i++) {
-            a_system[i]->preupdate();
-        }
-
-        loop_status = 0;
-        {
-            std::lock_guard<std::mutex> lg(mutex_end_frame);
-            is_end_frame = TRUE;
-        }
     }
 }
 
@@ -206,10 +172,5 @@ void Manager::runThreadEvent()
             event_system->update(entity);
         }
         event_system->postupdate();
-        if (is_end_frame && event_manager->count() > 0) {
-            event_manager->removeAll();
-            std::lock_guard<std::mutex> lg(mutex_end_frame);
-            is_end_frame = FALSE;
-        }
     }
 }

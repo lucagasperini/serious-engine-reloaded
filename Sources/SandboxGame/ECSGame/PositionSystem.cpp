@@ -100,4 +100,70 @@ void PositionSystem::postinit()
 void PositionSystem::update(Entity* _entity)
 {
     System::update(_entity);
+
+    SER_GET_COMPONENT(cursor, ComponentCursor, _entity);
+    if (cursor)
+        updateCursor(cursor);
+
+    SER_GET_COMPONENT(camera, ComponentCamera, _entity);
+    if (camera)
+        updateCamera(camera);
+}
+
+void PositionSystem::updateCursor(ComponentCursor* _cursor)
+{
+    if (SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE)) {
+        _cursor->x = arg[0];
+        _cursor->y = arg[1];
+    }
+}
+
+void PositionSystem::updateCamera(ComponentCamera* _camera)
+{
+    if (SER_GET_EVENT(EC_CAMERA_RIGHT)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+
+        SER_REMOVE_EVENT(EC_CAMERA_RIGHT);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_LEFT)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) - _camera->cam_speed,
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_LEFT);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_FORWARD)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3) + _camera->cam_speed);
+        SER_REMOVE_EVENT(EC_CAMERA_FORWARD);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_BACK)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3) - _camera->cam_speed);
+        SER_REMOVE_EVENT(EC_CAMERA_BACK);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_UP)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2),
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_UP);
+    }
+    if (SER_GET_EVENT(EC_CAMERA_DOWN)) {
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
+            _camera->cam_pos(2) - _camera->cam_speed,
+            _camera->cam_pos(3));
+        SER_REMOVE_EVENT(EC_CAMERA_DOWN);
+    }
+    if (SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE)) {
+        FLOAT x = _camera->cam_rot(1);
+        FLOAT y = _camera->cam_rot(2);
+
+        x += ((FLOAT)arg[2]) / g_resolution_width * 360;
+        y += ((FLOAT)arg[3]) / g_resolution_height * 360;
+
+        _camera->cam_rot = ANGLE3D(x, y, 0.0f);
+    }
 }
