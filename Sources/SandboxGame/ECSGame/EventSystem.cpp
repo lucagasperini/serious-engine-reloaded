@@ -70,18 +70,8 @@ void EventSystem::update(Entity* _entity)
 {
     System::update(_entity);
 
-    SER_GET_COMPONENT(position, ComponentPosition, _entity);
-    SER_GET_COMPONENT(button, ComponentButton, _entity);
-
-    if (button && position)
-        updateButton(position, button);
-}
-
-void EventSystem::updateButton(ComponentPosition* _position, ComponentButton* _button)
-{
-    if (_position->pos_x < x && _position->pos_y < y
-        && _position->pos_x + _position->pos_w > x
-        && _position->pos_y + _position->pos_h > y) {
-        SER_ADD_EVENT(EC_BUTTON_ONFOCUS, &this_entity->id, ULONG);
+    if (SER_GET_EVENT(EC_EXIT)) {
+        g_game_started = FALSE;
+        g_window_started = FALSE;
     }
 }

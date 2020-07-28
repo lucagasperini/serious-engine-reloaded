@@ -108,6 +108,12 @@ void PositionSystem::update(Entity* _entity)
     SER_GET_COMPONENT(camera, ComponentCamera, _entity);
     if (camera)
         updateCamera(camera);
+
+    SER_GET_COMPONENT(position, ComponentPosition, _entity);
+    SER_GET_COMPONENT(button, ComponentButton, _entity);
+
+    if (button && position)
+        updateButton(position, button);
 }
 
 void PositionSystem::updateCursor(ComponentCursor* _cursor)
@@ -165,5 +171,23 @@ void PositionSystem::updateCamera(ComponentCamera* _camera)
         y += ((FLOAT)arg[3]) / g_resolution_height * 360;
 
         _camera->cam_rot = ANGLE3D(x, y, 0.0f);
+    }
+}
+
+void PositionSystem::updateButton(ComponentPosition* _position, ComponentButton* _button)
+{
+    SER_GET_EVENT_ARG(arg, int, EC_MOUSE_MOVE);
+    if (!arg)
+        return;
+
+    if (_position->pos_x < arg[0] && _position->pos_y < arg[1]
+        && _position->pos_x + _position->pos_w > arg[0]
+        && _position->pos_y + _position->pos_h > arg[1]) {
+        SER_ADD_EVENT(EC_BUTTON_ONFOCUS, &this_entity->id, ULONG);
+
+        SER_GET_EVENT_ARG(click, int, EC_MOUSE_BUTTON);
+        if (click && _button->onclick && click[2] == SDL_BUTTON_LEFT) {
+            SER_ADD_EVENT_NOARG(_button->onclick);
+        }
     }
 }

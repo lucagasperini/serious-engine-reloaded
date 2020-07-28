@@ -40,6 +40,7 @@ public:
 
     void updateCursor(ComponentCursor* _cursor);
     void updateCamera(ComponentCamera* _camera);
+    void updateButton(ComponentPosition* _position, ComponentButton* _button);
 };
 
 #endif

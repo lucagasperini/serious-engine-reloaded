@@ -132,6 +132,7 @@ struct ComponentButton : component {
     COLOR color = 0xff;
     COLOR color_focus = 0xff;
     CTString text;
+    EventCode onclick = EC_NULL;
 };
 
 struct ComponentCursor : component {

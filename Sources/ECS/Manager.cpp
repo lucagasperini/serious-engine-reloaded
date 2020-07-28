@@ -21,6 +21,7 @@
 using namespace SER;
 
 extern BOOL g_game_started;
+extern BOOL g_window_started;
 
 ULONG Manager::system_counter = 0;
 System* Manager::a_system[SER_ECS_SYSTEM_MAX];

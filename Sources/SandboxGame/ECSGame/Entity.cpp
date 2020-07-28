@@ -271,6 +271,7 @@ void load_all_game_entity()
     //menu_button_quit->sea_action = quitgame;
     menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
+    menu_button_quit->onclick = EC_EXIT;
     SER_ADD_ENTITY(menu_button_quit, MenuButton);
 
     Cursor* e_cursor = new Cursor;
