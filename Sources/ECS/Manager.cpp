@@ -33,9 +33,6 @@ ULONG Manager::thread_number = 0;
 System* Manager::render_system;
 System* Manager::event_system;
 
-ULONG Manager::loop_status = 0;
-BOOL Manager::is_end_frame = FALSE;
-
 EntityManager* Manager::entity_manager;
 EventManager* Manager::event_manager;
 
@@ -109,7 +106,6 @@ void Manager::run()
     }
 
     if (thread_number > 0) {
-        loop_status = thread_number + 2;
         ULONG entity_thread = entity_manager->count() / thread_number;
 
         for (ULONG i = 0; i < thread_number; i++) {

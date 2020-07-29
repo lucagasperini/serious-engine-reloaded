@@ -62,9 +62,6 @@ private:
     static System* render_system;
     static System* event_system;
 
-    static ULONG loop_status;
-    static BOOL is_end_frame;
-
     static EntityManager* entity_manager;
     static EventManager* event_manager;
 
