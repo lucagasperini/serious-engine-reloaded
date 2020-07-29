@@ -59,9 +59,6 @@ UINT g_resolution_height = 720;
 UINT g_virtual_resolution_width = 1920;
 UINT g_virtual_resolution_height = 1080;
 
-BOOL g_game_started = FALSE;
-BOOL g_window_started = FALSE;
-
 int submain(char* _cmdline)
 {
     SESplashScreen splashscreen;
@@ -87,8 +84,6 @@ int submain(char* _cmdline)
     SER::Manager::setThreadNumber(number_thread);
     SER::Manager::splitThreadMemory();
 
-    g_window_started = TRUE;
-
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);
 
@@ -98,13 +93,8 @@ int submain(char* _cmdline)
 
     splashscreen.hide();
 
-    while (g_window_started) {
-
-        // start of game loop
-        g_game_started = TRUE;
+    while (SER::Manager::isGameStarted()) {
         SER::Manager::run();
-
-        SER::Manager::quit();
     }
     return TRUE;
 }

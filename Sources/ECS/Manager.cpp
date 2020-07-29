@@ -20,9 +20,6 @@
 
 using namespace SER;
 
-extern BOOL g_game_started;
-extern BOOL g_window_started;
-
 ULONG Manager::system_counter = 0;
 System* Manager::a_system[SER_ECS_SYSTEM_MAX];
 std::thread* Manager::a_thread = NULL;
@@ -35,6 +32,9 @@ System* Manager::event_system;
 
 EntityManager* Manager::entity_manager;
 EventManager* Manager::event_manager;
+
+BOOL Manager::game_started = FALSE;
+BOOL Manager::level_started = FALSE;
 
 Manager::Manager()
 {
@@ -53,6 +53,7 @@ void Manager::init(ULONG _entity_space, ULONG _event_limit)
     event_manager = new EventManager;
     event_manager->grow(_event_limit);
     system_counter = 0;
+    game_started = TRUE;
 }
 
 void Manager::addSystem(System* _system)
@@ -105,6 +106,8 @@ void Manager::run()
         a_system[i]->postinit();
     }
 
+    level_started = TRUE;
+
     if (thread_number > 0) {
         ULONG entity_thread = entity_manager->count() / thread_number;
 
@@ -117,20 +120,28 @@ void Manager::run()
         thread_event = std::thread(runThreadEvent);
         runThreadRender();
     }
-}
 
-void Manager::quit()
-{
     thread_event.join();
     for (ULONG i = 0; i < thread_number; i++) {
         a_thread[i].join();
     }
 }
 
+void Manager::quitLevel()
+{
+    level_started = FALSE;
+}
+
+void Manager::quitGame()
+{
+    level_started = FALSE;
+    game_started = FALSE;
+}
+
 void Manager::runThread(BYTE* _start_ptr, ULONG _number)
 {
     Entity* tmp_ptr = NULL;
-    while (g_game_started) {
+    while (level_started) {
 
         for (ULONG n_entity = 0; n_entity < _number; n_entity++) {
             tmp_ptr = entity_manager->get(_start_ptr);
@@ -143,9 +154,8 @@ void Manager::runThread(BYTE* _start_ptr, ULONG _number)
 
 void Manager::runThreadRender()
 {
-    while (g_game_started) {
-        {
-        }
+    while (level_started) {
+
         for (ULONG i = 0; i < system_counter; i++) {
             a_system[i]->postupdate();
         }
@@ -161,7 +171,7 @@ void Manager::runThreadRender()
 
 void Manager::runThreadEvent()
 {
-    while (g_game_started) {
+    while (level_started) {
 
         event_system->preupdate();
         BYTE* tmp_ptr = entity_manager->ptr();

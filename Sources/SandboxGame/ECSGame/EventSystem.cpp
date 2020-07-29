@@ -17,8 +17,6 @@
 
 #include "EventSystem.h"
 
-extern UINT g_window_started;
-extern UINT g_game_started;
 extern UINT g_resolution_width;
 extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
@@ -49,8 +47,7 @@ void EventSystem::preupdate()
 
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            g_game_started = FALSE;
-            g_window_started = FALSE;
+            Manager::quitGame();
         }
         if (event.type == SDL_KEYDOWN && event.key.keysym.sym) {
             for (UINT i = 0; i < keybind_counter; i++) {
@@ -71,7 +68,6 @@ void EventSystem::update(Entity* _entity)
     System::update(_entity);
 
     if (SER_GET_EVENT(EC_EXIT)) {
-        g_game_started = FALSE;
-        g_window_started = FALSE;
+        Manager::quitGame();
     }
 }

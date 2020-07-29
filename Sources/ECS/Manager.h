@@ -65,9 +65,15 @@ private:
     static EntityManager* entity_manager;
     static EventManager* event_manager;
 
+    static BOOL game_started;
+    static BOOL level_started;
+
 public:
     Manager();
     ~Manager();
+
+    static inline BOOL isGameStarted() { return game_started; }
+    static inline BOOL isLevelStarted() { return level_started; }
 
     static inline EntityManager* getEntityManager() { return entity_manager; }
     static inline EventManager* getEventManager() { return event_manager; }
@@ -83,7 +89,8 @@ public:
     static void splitThreadMemory();
 
     static void run();
-    static void quit();
+    static void quitGame();
+    static void quitLevel();
 
     static void runThread(BYTE* _start_ptr, ULONG _number);
     static void runThreadRender();

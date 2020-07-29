@@ -34,7 +34,6 @@ extern UINT g_resolution_width;
 extern UINT g_resolution_height;
 extern UINT g_virtual_resolution_width;
 extern UINT g_virtual_resolution_height;
-extern BOOL g_game_started;
 
 void RenderSystem::preupdate()
 {
@@ -259,7 +258,7 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
             _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
         else
             _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
-        g_game_started = FALSE;
+        Manager::quitLevel();
         SER_REMOVE_EVENT(EC_FULLSCREEN_CHANGE);
     }
     if (SER_GET_EVENT_ARG(arg, UINT, EC_RESOLUTION_CHANGE)) {
@@ -269,7 +268,7 @@ void RenderSystem::eventWindow(ComponentWindow* _window)
                 g_virtual_resolution_height = g_resolution_height;
                 g_resolution_width = arg[0];
                 g_resolution_height = arg[1];
-                g_game_started = FALSE;
+                Manager::quitLevel();
             }
         }
         SER_REMOVE_EVENT(EC_RESOLUTION_CHANGE);

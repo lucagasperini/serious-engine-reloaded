@@ -68,11 +68,6 @@
 
 using namespace SER;
 
-void quitgame()
-{
-    //g_game_started = FALSE;
-}
-
 void load_all_game_system()
 {
     RenderSystem* render_system = new RenderSystem;
