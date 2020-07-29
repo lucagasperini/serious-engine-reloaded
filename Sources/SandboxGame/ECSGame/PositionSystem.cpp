@@ -105,9 +105,10 @@ void PositionSystem::update(Entity* _entity)
     if (cursor)
         updateCursor(cursor);
 
+    SER_GET_COMPONENT(velocity, ComponentVelocity, _entity);
     SER_GET_COMPONENT(camera, ComponentCamera, _entity);
-    if (camera)
-        updateCamera(camera);
+    if (camera && velocity)
+        updateCamera(camera, velocity);
 
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
     SER_GET_COMPONENT(button, ComponentButton, _entity);
@@ -124,17 +125,17 @@ void PositionSystem::updateCursor(ComponentCursor* _cursor)
     }
 }
 
-void PositionSystem::updateCamera(ComponentCamera* _camera)
+void PositionSystem::updateCamera(ComponentCamera* _camera, ComponentVelocity* _velocity)
 {
     if (SER_GET_EVENT(EC_CAMERA_RIGHT)) {
-        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _camera->cam_speed,
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) + _velocity->velocity(1),
             _camera->cam_pos(2),
             _camera->cam_pos(3));
 
         SER_REMOVE_EVENT(EC_CAMERA_RIGHT);
     }
     if (SER_GET_EVENT(EC_CAMERA_LEFT)) {
-        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) - _camera->cam_speed,
+        _camera->cam_pos = FLOAT3D(_camera->cam_pos(1) - _velocity->velocity(1),
             _camera->cam_pos(2),
             _camera->cam_pos(3));
         SER_REMOVE_EVENT(EC_CAMERA_LEFT);
@@ -142,24 +143,24 @@ void PositionSystem::updateCamera(ComponentCamera* _camera)
     if (SER_GET_EVENT(EC_CAMERA_FORWARD)) {
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
             _camera->cam_pos(2),
-            _camera->cam_pos(3) + _camera->cam_speed);
+            _camera->cam_pos(3) + _velocity->velocity(3));
         SER_REMOVE_EVENT(EC_CAMERA_FORWARD);
     }
     if (SER_GET_EVENT(EC_CAMERA_BACK)) {
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
             _camera->cam_pos(2),
-            _camera->cam_pos(3) - _camera->cam_speed);
+            _camera->cam_pos(3) - _velocity->velocity(3));
         SER_REMOVE_EVENT(EC_CAMERA_BACK);
     }
     if (SER_GET_EVENT(EC_CAMERA_UP)) {
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
-            _camera->cam_pos(2),
+            _camera->cam_pos(2) + _velocity->velocity(2),
             _camera->cam_pos(3));
         SER_REMOVE_EVENT(EC_CAMERA_UP);
     }
     if (SER_GET_EVENT(EC_CAMERA_DOWN)) {
         _camera->cam_pos = FLOAT3D(_camera->cam_pos(1),
-            _camera->cam_pos(2) - _camera->cam_speed,
+            _camera->cam_pos(2) - _velocity->velocity(2),
             _camera->cam_pos(3));
         SER_REMOVE_EVENT(EC_CAMERA_DOWN);
     }
@@ -167,8 +168,8 @@ void PositionSystem::updateCamera(ComponentCamera* _camera)
         FLOAT x = _camera->cam_rot(1);
         FLOAT y = _camera->cam_rot(2);
 
-        x += ((FLOAT)arg[2]) / g_resolution_width * 360;
-        y += ((FLOAT)arg[3]) / g_resolution_height * 360;
+        x += ((FLOAT)arg[2]) * _camera->cam_speed / g_resolution_width * 360;
+        y += ((FLOAT)arg[3]) * _camera->cam_speed / g_resolution_height * 360;
 
         _camera->cam_rot = ANGLE3D(x, y, 0.0f);
     }

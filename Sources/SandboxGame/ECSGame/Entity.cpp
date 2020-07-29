@@ -133,7 +133,8 @@ void load_all_game_entity()
     e_camera->cam_fov = 90.0f;
     e_camera->cam_pos = world_start_position;
     e_camera->cam_rot = world_start_rotation;
-    e_camera->cam_speed = 1.0f; /*
+    e_camera->velocity = FLOAT3D(1.0f, 1.0f, 1.0f);
+    e_camera->cam_speed = 0.20f; /*
     memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
     camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F12;
     camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;

@@ -39,7 +39,7 @@ public:
     void postupdate() override {};
 
     void updateCursor(ComponentCursor* _cursor);
-    void updateCamera(ComponentCamera* _camera);
+    void updateCamera(ComponentCamera* _camera, ComponentVelocity* _velocity);
     void updateButton(ComponentPosition* _position, ComponentButton* _button);
 };
 

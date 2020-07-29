@@ -39,7 +39,8 @@ struct MenuButton : SER::Entity,
 };
 
 struct Camera : SER::Entity,
-                ComponentCamera {
+                ComponentCamera,
+                ComponentVelocity {
 };
 
 #endif

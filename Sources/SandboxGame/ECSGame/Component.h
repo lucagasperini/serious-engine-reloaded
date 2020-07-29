@@ -98,9 +98,13 @@ struct ComponentTexture : component {
     CTextureObject tex_data;
 };
 
+struct ComponentVelocity {
+    FLOAT3D velocity;
+};
+
 struct ComponentCamera : component {
     BOOL cam_on = TRUE;
-    FLOAT cam_speed = 1.0f;
+    FLOAT cam_speed = 0.5f;
     FLOAT3D cam_pos;
     ANGLE3D cam_rot;
     ANGLE cam_fov = 90.0f;
