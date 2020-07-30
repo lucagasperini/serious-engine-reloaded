@@ -49,7 +49,9 @@
 
 #define SER_GET_SETTING_ARG(_name, _type, _setting) _type* _name = (_type*)Manager::getSettingManager()->get(_setting)
 
-#define SER_ADD_SETTING(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, _arg, sizeof(_type))
+#define SER_ADD_SETTING_ARRAY(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, _arg, sizeof(_type))
+
+#define SER_ADD_SETTING(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, new _type(_arg), sizeof(_type))
 
 namespace SER {
 
