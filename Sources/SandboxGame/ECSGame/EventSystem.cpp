@@ -70,4 +70,24 @@ void EventSystem::update(Entity* _entity)
     if (SER_GET_EVENT(EC_EXIT)) {
         Manager::quitGame();
     }
+    if (SER_GET_EVENT(EC_DEBUG_BORDER)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_BORDER);
+        SER_ADD_SETTING(SC_DEBUG_BORDER, new BOOL(!(*arg)), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_BORDER);
+    }
+    if (SER_GET_EVENT(EC_DEBUG_POSITION)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_POSITION);
+        SER_ADD_SETTING(SC_DEBUG_POSITION, new BOOL(!(*arg)), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_POSITION);
+    }
+    if (SER_GET_EVENT(EC_DEBUG_ENTITYID)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_ENTITYID);
+        SER_ADD_SETTING(SC_DEBUG_ENTITYID, new BOOL(!(*arg)), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_ENTITYID);
+    }
+    if (SER_GET_EVENT(EC_DEBUG_FPS)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_FPS);
+        SER_ADD_SETTING(SC_DEBUG_FPS, new BOOL(!(*arg)), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_FPS);
+    }
 }

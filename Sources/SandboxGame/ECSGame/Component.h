@@ -49,6 +49,14 @@ enum EventCode {
     EC_RESOLUTION_CHANGE = 0xF1,
 };
 
+enum SettingCode {
+    SC_DEBUG_BORDER = 0xD0,
+    SC_DEBUG_ENTITYID = 0xD1,
+    SC_DEBUG_POSITION = 0xD2,
+    SC_DEBUG_FPS = 0xD3,
+    SC_DEBUG_CURSOR = 0xD4,
+};
+
 struct ComponentWindow : component {
     CTString win_title;
     void* win_pointer = NULL;

@@ -27,11 +27,12 @@ std::thread Manager::thread_event;
 BYTE** Manager::a_thread_memory = NULL;
 ULONG Manager::thread_number = 0;
 
-System* Manager::render_system;
-System* Manager::event_system;
+System* Manager::render_system = NULL;
+System* Manager::event_system = NULL;
 
-EntityManager* Manager::entity_manager;
-EventManager* Manager::event_manager;
+EntityManager* Manager::entity_manager = NULL;
+EventManager* Manager::event_manager = NULL;
+SettingManager* Manager::setting_manager = NULL;
 
 BOOL Manager::game_started = FALSE;
 BOOL Manager::level_started = FALSE;
@@ -46,12 +47,14 @@ Manager::~Manager()
     //a_system = NULL;
 }
 
-void Manager::init(ULONG _entity_space, ULONG _event_limit)
+void Manager::init(ULONG _entity_space, ULONG _event_limit, ULONG _setting_limit)
 {
     entity_manager = new EntityManager;
     entity_manager->grow(_entity_space);
     event_manager = new EventManager;
     event_manager->grow(_event_limit);
+    setting_manager = new SettingManager;
+    setting_manager->grow(_setting_limit);
     system_counter = 0;
     game_started = TRUE;
 }

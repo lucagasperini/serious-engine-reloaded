@@ -132,21 +132,31 @@ void RenderSystem::initWindow(ComponentWindow* _window)
 void RenderSystem::update(Entity* _entity)
 {
     System::update(_entity);
+
     SER_GET_COMPONENT(window, ComponentWindow, _entity);
     if (window)
         eventWindow(window);
+
     SER_GET_COMPONENT(camera, ComponentCamera, _entity);
     if (camera)
         updateWorld(camera);
+
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
-    if (g_dbg_draw_border && position)
+
+    SER_GET_SETTING_ARG(debug_border, BOOL, SC_DEBUG_BORDER);
+    SER_GET_SETTING_ARG(debug_position, BOOL, SC_DEBUG_POSITION);
+    SER_GET_SETTING_ARG(debug_entity_id, BOOL, SC_DEBUG_ENTITYID);
+    SER_GET_SETTING_ARG(debug_fps, BOOL, SC_DEBUG_FPS);
+
+    if (*debug_border && position)
         updateBorder(position);
-    if (g_dbg_draw_id && position)
-        updateId(_entity, position);
-    if (g_dbg_draw_position && camera)
+    if (*debug_entity_id && position)
+        updateId(position);
+    if (*debug_position && camera)
         updatePosition(camera);
-    if (g_dbg_draw_fps)
+    if (*debug_fps)
         updateFps();
+
     SER_GET_COMPONENT(texture, ComponentTexture, _entity);
     if (position && texture)
         updateTexture(position, texture);
@@ -205,12 +215,12 @@ void RenderSystem::updateBorder(ComponentPosition* _position)
     dp->DrawBorder(_position->pos_x, _position->pos_y, _position->pos_w, _position->pos_h, g_fb_color);
 }
 
-void RenderSystem::updateId(Entity* _entity, ComponentPosition* _position)
+void RenderSystem::updateId(ComponentPosition* _position)
 {
     PIXaabbox2D box(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h));
     //dp->SetFont(main_font_small);
     char* buffer = new char[32];
-    snprintf(buffer, 32, "%i", _entity->id);
+    snprintf(buffer, 32, "%i", this_entity->id);
     dp->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 

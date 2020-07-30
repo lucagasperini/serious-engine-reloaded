@@ -68,6 +68,14 @@
 
 using namespace SER;
 
+void load_all_game_setting()
+{
+    SER_ADD_SETTING(SC_DEBUG_BORDER, new BOOL(FALSE), BOOL);
+    SER_ADD_SETTING(SC_DEBUG_POSITION, new BOOL(FALSE), BOOL);
+    SER_ADD_SETTING(SC_DEBUG_ENTITYID, new BOOL(FALSE), BOOL);
+    SER_ADD_SETTING(SC_DEBUG_FPS, new BOOL(FALSE), BOOL);
+}
+
 void load_all_game_system()
 {
     RenderSystem* render_system = new RenderSystem;
@@ -85,6 +93,12 @@ void load_all_game_system()
     KEYBIND_ADD_NOARG(SDLK_d, EC_CAMERA_LEFT);
     KEYBIND_ADD_NOARG(SDLK_w, EC_CAMERA_FORWARD);
     KEYBIND_ADD_NOARG(SDLK_s, EC_CAMERA_BACK);
+    KEYBIND_ADD_NOARG(SDLK_F6, EC_DEBUG_BORDER);
+    KEYBIND_ADD_NOARG(SDLK_F7, EC_DEBUG_ENTITYID);
+    KEYBIND_ADD_NOARG(SDLK_F8, EC_DEBUG_POSITION);
+    KEYBIND_ADD_NOARG(SDLK_F9, EC_DEBUG_FPS);
+    KEYBIND_ADD_NOARG(SDLK_F10, EC_DEBUG_CURSOR);
+    KEYBIND_ADD_NOARG(SDLK_ESCAPE, EC_EXIT);
 
     Manager::setEventSystem((System*)event_system);
 
@@ -113,31 +127,13 @@ void load_all_game_entity()
     e_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
     SER_ADD_ENTITY(e_window, MainWindow);
 
-    /*
-    game_control->kb_keybind[SE_KEYBIND_EXIT] = SDLK_ESCAPE;
-    game_control->kb_keybind[SE_KEYBIND_FULLSCREEN] = SDLK_F1;
-
-    game_control->kb_keybind[SE_KEYBIND_DEBUG_BORDER] = SDLK_F6;
-    game_control->kb_keybind[SE_KEYBIND_DEBUG_ENTITYID] = SDLK_F7;
-    game_control->kb_keybind[SE_KEYBIND_DEBUG_POSITION] = SDLK_F8;
-    game_control->kb_keybind[SE_KEYBIND_DEBUG_FPS] = SDLK_F9;
-    game_control->kb_keybind[SE_KEYBIND_DEBUG_CURSOR] = SDLK_F10;
-    */
-
     Camera* e_camera = new Camera();
     e_camera->cam_fov = 90.0f;
     e_camera->cam_pos = world_start_position;
     e_camera->cam_rot = world_start_rotation;
     e_camera->velocity = FLOAT3D(1.0f, 1.0f, 1.0f);
-    e_camera->cam_speed = 0.20f; /*
-    memset(camera->kb_keybind, 0, sizeof(ULONG) * SE_ECS_KEYBIND_MAX);
-    camera->kb_keybind[SE_KEYBIND_CAMERA_RESET] = SDLK_F12;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_RIGHT] = SDLK_RIGHT;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_LEFT] = SDLK_LEFT;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_FORWARD] = SDLK_UP;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_BACK] = SDLK_DOWN;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_UP] = SDLK_SPACE;
-    camera->kb_keybind[SE_KEYBIND_CAMERA_DOWN] = SDLK_c;*/
+    e_camera->cam_speed = 0.20f;
+
     SER_ADD_ENTITY(e_camera, Camera);
 
     MenuImage* logosam = new MenuImage();

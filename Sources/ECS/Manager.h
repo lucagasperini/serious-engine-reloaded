@@ -20,6 +20,7 @@
 
 #include "Entity.h"
 #include "Event.h"
+#include "Setting.h"
 #include "System.h"
 #include <Engine/Engine.h>
 #include <condition_variable>
@@ -44,6 +45,12 @@
 
 #define SER_REMOVE_EVENT(_event) Manager::getEventManager()->remove(_event)
 
+#define SER_GET_SETTING(_setting) Manager::getSettingManager()->get(_setting)
+
+#define SER_GET_SETTING_ARG(_name, _type, _setting) _type* _name = (_type*)Manager::getSettingManager()->get(_setting)
+
+#define SER_ADD_SETTING(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, _arg, sizeof(_type))
+
 namespace SER {
 
 class Manager {
@@ -64,6 +71,7 @@ private:
 
     static EntityManager* entity_manager;
     static EventManager* event_manager;
+    static SettingManager* setting_manager;
 
     static BOOL game_started;
     static BOOL level_started;
@@ -77,11 +85,12 @@ public:
 
     static inline EntityManager* getEntityManager() { return entity_manager; }
     static inline EventManager* getEventManager() { return event_manager; }
+    static inline SettingManager* getSettingManager() { return setting_manager; }
 
     static inline void setRenderSystem(System* _render_system) { render_system = _render_system; };
     static inline void setEventSystem(System* _event_system) { event_system = _event_system; };
 
-    static void init(ULONG _entity_space, ULONG _event_limit);
+    static void init(ULONG _entity_space, ULONG _event_limit, ULONG _setting_limit);
 
     static void setThreadNumber(ULONG _thread_number);
     static inline ULONG getThreadNumber() { return thread_number; }

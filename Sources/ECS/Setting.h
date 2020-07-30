@@ -15,26 +15,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SER_ECS_EVENT_H
-#define SER_ECS_EVENT_H
+#ifndef SER_ECS_SETTING_H
+#define SER_ECS_SETTING_H
 
 #include <Engine/Base/Types.h>
 #include <mutex>
 
 namespace SER {
 
-class EventManager {
+class SettingManager {
 private:
-    BYTE** a_event;
+    BYTE** a_setting;
     ULONG counter;
-    ULONG event_number;
     ULONG mem_size;
 
     std::mutex mutex;
 
 public:
-    EventManager();
-    ~EventManager();
+    SettingManager();
+    ~SettingManager();
 
     void grow(ULONG _new);
 
@@ -50,4 +49,5 @@ public:
 };
 
 }
+
 #endif

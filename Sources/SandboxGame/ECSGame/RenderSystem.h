@@ -45,7 +45,7 @@ public:
     void updateTexture(ComponentPosition* _position, ComponentTexture* _texture);
     void updateButton(ComponentPosition* _position, ComponentButton* _button);
     void updateBorder(ComponentPosition* _position);
-    void updateId(SER::Entity* _entity, ComponentPosition* _position);
+    void updateId(ComponentPosition* _position);
     void updatePosition(ComponentCamera* _camera);
     void updateFps();
     void updateWorld(ComponentCamera* _camera);
