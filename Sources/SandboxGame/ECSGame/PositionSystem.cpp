@@ -184,7 +184,7 @@ void PositionSystem::updateButton(ComponentPosition* _position, ComponentButton*
     if (_position->pos_x < arg[0] && _position->pos_y < arg[1]
         && _position->pos_x + _position->pos_w > arg[0]
         && _position->pos_y + _position->pos_h > arg[1]) {
-        SER_ADD_EVENT(EC_BUTTON_ONFOCUS, &this_entity->id, ULONG);
+        SER_ADD_EVENT(EC_BUTTON_ONFOCUS, this_entity->id, ULONG);
 
         SER_GET_EVENT_ARG(click, int, EC_MOUSE_BUTTON);
         if (click && _button->onclick && click[2] == SDL_BUTTON_LEFT) {

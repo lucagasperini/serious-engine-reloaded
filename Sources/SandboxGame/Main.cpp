@@ -97,6 +97,7 @@ int submain(char* _cmdline)
     while (SER::Manager::isGameStarted()) {
         SER::Manager::run();
     }
+    SE_EndEngine();
     return TRUE;
 }
 

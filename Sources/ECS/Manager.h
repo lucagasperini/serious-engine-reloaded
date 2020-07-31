@@ -31,11 +31,15 @@
 
 #define SER_GET_COMPONENT(_name, _component, _entity) _component* _name = dynamic_cast<_component*>(_entity)
 
-#define SER_ADD_ENTITY(_name, _entity) SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity))
+#define SER_ADD_ENTITY(_name, _entity)                                          \
+    {                                                                           \
+        SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity)); \
+        delete _name;                                                           \
+    }
 
 #define SER_ADD_EVENT_NOARG(_event) Manager::getEventManager()->add(_event)
 
-#define SER_ADD_EVENT(_event, _arg, _type) Manager::getEventManager()->add(_event, _arg, sizeof(_type))
+#define SER_ADD_EVENT(_event, _arg, _type) Manager::getEventManager()->add(_event, new _type(_arg), sizeof(_type))
 
 #define SER_ADD_EVENT_ARRAY(_event, _arg, _type, _number) Manager::getEventManager()->add(_event, _arg, sizeof(_type) * _number)
 
@@ -51,7 +55,12 @@
 
 #define SER_ADD_SETTING_ARRAY(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, _arg, sizeof(_type))
 
-#define SER_ADD_SETTING(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, new _type(_arg), sizeof(_type))
+#define SER_ADD_SETTING(_setting, _arg, _type)                                       \
+    {                                                                                \
+        _type* ____tmp_ptr____ = new _type(_arg);                                    \
+        Manager::getSettingManager()->add(_setting, ____tmp_ptr____, sizeof(_type)); \
+        delete ____tmp_ptr____;                                                      \
+    }
 
 namespace SER {
 

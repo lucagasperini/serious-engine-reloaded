@@ -18,6 +18,8 @@
 #include "RenderSystem.h"
 #include <ECS/Manager.h>
 
+#include <Engine/Templates/Stock_CTextureData.h>
+
 using namespace SER;
 
 //TODO: Create a structure to manage fonts.
@@ -175,19 +177,27 @@ void RenderSystem::updateCursor(ComponentCursor* _cursor)
     if (g_dbg_draw_cursor)
         dp->DrawBorder(_cursor->x, _cursor->y, _cursor->w, _cursor->h, g_fb_color);
 
-    dp->PutTexture(&_cursor->texture,
+    CTextureObject* tmp_obj = new CTextureObject;
+    tmp_obj->SetData_t(*_cursor->texture);
+    dp->PutTexture(tmp_obj,
         PIXaabbox2D(PIX2D(_cursor->x, _cursor->y),
             PIX2D(_cursor->x + _cursor->w, _cursor->y + _cursor->h)));
 }
 
 void RenderSystem::updateTexture(ComponentPosition* _position, ComponentTexture* _texture)
 {
-    dp->PutTexture(&_texture->tex_data, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
+    //_pTextureStock->Obtain_t(_texture->tex_file)->get;
+
+    CTextureObject* tmp_obj = new CTextureObject;
+    tmp_obj->SetData_t(*_texture->tex_file);
+    dp->PutTexture(tmp_obj, PIXaabbox2D(PIX2D(_position->pos_x, _position->pos_y), PIX2D(_position->pos_x + _position->pos_w, _position->pos_y + _position->pos_h)));
 }
 
 void RenderSystem::updateButton(ComponentPosition* _position, ComponentButton* _button)
 {
-    dp->SetFont(&_button->fontdata);
+    CFontData font_big;
+    font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
+    dp->SetFont(&font_big);
     dp->SetTextScaling(1.0f);
     dp->SetTextAspect(1.0f);
     //dp->SetTextMode(_text->txt_mode);
@@ -203,11 +213,11 @@ void RenderSystem::updateButton(ComponentPosition* _position, ComponentButton* _
         col = _button->color;
     }
     if (_button->align == -1)
-        dp->PutText(_button->text, box.Min()(1), box.Min()(2), col);
+        dp->PutText(*_button->text, box.Min()(1), box.Min()(2), col);
     else if (_button->align == +1)
-        dp->PutTextR(_button->text, box.Max()(1), box.Min()(2), col);
+        dp->PutTextR(*_button->text, box.Max()(1), box.Min()(2), col);
     else
-        dp->PutTextC(_button->text, box.Center()(1), box.Min()(2), col);
+        dp->PutTextC(*_button->text, box.Center()(1), box.Min()(2), col);
 }
 
 void RenderSystem::updateBorder(ComponentPosition* _position)

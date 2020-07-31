@@ -103,7 +103,7 @@ struct ComponentPosition : component {
 };
 
 struct ComponentTexture : component {
-    CTextureObject tex_data;
+    CTString* tex_file;
 };
 
 struct ComponentVelocity {
@@ -140,15 +140,15 @@ struct ComponentAlign : component {
 struct ComponentButton : component {
     INDEX fontsize = 0;
     INDEX align = 0;
-    CFontData fontdata;
+    //CFontData fontdata;
     COLOR color = 0xff;
     COLOR color_focus = 0xff;
-    CTString text;
+    CTString* text;
     EventCode onclick = EC_NULL;
 };
 
 struct ComponentCursor : component {
-    CTextureObject texture;
+    CTString* texture;
     UINT x = 0;
     UINT y = 0;
     UINT w = 0;
