@@ -70,30 +70,12 @@
 
 using namespace SER;
 
-class tempo {
-public:
-    int warrior;
-    int demon_hunter;
-    tempo()
-    {
-        warrior = 10;
-        demon_hunter = 10000;
-    }
-    ~tempo()
-    {
-        warrior = 0;
-        demon_hunter = 0;
-        printf("tempo destoyed");
-    }
-};
-
 void load_all_game_setting()
 {
     SER_ADD_SETTING(SC_DEBUG_BORDER, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_POSITION, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_ENTITYID, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_FPS, FALSE, BOOL);
-    SER_ADD_SETTING(SC_DEBUG_CURSOR, tempo(), tempo);
 }
 
 void load_all_game_system()
