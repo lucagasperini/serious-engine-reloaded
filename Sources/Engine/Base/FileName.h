@@ -30,7 +30,8 @@ public:
   static const char *convertToWin32(const char *src);
 
   class CSerial *fnm_pserPreloaded;     // pointer to already loaded object if available
-private:
+//BUG: why it is private???
+//private:
 
   /* Constructor from character string. */
   inline CTFileName(const char *pString) : CTString(convertFromWin32(pString)), fnm_pserPreloaded(NULL) {}

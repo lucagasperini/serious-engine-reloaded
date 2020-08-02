@@ -37,6 +37,31 @@
         delete _name;                                                           \
     }
 
+#define SER_ADD_ENTITY_FEM(_name, _entity, _size, _memory, _member_ptr)                         \
+    {                                                                                           \
+        FastEntityMemory* ____fem____ = new FastEntityMemory[1];                                \
+        ____fem____[0] = FastEntityMemory { _size, _memory, (void**)&_member_ptr };             \
+        SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), ____fem____, 1); \
+        delete _name;                                                                           \
+        delete ____fem____;                                                                     \
+    }
+
+#define SER_ADD_ENTITY_FEM_STRING(_name, _entity, _str, _member_ptr)                            \
+    {                                                                                           \
+        FastEntityMemory* ____fem____ = new FastEntityMemory[1];                                \
+        ____fem____[0] = FastEntityMemory { strlen(_str) + 1, _str, (void**)&_member_ptr };     \
+        SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), ____fem____, 1); \
+        delete _name;                                                                           \
+        delete ____fem____;                                                                     \
+    }
+
+#define SER_ADD_ENTITY_FEM_ARRAY(_name, _entity, _a_fem, _fem_count)                                \
+    {                                                                                               \
+        SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), _a_fem, _fem_count); \
+        delete _name;                                                                               \
+        delete _a_fem;                                                                              \
+    }
+
 #define SER_ADD_EVENT_NOARG(_event) Manager::getEventManager()->add(_event)
 
 #define SER_ADD_EVENT(_event, _arg, _type) Manager::getEventManager()->add(_event, new _type(_arg), sizeof(_type))

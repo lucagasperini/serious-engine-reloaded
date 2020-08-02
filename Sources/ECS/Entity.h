@@ -31,6 +31,12 @@ struct Entity {
     virtual ~Entity() {}
 };
 
+struct FastEntityMemory {
+    ULONG size;
+    char* str;
+    void** ptr;
+};
+
 class EntityManager {
 private:
     ULONG counter;
@@ -55,7 +61,8 @@ public:
     Entity* get(BYTE*& _iter);
     inline BYTE* ptr() { return a_entity; }
 
-    void add(Entity* _entity, ULONG _size);
+    void add(Entity* _entity, ULONG _size, FastEntityMemory* _a_fem, ULONG _fem_count);
+    inline void add(Entity* _entity, ULONG _size) { add(_entity, _size, NULL, 0); }
 
     void remove(ULONG _id);
     void remove(Entity* _entity);

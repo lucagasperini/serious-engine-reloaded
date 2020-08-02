@@ -54,20 +54,20 @@ Entity* EntityManager::get(BYTE*& _iter)
         return NULL;
     }
 
-    if (*_iter ^ SER_ECS_ENTITY_FLAG_ALLOC) {
-        _iter += *((ULONG*)_iter + sizeof(BYTE)) + sizeof(BYTE);
+    ULONG* size_block_ptr = (ULONG*)_iter;
+    BYTE* flag_ptr = _iter + sizeof(ULONG);
+
+    _iter += *size_block_ptr;
+
+    if (*flag_ptr < 1) {
+
         return get(_iter);
     }
 
-    _iter += sizeof(BYTE);
+    ULONG* entity_size_ptr = (ULONG*)(flag_ptr + 1);
+    Entity* entity_ptr = (Entity*)(entity_size_ptr + 1);
 
-    ULONG* obj_size_ptr = (ULONG*)_iter;
-    _iter += sizeof(ULONG);
-
-    Entity* return_ptr = (Entity*)_iter;
-    _iter += *obj_size_ptr;
-
-    return return_ptr;
+    return entity_ptr;
 }
 
 Entity* EntityManager::get(ULONG _id)
@@ -80,18 +80,50 @@ Entity* EntityManager::get(ULONG _id)
     return NULL;
 }
 
-void EntityManager::add(Entity* _entity, ULONG _size)
+void EntityManager::add(Entity* _entity, ULONG _size, FastEntityMemory* _a_fem, ULONG _fem_count)
 {
     _entity->id = counter++;
 
-    memset(mem_alloc, SER_ECS_ENTITY_FLAG_ALLOC, sizeof(BYTE));
-    mem_alloc += sizeof(BYTE);
+    BYTE* start_ptr = mem_alloc;
 
-    memcpy(mem_alloc, &_size, sizeof(ULONG));
+    ULONG* size_block_ptr = (ULONG*)mem_alloc;
     mem_alloc += sizeof(ULONG);
 
-    memcpy(mem_alloc, _entity, _size);
+    BYTE* flag_ptr = mem_alloc;
+    mem_alloc += sizeof(BYTE);
+
+    ULONG* size_entity_ptr = (ULONG*)mem_alloc;
+    mem_alloc += sizeof(ULONG);
+
+    Entity* entity_ptr = (Entity*)mem_alloc;
     mem_alloc += _size;
+
+    ULONG* a_subobj_size[_fem_count];
+    BYTE* a_subobj[_fem_count];
+
+    for (ULONG i = 0; i < _fem_count; i++) {
+        a_subobj_size[i] = (ULONG*)mem_alloc;
+        mem_alloc += sizeof(ULONG);
+        *_a_fem[i].ptr = mem_alloc;
+        a_subobj[i] = mem_alloc;
+        mem_alloc += _a_fem[i].size;
+    }
+
+    ULONG size_block = mem_alloc - start_ptr;
+    memcpy(size_block_ptr, &size_block, sizeof(ULONG));
+
+    BYTE flag = _fem_count + SER_ECS_ENTITY_FLAG_ALLOC;
+    memset(flag_ptr, flag, sizeof(BYTE));
+
+    memcpy(size_entity_ptr, &_size, sizeof(ULONG));
+
+    memcpy(entity_ptr, _entity, _size);
+
+    for (ULONG i = 0; i < _fem_count; i++) {
+        memcpy(a_subobj_size[i], &_a_fem[i].size, sizeof(ULONG));
+
+        memcpy(a_subobj[i], _a_fem[i].str, _a_fem[i].size);
+    }
 }
 
 void EntityManager::remove(ULONG _id)

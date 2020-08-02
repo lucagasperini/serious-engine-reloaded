@@ -122,12 +122,11 @@ void load_all_game_entity()
     font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
     MainWindow* e_window = new MainWindow;
-    e_window->win_title = "Serious Engine Sandbox Game";
     e_window->win_api = GfxAPIType::GAT_OGL;
     e_window->win_adapter = 0;
     e_window->win_depth = DisplayDepth::DD_32BIT;
     e_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
-    SER_ADD_ENTITY(e_window, MainWindow);
+    SER_ADD_ENTITY_FEM_STRING(e_window, MainWindow, "Serious Engine Sandbox Game", e_window->win_title);
 
     Camera* e_camera = new Camera();
     e_camera->cam_fov = 90.0f;
@@ -135,37 +134,28 @@ void load_all_game_entity()
     e_camera->cam_rot = world_start_rotation;
     e_camera->velocity = FLOAT3D(1.0f, 1.0f, 1.0f);
     e_camera->cam_speed = 0.20f;
-
     SER_ADD_ENTITY(e_camera, Camera);
-
-    _pTextureStock->Obtain_t(CTFILENAME("Textures\\Logo\\logo.tex"));
-    _pTextureStock->Obtain_t(CTFILENAME("Textures\\Logo\\LogoCT.tex"));
-    _pTextureStock->Obtain_t(CTFILENAME("Textures\\Logo\\GodGamesLogo.tex"));
-    _pTextureStock->Obtain_t(CTFILENAME("TexturesMP\\General\\Pointer.tex"));
 
     MenuImage* logosam = new MenuImage();
     logosam->pos_x = 480;
     logosam->pos_y = 10;
     logosam->pos_w = 1024;
     logosam->pos_h = 256;
-    logosam->tex_file = new CTString("Textures\\Logo\\logo.tex");
-    SER_ADD_ENTITY(logosam, MenuImage);
+    SER_ADD_ENTITY_FEM_STRING(logosam, MenuImage, "Textures\\Logo\\logo.tex", logosam->tex_file);
 
     MenuImage* logoct = new MenuImage();
     logoct->pos_x = 16;
     logoct->pos_y = 864;
     logoct->pos_w = 200;
     logoct->pos_h = 200;
-    logoct->tex_file = new CTString("Textures\\Logo\\LogoCT.tex");
-    SER_ADD_ENTITY(logoct, MenuImage);
+    SER_ADD_ENTITY_FEM_STRING(logoct, MenuImage, "Textures\\Logo\\LogoCT.tex", logoct->tex_file);
 
     MenuImage* logose = new MenuImage();
     logose->pos_x = 1704;
     logose->pos_y = 864;
     logose->pos_w = 200;
     logose->pos_h = 200;
-    logose->tex_file = new CTString("Textures\\Logo\\GodGamesLogo.tex");
-    SER_ADD_ENTITY(logose, MenuImage);
+    SER_ADD_ENTITY_FEM_STRING(logose, MenuImage, "Textures\\Logo\\GodGamesLogo.tex", logose->tex_file);
 
     MenuButton* menu_button_sp = new MenuButton;
     menu_button_sp->pos_y = 300;
@@ -175,10 +165,9 @@ void load_all_game_entity()
     menu_button_sp->align_x = 0;
     //menu_button_sp->fontdata = font_big;
     menu_button_sp->fontsize = 2;
-    menu_button_sp->text = new CTString(TRANS("SINGLE PLAYER"));
     menu_button_sp->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_sp->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_sp, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_sp, MenuButton, TRANS("SINGLE PLAYER"), menu_button_sp->text);
 
     MenuButton* menu_button_net = new MenuButton;
     menu_button_net->pos_y = 375;
@@ -188,10 +177,9 @@ void load_all_game_entity()
     menu_button_net->align_x = 0;
     //menu_button_net->fontdata = font_big;
     menu_button_net->fontsize = 2;
-    menu_button_net->text = new CTString(TRANS("NETWORK"));
     menu_button_net->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_net->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_net, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_net, MenuButton, TRANS("NETWORK"), menu_button_net->text);
 
     MenuButton* menu_button_split = new MenuButton;
     menu_button_split->pos_y = 450;
@@ -201,10 +189,9 @@ void load_all_game_entity()
     menu_button_split->align_x = 0;
     //menu_button_split->fontdata = font_big;
     menu_button_split->fontsize = 2;
-    menu_button_split->text = new CTString(TRANS("SPLIT SCREEN"));
     menu_button_split->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_split->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_split, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_split, MenuButton, TRANS("SPLIT SCREEN"), menu_button_split->text);
 
     MenuButton* menu_button_demo = new MenuButton;
     menu_button_demo->pos_y = 525;
@@ -214,10 +201,9 @@ void load_all_game_entity()
     menu_button_demo->align_x = 0;
     //menu_button_demo->fontdata = font_big;
     menu_button_demo->fontsize = 2;
-    menu_button_demo->text = new CTString(TRANS("DEMO"));
     menu_button_demo->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_demo->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_demo, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_demo, MenuButton, TRANS("DEMO"), menu_button_demo->text);
 
     MenuButton* menu_button_mod = new MenuButton;
     menu_button_mod->pos_y = 600;
@@ -227,10 +213,9 @@ void load_all_game_entity()
     menu_button_mod->align_x = 0;
     //menu_button_mod->fontdata = font_big;
     menu_button_mod->fontsize = 2;
-    menu_button_mod->text = new CTString(TRANS("MODS"));
     menu_button_mod->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_mod->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_mod, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_mod, MenuButton, TRANS("MODS"), menu_button_mod->text);
 
     MenuButton* menu_button_hs = new MenuButton;
     menu_button_hs->pos_y = 675;
@@ -240,10 +225,9 @@ void load_all_game_entity()
     menu_button_hs->align_x = 0;
     //menu_button_hs->fontdata = font_big;
     menu_button_hs->fontsize = 2;
-    menu_button_hs->text = new CTString(TRANS("HIGH SCORES"));
     menu_button_hs->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_hs->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_hs, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_hs, MenuButton, TRANS("HIGH SCORES"), menu_button_hs->text);
 
     MenuButton* menu_button_opt = new MenuButton;
     menu_button_opt->pos_y = 750;
@@ -253,10 +237,9 @@ void load_all_game_entity()
     menu_button_opt->align_x = 0;
     //menu_button_opt->fontdata = font_big;
     menu_button_opt->fontsize = 2;
-    menu_button_opt->text = new CTString(TRANS("OPTIONS"));
     menu_button_opt->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_opt->color_focus = SE_COL_ORANGE_DARK | 255;
-    SER_ADD_ENTITY(menu_button_opt, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_opt, MenuButton, TRANS("OPTIONS"), menu_button_opt->text);
 
     MenuButton* menu_button_quit = new MenuButton;
     menu_button_quit->pos_y = 825;
@@ -266,16 +249,14 @@ void load_all_game_entity()
     menu_button_quit->align_x = 0;
     //menu_button_quit->fontdata = font_big;
     menu_button_quit->fontsize = 2;
-    menu_button_quit->text = new CTString(TRANS("QUIT"));
     //menu_button_quit->sea_action = quitgame;
     menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
     menu_button_quit->onclick = EC_EXIT;
-    SER_ADD_ENTITY(menu_button_quit, MenuButton);
+    SER_ADD_ENTITY_FEM_STRING(menu_button_quit, MenuButton, TRANS("QUIT"), menu_button_quit->text);
 
     Cursor* e_cursor = new Cursor;
-    e_cursor->texture = new CTString("TexturesMP\\General\\Pointer.tex");
     e_cursor->w = 32;
     e_cursor->h = 32;
-    SER_ADD_ENTITY(e_cursor, Cursor);
+    SER_ADD_ENTITY_FEM_STRING(e_cursor, Cursor, "TexturesMP\\General\\Pointer.tex", e_cursor->texture);
 }

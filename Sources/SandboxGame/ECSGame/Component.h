@@ -58,7 +58,7 @@ enum SettingCode {
 };
 
 struct ComponentWindow : component {
-    CTString win_title;
+    char* win_title;
     void* win_pointer = NULL;
     /* List of Gfx API for Serious Engine:
     GAT_NONE : no gfx API (gfx functions are disabled)
@@ -103,7 +103,7 @@ struct ComponentPosition : component {
 };
 
 struct ComponentTexture : component {
-    CTString* tex_file;
+    char* tex_file;
 };
 
 struct ComponentVelocity {
@@ -143,12 +143,12 @@ struct ComponentButton : component {
     //CFontData fontdata;
     COLOR color = 0xff;
     COLOR color_focus = 0xff;
-    CTString* text;
+    char* text;
     EventCode onclick = EC_NULL;
 };
 
 struct ComponentCursor : component {
-    CTString* texture;
+    char* texture;
     UINT x = 0;
     UINT y = 0;
     UINT w = 0;
