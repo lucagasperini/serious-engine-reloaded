@@ -119,9 +119,13 @@ void RenderSystem::initWindow(ComponentWindow* _window)
     SE_UpdateWindowHandle(_window->win_pointer);
 
     _pGfx->CreateWindowCanvas(_window->win_pointer, &vp, &dp);
-#ifndef DEBUG
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
+
+    SER_GET_SETTING_ARG(debug_grabmouse, BOOL, SC_DEBUG_GRABMOUSE);
+    if (*debug_grabmouse)
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+    else
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+
     // initial screen fill and swap, just to get context running
     if (dp != NULL && dp->Lock()) {
         dp->Fill(C_BLACK | 255);
@@ -170,7 +174,7 @@ void RenderSystem::update(Entity* _entity)
 void RenderSystem::updateCursor(ComponentCursor* _cursor)
 {
     SER_GET_SETTING_ARG(debug_cursor, BOOL, SC_DEBUG_CURSOR);
-    if (debug_cursor)
+    if (*debug_cursor)
         dp->DrawBorder(_cursor->x, _cursor->y, _cursor->w, _cursor->h, g_fb_color);
 
     CTextureObject* tmp_obj = new CTextureObject;

@@ -102,4 +102,15 @@ void EventSystem::update(Entity* _entity)
 
         SER_REMOVE_EVENT(EC_RESOLUTION_CHANGE);
     }
+    if (SER_GET_EVENT(EC_DEBUG_CURSOR)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_CURSOR);
+        SER_ADD_SETTING(SC_DEBUG_CURSOR, !(*arg), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_CURSOR);
+    }
+    if (SER_GET_EVENT(EC_DEBUG_GRABMOUSE)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_GRABMOUSE);
+        SER_ADD_SETTING(SC_DEBUG_GRABMOUSE, !(*arg), BOOL);
+        SER_REMOVE_EVENT(EC_DEBUG_GRABMOUSE);
+        Manager::quitLevel();
+    }
 }
