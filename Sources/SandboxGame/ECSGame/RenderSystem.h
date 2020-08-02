@@ -48,11 +48,9 @@ public:
     void updateId(ComponentPosition* _position);
     void updatePosition(ComponentCamera* _camera);
     void updateFps();
-    void updateWorld(ComponentCamera* _camera);
+    void updateCamera(ComponentCamera* _camera);
 
     void destroyWindow(ComponentWindow* _window);
-
-    void eventWindow(ComponentWindow* _window);
 };
 
 #endif

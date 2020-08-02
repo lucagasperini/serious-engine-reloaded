@@ -70,12 +70,17 @@
 
 using namespace SER;
 
+extern UINT g_list_resolution[][2];
+
 void load_all_game_setting()
 {
     SER_ADD_SETTING(SC_DEBUG_BORDER, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_POSITION, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_ENTITYID, FALSE, BOOL);
     SER_ADD_SETTING(SC_DEBUG_FPS, FALSE, BOOL);
+    SER_ADD_SETTING_ARRAY(SC_RESOLUTION, g_list_resolution[2], UINT, 2);
+    SER_ADD_SETTING_ARRAY(SC_VIRTUAL_RESOLUTION, g_list_resolution[3], UINT, 2);
+    SER_ADD_SETTING(SC_FULLSCREEN, FALSE, BOOL);
 }
 
 void load_all_game_system()
@@ -83,14 +88,12 @@ void load_all_game_system()
     RenderSystem* render_system = new RenderSystem;
     Manager::setRenderSystem((System*)render_system);
 
-    UINT list_resolution[][2] = { { 640, 480 }, { 800, 600 }, { 1280, 720 }, { 1920, 1080 } };
-
     EventSystem* event_system = new EventSystem;
     KEYBIND_ADD_NOARG(SDLK_F1, EC_FULLSCREEN_CHANGE);
-    KEYBIND_ADD_ARRAY(SDLK_F2, EC_RESOLUTION_CHANGE, list_resolution[0], UINT, 2);
-    KEYBIND_ADD_ARRAY(SDLK_F3, EC_RESOLUTION_CHANGE, list_resolution[1], UINT, 2);
-    KEYBIND_ADD_ARRAY(SDLK_F4, EC_RESOLUTION_CHANGE, list_resolution[2], UINT, 2);
-    KEYBIND_ADD_ARRAY(SDLK_F5, EC_RESOLUTION_CHANGE, list_resolution[3], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F2, EC_RESOLUTION_CHANGE, g_list_resolution[0], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F3, EC_RESOLUTION_CHANGE, g_list_resolution[1], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F4, EC_RESOLUTION_CHANGE, g_list_resolution[2], UINT, 2);
+    KEYBIND_ADD_ARRAY(SDLK_F5, EC_RESOLUTION_CHANGE, g_list_resolution[3], UINT, 2);
     KEYBIND_ADD_NOARG(SDLK_a, EC_CAMERA_RIGHT);
     KEYBIND_ADD_NOARG(SDLK_d, EC_CAMERA_LEFT);
     KEYBIND_ADD_NOARG(SDLK_w, EC_CAMERA_FORWARD);

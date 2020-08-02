@@ -35,6 +35,7 @@
     {                                                                           \
         SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity)); \
         delete _name;                                                           \
+        _name = NULL;                                                           \
     }
 
 #define SER_ADD_ENTITY_FEM(_name, _entity, _size, _memory, _member_ptr)                         \
@@ -44,6 +45,7 @@
         SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), ____fem____, 1); \
         delete _name;                                                                           \
         delete ____fem____;                                                                     \
+        _name = NULL;                                                                           \
     }
 
 #define SER_ADD_ENTITY_FEM_STRING(_name, _entity, _str, _member_ptr)                            \
@@ -53,6 +55,7 @@
         SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), ____fem____, 1); \
         delete _name;                                                                           \
         delete ____fem____;                                                                     \
+        _name = NULL;                                                                           \
     }
 
 #define SER_ADD_ENTITY_FEM_ARRAY(_name, _entity, _a_fem, _fem_count)                                \
@@ -60,6 +63,7 @@
         SER::Manager::getEntityManager()->add((Entity*)_name, sizeof(_entity), _a_fem, _fem_count); \
         delete _name;                                                                               \
         delete _a_fem;                                                                              \
+        _name = NULL;                                                                               \
     }
 
 #define SER_ADD_EVENT_NOARG(_event) Manager::getEventManager()->add(_event)
@@ -78,7 +82,8 @@
 
 #define SER_GET_SETTING_ARG(_name, _type, _setting) _type* _name = (_type*)Manager::getSettingManager()->get(_setting)
 
-#define SER_ADD_SETTING_ARRAY(_setting, _arg, _type) Manager::getSettingManager()->add(_setting, _arg, sizeof(_type))
+#define SER_ADD_SETTING_ARRAY(_setting, _arg, _type, _number) \
+    Manager::getSettingManager()->add(_setting, _arg, sizeof(_type) * _number)
 
 #define SER_ADD_SETTING(_setting, _arg, _type)                                       \
     {                                                                                \

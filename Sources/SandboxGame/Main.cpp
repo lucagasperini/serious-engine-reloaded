@@ -47,17 +47,12 @@ CTFileStream g_logstream;
 
 COLOR g_fb_color = C_BLACK | 0xff;
 
-BOOL g_dbg_draw_border = FALSE;
-BOOL g_dbg_draw_id = FALSE;
-BOOL g_dbg_draw_position = FALSE;
-BOOL g_dbg_draw_fps = FALSE;
-BOOL g_dbg_draw_cursor = FALSE;
-
-UINT g_resolution_width = 1280;
-UINT g_resolution_height = 720;
-
-UINT g_virtual_resolution_width = 1920;
-UINT g_virtual_resolution_height = 1080;
+UINT g_list_resolution[][2] = {
+    { 640, 480 },
+    { 800, 600 },
+    { 1280, 720 },
+    { 1920, 1080 }
+};
 
 int submain(char* _cmdline)
 {

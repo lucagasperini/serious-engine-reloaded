@@ -55,6 +55,9 @@ enum SettingCode {
     SC_DEBUG_POSITION = 0xD2,
     SC_DEBUG_FPS = 0xD3,
     SC_DEBUG_CURSOR = 0xD4,
+    SC_FULLSCREEN = 0xF0,
+    SC_RESOLUTION = 0xF1,
+    SC_VIRTUAL_RESOLUTION = 0xF2
 };
 
 struct ComponentWindow : component {

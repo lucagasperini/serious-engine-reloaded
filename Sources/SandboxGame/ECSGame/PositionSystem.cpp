@@ -17,17 +17,14 @@
 
 #include "PositionSystem.h"
 
-extern UINT g_resolution_width;
-extern UINT g_resolution_height;
-extern UINT g_virtual_resolution_width;
-extern UINT g_virtual_resolution_height;
-
 using namespace SER;
 
 void PositionSystem::initScale(ComponentPosition* _position)
 {
-    FLOAT scaleX = (FLOAT)g_resolution_width / (FLOAT)g_virtual_resolution_width;
-    FLOAT scaleY = (FLOAT)g_resolution_height / (FLOAT)g_virtual_resolution_height;
+    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+    SER_GET_SETTING_ARG(virt_resolution, UINT, SC_VIRTUAL_RESOLUTION);
+    FLOAT scaleX = (FLOAT)resolution[0] / (FLOAT)virt_resolution[0];
+    FLOAT scaleY = (FLOAT)resolution[1] / (FLOAT)virt_resolution[1];
 
     _position->pos_x = (FLOAT)_position->pos_x * scaleX;
     _position->pos_y = (FLOAT)_position->pos_y * scaleY;
@@ -37,8 +34,9 @@ void PositionSystem::initScale(ComponentPosition* _position)
 
 void PositionSystem::initAlign(ComponentPosition* _position, ComponentAlign* _align)
 {
-    ULONG center_x = g_resolution_width / 2;
-    ULONG center_y = g_resolution_height / 2;
+    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+    ULONG center_x = resolution[0] / 2;
+    ULONG center_y = resolution[1] / 2;
 
     switch (_align->align_x) {
     case -2:
@@ -79,7 +77,8 @@ void PositionSystem::initAlign(ComponentPosition* _position, ComponentAlign* _al
 void PositionSystem::init(Entity* _entity)
 {
     System::init(_entity);
-    if (scale_x != g_resolution_width || scale_y != g_resolution_height) {
+    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+    if (scale_x != resolution[0] || scale_y != resolution[1]) {
         SER_GET_COMPONENT(position, ComponentPosition, _entity);
         SER_GET_COMPONENT(align, ComponentAlign, _entity);
 
@@ -93,8 +92,9 @@ void PositionSystem::init(Entity* _entity)
 
 void PositionSystem::postinit()
 {
-    scale_x = g_resolution_width;
-    scale_y = g_resolution_height;
+    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+    scale_x = resolution[0];
+    scale_y = resolution[1];
 }
 
 void PositionSystem::update(Entity* _entity)
@@ -168,8 +168,10 @@ void PositionSystem::updateCamera(ComponentCamera* _camera, ComponentVelocity* _
         FLOAT x = _camera->cam_rot(1);
         FLOAT y = _camera->cam_rot(2);
 
-        x += ((FLOAT)arg[2]) * _camera->cam_speed / g_resolution_width * 360;
-        y += ((FLOAT)arg[3]) * _camera->cam_speed / g_resolution_height * 360;
+        SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+
+        x += ((FLOAT)arg[2]) * _camera->cam_speed / resolution[0] * 360;
+        y += ((FLOAT)arg[3]) * _camera->cam_speed / resolution[1] * 360;
 
         _camera->cam_rot = ANGLE3D(x, y, 0.0f);
     }

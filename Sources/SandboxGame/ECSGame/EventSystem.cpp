@@ -17,11 +17,6 @@
 
 #include "EventSystem.h"
 
-extern UINT g_resolution_width;
-extern UINT g_resolution_height;
-extern UINT g_virtual_resolution_width;
-extern UINT g_virtual_resolution_height;
-
 using namespace SER;
 
 void EventSystem::addKeybind(const EventKeybind& _keybind)
@@ -89,5 +84,22 @@ void EventSystem::update(Entity* _entity)
         SER_GET_SETTING_ARG(arg, BOOL, SC_DEBUG_FPS);
         SER_ADD_SETTING(SC_DEBUG_FPS, !(*arg), BOOL);
         SER_REMOVE_EVENT(EC_DEBUG_FPS);
+    }
+    if (SER_GET_EVENT(EC_FULLSCREEN_CHANGE)) {
+        SER_GET_SETTING_ARG(arg, BOOL, SC_FULLSCREEN);
+        SER_ADD_SETTING(SC_FULLSCREEN, !(*arg), BOOL);
+        SER_REMOVE_EVENT(EC_FULLSCREEN_CHANGE);
+        Manager::quitLevel();
+    }
+    if (SER_GET_EVENT_ARG(arg, UINT, EC_RESOLUTION_CHANGE)) {
+
+        SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+        if (resolution[0] != arg[0] || resolution[1] != arg[1]) {
+            SER_ADD_SETTING_ARRAY(SC_VIRTUAL_RESOLUTION, resolution, UINT, 2);
+            SER_ADD_SETTING_ARRAY(SC_RESOLUTION, arg, UINT, 2);
+            Manager::quitLevel();
+        }
+
+        SER_REMOVE_EVENT(EC_RESOLUTION_CHANGE);
     }
 }

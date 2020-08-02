@@ -26,16 +26,7 @@ using namespace SER;
 //extern CFontData* main_font_small;
 //extern CFontData* main_font_medium;
 extern COLOR g_fb_color;
-extern BOOL g_dbg_draw_border;
-extern BOOL g_dbg_draw_id;
-extern BOOL g_dbg_draw_position;
-extern BOOL g_dbg_draw_fps;
-extern BOOL g_dbg_draw_cursor;
 extern CWorld* g_world_data;
-extern UINT g_resolution_width;
-extern UINT g_resolution_height;
-extern UINT g_virtual_resolution_width;
-extern UINT g_virtual_resolution_height;
 
 void RenderSystem::preupdate()
 {
@@ -101,18 +92,26 @@ void RenderSystem::initWindow(ComponentWindow* _window)
         destroyWindow(_window);
     }
 
+    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
+    SER_GET_SETTING_ARG(is_fullscreen, BOOL, SC_FULLSCREEN);
+
     // try to set new display mode
     _pGfx->SetDisplayMode(_window->win_api, _window->win_adapter,
-        g_resolution_width, g_resolution_height, _window->win_depth);
+        resolution[0], resolution[1], _window->win_depth);
 
     ULONG tmp_flags = _window->win_flags;
 
     if (_window->win_api == GAT_OGL && !(tmp_flags & SDL_WINDOW_OPENGL))
         tmp_flags = tmp_flags | SDL_WINDOW_OPENGL;
 
+    if (*is_fullscreen)
+        tmp_flags = tmp_flags | SDL_WINDOW_FULLSCREEN;
+    else
+        tmp_flags = tmp_flags & ~SDL_WINDOW_FULLSCREEN;
+
     _window->win_pointer = SDL_CreateWindow(_window->win_title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        g_resolution_width, g_resolution_height, tmp_flags);
+        resolution[0], resolution[1], tmp_flags);
 
     if (_window->win_pointer == NULL)
         FatalError(TRANS("Cannot open main window!"));
@@ -135,13 +134,9 @@ void RenderSystem::update(Entity* _entity)
 {
     System::update(_entity);
 
-    SER_GET_COMPONENT(window, ComponentWindow, _entity);
-    if (window)
-        eventWindow(window);
-
     SER_GET_COMPONENT(camera, ComponentCamera, _entity);
     if (camera)
-        updateWorld(camera);
+        updateCamera(camera);
 
     SER_GET_COMPONENT(position, ComponentPosition, _entity);
 
@@ -174,7 +169,8 @@ void RenderSystem::update(Entity* _entity)
 
 void RenderSystem::updateCursor(ComponentCursor* _cursor)
 {
-    if (g_dbg_draw_cursor)
+    SER_GET_SETTING_ARG(debug_cursor, BOOL, SC_DEBUG_CURSOR);
+    if (debug_cursor)
         dp->DrawBorder(_cursor->x, _cursor->y, _cursor->w, _cursor->h, g_fb_color);
 
     CTextureObject* tmp_obj = new CTextureObject;
@@ -232,27 +228,27 @@ void RenderSystem::updateId(ComponentPosition* _position)
     dp->PutText(buffer, box.Min()(1), box.Min()(2), g_fb_color);
 }
 
-void RenderSystem::updateWorld(ComponentCamera* _camera)
+void RenderSystem::updateCamera(ComponentCamera* _camera)
 {
-    CPlacement3D plCamera;
-    plCamera.pl_PositionVector = _camera->cam_pos;
-    plCamera.pl_OrientationAngle = _camera->cam_rot;
+    CPlacement3D placement;
+    placement.pl_PositionVector = _camera->cam_pos;
+    placement.pl_OrientationAngle = _camera->cam_rot;
 
     // init projection parameters
-    CPerspectiveProjection3D prPerspectiveProjection;
-    prPerspectiveProjection.FOVL() = _camera->cam_fov;
-    prPerspectiveProjection.ScreenBBoxL() = FLOATaabbox2D(
-        FLOAT2D(0.0f, 0.0f), FLOAT2D((float)dp->GetWidth(), (float)dp->GetHeight()));
-    prPerspectiveProjection.AspectRatioL() = 1.0f;
-    prPerspectiveProjection.FrontClipDistanceL() = 0.3f;
+    CPerspectiveProjection3D perspective;
+    perspective.FOVL() = _camera->cam_fov;
+    perspective.ScreenBBoxL() = FLOATaabbox2D(
+        FLOAT2D(0.0f, 0.0f), FLOAT2D((FLOAT)dp->GetWidth(), (FLOAT)dp->GetHeight()));
+    perspective.AspectRatioL() = 1.0f;
+    perspective.FrontClipDistanceL() = 0.3f;
 
-    CAnyProjection3D prProjection;
-    prProjection = prPerspectiveProjection;
+    CAnyProjection3D projection;
+    projection = perspective;
 
     // set up viewer position
-    prProjection->ViewerPlacementL() = plCamera;
+    projection->ViewerPlacementL() = placement;
     // render the view
-    RenderView(*g_world_data, *(CEntity*)NULL, prProjection, *dp);
+    RenderView(*g_world_data, *(CEntity*)NULL, projection, *dp);
 }
 
 void RenderSystem::destroyWindow(ComponentWindow* _window)
@@ -266,29 +262,5 @@ void RenderSystem::destroyWindow(ComponentWindow* _window)
         // destroy it
         SDL_DestroyWindow((SDL_Window*)_window->win_pointer);
         _window->win_pointer = NULL;
-    }
-}
-
-void RenderSystem::eventWindow(ComponentWindow* _window)
-{
-    if (SER_GET_EVENT_ARG(arg, void, EC_FULLSCREEN_CHANGE)) {
-        if (_window->win_flags & SDL_WINDOW_FULLSCREEN)
-            _window->win_flags = _window->win_flags ^ SDL_WINDOW_FULLSCREEN;
-        else
-            _window->win_flags = _window->win_flags | SDL_WINDOW_FULLSCREEN;
-        Manager::quitLevel();
-        SER_REMOVE_EVENT(EC_FULLSCREEN_CHANGE);
-    }
-    if (SER_GET_EVENT_ARG(arg, UINT, EC_RESOLUTION_CHANGE)) {
-        if (arg[0] != 0 && arg[1] != 0) {
-            if (g_resolution_width != arg[0] || g_resolution_height != arg[1]) {
-                g_virtual_resolution_width = g_resolution_width;
-                g_virtual_resolution_height = g_resolution_height;
-                g_resolution_width = arg[0];
-                g_resolution_height = arg[1];
-                Manager::quitLevel();
-            }
-        }
-        SER_REMOVE_EVENT(EC_RESOLUTION_CHANGE);
     }
 }
