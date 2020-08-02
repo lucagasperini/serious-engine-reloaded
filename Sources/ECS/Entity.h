@@ -67,7 +67,12 @@ public:
     void remove(ULONG _id);
     void remove(Entity* _entity);
 
+    BOOL saveDisk(CTFileName _file);
+    BOOL loadDisk(CTFileName _file);
+
     inline ULONG count() { return counter; }
+    inline ULONG sizeMax() { return mem_entity_max; }
+    inline ULONG sizeAlloc() { return mem_alloc - a_entity; }
 };
 
 }

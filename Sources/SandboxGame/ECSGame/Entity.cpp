@@ -110,16 +110,9 @@ void load_all_game_system()
 
 void load_all_game_entity()
 {
-    CFontData font_small;
-    CFontData font_medium;
-    CFontData font_big;
 
     FLOAT3D world_start_position = FLOAT3D(9, 6, 32);
     ANGLE3D world_start_rotation = ANGLE3D(0, 20, 0);
-
-    font_small.Load_t(CTFILENAME("Fonts\\Display3-narrow.fnt"));
-    font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
-    font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
     MainWindow* e_window = new MainWindow;
     e_window->win_api = GfxAPIType::GAT_OGL;
@@ -249,7 +242,6 @@ void load_all_game_entity()
     menu_button_quit->align_x = 0;
     //menu_button_quit->fontdata = font_big;
     menu_button_quit->fontsize = 2;
-    //menu_button_quit->sea_action = quitgame;
     menu_button_quit->color = SE_COL_ORANGE_LIGHT | 255;
     menu_button_quit->color_focus = SE_COL_ORANGE_DARK | 255;
     menu_button_quit->onclick = EC_EXIT;

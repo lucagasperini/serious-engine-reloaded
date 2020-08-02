@@ -69,6 +69,13 @@ int submain(char* _cmdline)
     SE_InitEngine(argv0, g_gamename);
 
     SE_LoadDefaultFonts();
+    CFontData font_small;
+    CFontData font_medium;
+    CFontData font_big;
+
+    font_small.Load_t(CTFILENAME("Fonts\\Display3-narrow.fnt"));
+    font_medium.Load_t(CTFILENAME("Fonts\\Display3-normal.fnt"));
+    font_big.Load_t(CTFILENAME("Fonts\\Display3-caps.fnt"));
 
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
@@ -77,13 +84,16 @@ int submain(char* _cmdline)
 
     load_all_game_setting();
     load_all_game_system();
-    load_all_game_entity();
+    //load_all_game_entity();
+    SER::Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin");
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
     SER::Manager::setThreadNumber(number_thread);
     SER::Manager::splitThreadMemory();
+
+    SER::Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);

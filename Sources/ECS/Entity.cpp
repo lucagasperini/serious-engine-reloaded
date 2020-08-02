@@ -16,6 +16,8 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Entity.h"
+#include <Engine/Base/FileName.h>
+#include <Engine/Base/Stream.h>
 
 using namespace SER;
 
@@ -141,4 +143,29 @@ void EntityManager::remove(Entity* _entity)
 {
     BYTE* tmp_ptr = ((BYTE*)_entity) - sizeof(ULONG) - sizeof(BYTE);
     memset(tmp_ptr, SER_ECS_ENTITY_FLAG_FREE, sizeof(BYTE));
+}
+
+BOOL EntityManager::saveDisk(CTFileName _file)
+{
+    CTFileStream stream;
+    ULONG size_alloc = sizeAlloc();
+    stream.Open_t(_file, CTStream::OM_WRITEBINARY);
+    stream << size_alloc;
+    stream << counter;
+    stream.Write_t(a_entity, size_alloc);
+    stream.Close();
+    return TRUE;
+}
+
+BOOL EntityManager::loadDisk(CTFileName _file)
+{
+    CTFileStream stream;
+    ULONG size_alloc = 0;
+    stream.Open_t(_file, CTStream::OM_READBINARY);
+    stream >> size_alloc;
+    stream >> counter;
+    stream.Read_t(mem_alloc, size_alloc);
+    stream.Close();
+    mem_alloc += size_alloc;
+    return TRUE;
 }

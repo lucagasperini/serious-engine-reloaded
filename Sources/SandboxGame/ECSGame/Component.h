@@ -58,7 +58,7 @@ enum SettingCode {
 };
 
 struct ComponentWindow : component {
-    char* win_title;
+    char* win_title = NULL;
     void* win_pointer = NULL;
     /* List of Gfx API for Serious Engine:
     GAT_NONE : no gfx API (gfx functions are disabled)
@@ -103,18 +103,18 @@ struct ComponentPosition : component {
 };
 
 struct ComponentTexture : component {
-    char* tex_file;
+    char* tex_file = NULL;
 };
 
 struct ComponentVelocity {
-    FLOAT3D velocity;
+    FLOAT3D velocity = FLOAT3D(0.0f, 0.0f, 0.0f);
 };
 
 struct ComponentCamera : component {
     BOOL cam_on = TRUE;
     FLOAT cam_speed = 0.5f;
-    FLOAT3D cam_pos;
-    ANGLE3D cam_rot;
+    FLOAT3D cam_pos = FLOAT3D(0.0f, 0.0f, 0.0f);
+    ANGLE3D cam_rot = ANGLE3D(0.0f, 0.0f, 0.0f);
     ANGLE cam_fov = 90.0f;
 };
 
@@ -143,12 +143,12 @@ struct ComponentButton : component {
     //CFontData fontdata;
     COLOR color = 0xff;
     COLOR color_focus = 0xff;
-    char* text;
+    char* text = NULL;
     EventCode onclick = EC_NULL;
 };
 
 struct ComponentCursor : component {
-    char* texture;
+    char* texture = NULL;
     UINT x = 0;
     UINT y = 0;
     UINT w = 0;
