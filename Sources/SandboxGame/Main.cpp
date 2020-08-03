@@ -30,8 +30,6 @@
 
 #include <thread>
 
-using namespace SER;
-
 // FIXME: Cant compile without this global variable
 HWND _hwndMain = NULL;
 
@@ -79,20 +77,20 @@ int submain(char* _cmdline)
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     // Add space for 1 MB + 256 Event pointers (32/64 bit per pointer) + 256 Setting pointers (32/64 bit per pointer)
-    Manager::init((1UL << 20), 256, 256);
+    SER::Manager::init((1UL << 20), 256, 256);
 
     load_all_game_setting();
     load_all_game_system();
-    if (!Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin")) {
-        load_all_game_entity();
-        Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
-    }
+    //if (!Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin")) {
+    load_all_game_entity();
+    SER::Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
+    //}
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
-    Manager::setThreadNumber(number_thread);
-    Manager::splitThreadMemory();
+    SER::Manager::setThreadNumber(number_thread);
+    SER::Manager::splitThreadMemory();
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);
@@ -106,14 +104,14 @@ int submain(char* _cmdline)
     mainwindow.setDepth(DisplayDepth::DD_32BIT);
     splashscreen.hide();
 
-    while (Manager::isGameStarted()) {
+    while (SER::Manager::isGameStarted()) {
         mainwindow.init();
         {
-            RenderSystem* render_ptr = (RenderSystem*)Manager::getRenderSystem();
+            RenderSystem* render_ptr = (RenderSystem*)SER::Manager::getRenderSystem();
             render_ptr->setDrawPort(mainwindow.getDrawPort());
             render_ptr->setViewPort(mainwindow.getViewPort());
         }
-        Manager::run();
+        SER::Manager::run();
         mainwindow.destroy();
     }
     SE_EndEngine();
