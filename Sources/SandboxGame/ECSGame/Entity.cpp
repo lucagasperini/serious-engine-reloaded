@@ -120,13 +120,6 @@ void load_all_game_entity()
     FLOAT3D world_start_position = FLOAT3D(9, 6, 32);
     ANGLE3D world_start_rotation = ANGLE3D(0, 20, 0);
 
-    MainWindow* e_window = new MainWindow;
-    e_window->win_api = GfxAPIType::GAT_OGL;
-    e_window->win_adapter = 0;
-    e_window->win_depth = DisplayDepth::DD_32BIT;
-    e_window->win_flags = SE_MAINWINDOW_FLAGS_NULL;
-    SER_ADD_ENTITY_FEM_STRING(e_window, MainWindow, "Serious Engine Sandbox Game", e_window->win_title);
-
     Camera* e_camera = new Camera();
     e_camera->cam_fov = 90.0f;
     e_camera->cam_pos = world_start_position;

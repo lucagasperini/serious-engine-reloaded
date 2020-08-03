@@ -31,11 +31,12 @@ private:
     CViewPort* vp = NULL;
 
 public:
+    inline void setDrawPort(CDrawPort* _dp) { dp = _dp; }
+    inline void setViewPort(CViewPort* _vp) { vp = _vp; }
+
     void preinit() override {}
     void init(SER::Entity* _entity) override;
     void postinit() override {}
-
-    void initWindow(ComponentWindow* _window);
 
     void preupdate();
     void update(SER::Entity* _entity) override;
@@ -49,8 +50,6 @@ public:
     void updatePosition(ComponentCamera* _camera);
     void updateFps();
     void updateCamera(ComponentCamera* _camera);
-
-    void destroyWindow(ComponentWindow* _window);
 };
 
 #endif

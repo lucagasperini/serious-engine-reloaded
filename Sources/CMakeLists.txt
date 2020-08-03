@@ -971,6 +971,7 @@ endif()
 set(SANDBOXGAME "sandbox-game")
 add_executable(${SANDBOXGAME}
     SandboxGame/Main.cpp
+    SandboxGame/MainWindow.cpp
     SandboxGame/SplashScreen.cpp
     SandboxGame/ECSGame/Entity.cpp
     SandboxGame/ECSGame/RenderSystem.cpp

@@ -15,20 +15,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <SDL.h>
-
 #include <Engine/Base/CTString.h>
 #include <Engine/Base/SDL/SDLEvents.h>
 #include <Engine/Base/Stream.h>
 #include <Engine/Engine.h>
 #include <Engine/Sound/SoundLibrary.h>
 
+#include "MainWindow.h"
 #include "SplashScreen.h"
 #include <ECS/Manager.h>
 
 #include "ECSGame/Entity.h"
+#include "ECSGame/RenderSystem.h"
 
 #include <thread>
+
+using namespace SER;
 
 // FIXME: Cant compile without this global variable
 HWND _hwndMain = NULL;
@@ -40,7 +42,7 @@ extern void load_all_game_entity();
 
 CTFileName g_world_file = CTFILENAME("Levels\\TestGame.wld");
 CWorld* g_world_data = NULL;
-CTString g_gamename = "serioussammf";
+CTString g_gamename = "ser_sandbox";
 
 CTFileName g_logfile = CTFILENAME("fast.log");
 CTFileStream g_logstream;
@@ -57,6 +59,8 @@ UINT g_list_resolution[][2] = {
 int submain(char* _cmdline)
 {
     SESplashScreen splashscreen;
+    MainWindow mainwindow;
+
     splashscreen.setBitmap("Splash.bmp");
     splashscreen.show();
 
@@ -75,20 +79,20 @@ int submain(char* _cmdline)
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     // Add space for 1 MB + 256 Event pointers (32/64 bit per pointer) + 256 Setting pointers (32/64 bit per pointer)
-    SER::Manager::init(1048576, 256, 256);
+    Manager::init(1048576, 256, 256);
 
     load_all_game_setting();
     load_all_game_system();
-    //load_all_game_entity();
-    SER::Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin");
+    load_all_game_entity();
+    //Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin");
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
-    SER::Manager::setThreadNumber(number_thread);
-    SER::Manager::splitThreadMemory();
+    Manager::setThreadNumber(number_thread);
+    Manager::splitThreadMemory();
 
-    SER::Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
+    Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);
@@ -97,10 +101,20 @@ int submain(char* _cmdline)
     printf("Loading time t1: %ld\n", t1 - t0);
     printf("Loading time t2: %ld\n", t2 - t1);
 
+    mainwindow.setTitle("Serious Engine Reloaded Sandbox Game");
+    mainwindow.setAPI(GfxAPIType::GAT_OGL);
+    mainwindow.setDepth(DisplayDepth::DD_32BIT);
     splashscreen.hide();
 
-    while (SER::Manager::isGameStarted()) {
-        SER::Manager::run();
+    while (Manager::isGameStarted()) {
+        mainwindow.init();
+        {
+            RenderSystem* render_ptr = (RenderSystem*)Manager::getRenderSystem();
+            render_ptr->setDrawPort(mainwindow.getDrawPort());
+            render_ptr->setViewPort(mainwindow.getViewPort());
+        }
+        Manager::run();
+        mainwindow.destroy();
     }
     SE_EndEngine();
     return TRUE;

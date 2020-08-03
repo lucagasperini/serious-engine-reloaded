@@ -81,57 +81,6 @@ void RenderSystem::updateFps()
 void RenderSystem::init(Entity* _entity)
 {
     System::init(_entity);
-    SER_GET_COMPONENT(window, ComponentWindow, _entity);
-    if (window)
-        initWindow(window);
-}
-
-void RenderSystem::initWindow(ComponentWindow* _window)
-{
-    if (_window->win_pointer != NULL) {
-        destroyWindow(_window);
-    }
-
-    SER_GET_SETTING_ARG(resolution, UINT, SC_RESOLUTION);
-    SER_GET_SETTING_ARG(is_fullscreen, BOOL, SC_FULLSCREEN);
-
-    // try to set new display mode
-    _pGfx->SetDisplayMode(_window->win_api, _window->win_adapter,
-        resolution[0], resolution[1], _window->win_depth);
-
-    ULONG tmp_flags = _window->win_flags;
-
-    if (_window->win_api == GAT_OGL && !(tmp_flags & SDL_WINDOW_OPENGL))
-        tmp_flags = tmp_flags | SDL_WINDOW_OPENGL;
-
-    if (*is_fullscreen)
-        tmp_flags = tmp_flags | SDL_WINDOW_FULLSCREEN;
-    else
-        tmp_flags = tmp_flags & ~SDL_WINDOW_FULLSCREEN;
-
-    _window->win_pointer = SDL_CreateWindow(_window->win_title,
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        resolution[0], resolution[1], tmp_flags);
-
-    if (_window->win_pointer == NULL)
-        FatalError(TRANS("Cannot open main window!"));
-
-    SE_UpdateWindowHandle(_window->win_pointer);
-
-    _pGfx->CreateWindowCanvas(_window->win_pointer, &vp, &dp);
-
-    SER_GET_SETTING_ARG(debug_grabmouse, BOOL, SC_DEBUG_GRABMOUSE);
-    if (*debug_grabmouse)
-        SDL_SetRelativeMouseMode(SDL_TRUE);
-    else
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-
-    // initial screen fill and swap, just to get context running
-    if (dp != NULL && dp->Lock()) {
-        dp->Fill(C_BLACK | 255);
-        dp->Unlock();
-        vp->SwapBuffers();
-    }
 }
 
 void RenderSystem::update(Entity* _entity)
@@ -253,18 +202,4 @@ void RenderSystem::updateCamera(ComponentCamera* _camera)
     projection->ViewerPlacementL() = placement;
     // render the view
     RenderView(*g_world_data, *(CEntity*)NULL, projection, *dp);
-}
-
-void RenderSystem::destroyWindow(ComponentWindow* _window)
-{
-    if (vp != NULL) {
-        _pGfx->DestroyWindowCanvas(vp);
-        vp = NULL;
-    }
-    // if window exists
-    if (_window->win_pointer != NULL) {
-        // destroy it
-        SDL_DestroyWindow((SDL_Window*)_window->win_pointer);
-        _window->win_pointer = NULL;
-    }
 }

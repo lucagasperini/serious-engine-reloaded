@@ -21,9 +21,6 @@
 #include "Component.h"
 #include <ECS/Manager.h>
 
-struct MainWindow : SER::Entity, ComponentWindow {
-};
-
 struct Cursor : SER::Entity, ComponentCursor {
 };
 
