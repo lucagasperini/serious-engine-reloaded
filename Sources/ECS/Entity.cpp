@@ -147,25 +147,38 @@ void EntityManager::remove(Entity* _entity)
 
 BOOL EntityManager::saveDisk(CTFileName _file)
 {
-    CTFileStream stream;
-    ULONG size_alloc = sizeAlloc();
-    stream.Open_t(_file, CTStream::OM_WRITEBINARY);
-    stream << size_alloc;
-    stream << counter;
-    stream.Write_t(a_entity, size_alloc);
-    stream.Close();
+    CTMemoryStream mem_stream(a_entity, sizeAlloc(), CTStream::OM_READ);
+    CTFileStream file_stream;
+    file_stream.Open_t(_file, CTStream::OM_WRITEBINARY);
+    file_stream.WriteSize_t(mem_stream.GetStreamSize());
+    file_stream.WriteStream_t(mem_stream);
+    file_stream << mem_stream.GetStreamCRC32_t();
+    file_stream << counter;
+    file_stream.Close();
     return TRUE;
 }
 
 BOOL EntityManager::loadDisk(CTFileName _file)
 {
-    CTFileStream stream;
-    ULONG size_alloc = 0;
-    stream.Open_t(_file, CTStream::OM_READBINARY);
-    stream >> size_alloc;
-    stream >> counter;
-    stream.Read_t(mem_alloc, size_alloc);
-    stream.Close();
-    mem_alloc += size_alloc;
-    return TRUE;
+    CTFileStream file_stream;
+    file_stream.Open_t(_file, CTStream::OM_READBINARY);
+    ULONG tmp_size = file_stream.GetSize_t();
+    CTMemoryStream mem_stream(mem_alloc, tmp_size, CTStream::OM_WRITE);
+    file_stream.Read_t(mem_stream.mstrm_pubBuffer, tmp_size);
+    
+    ULONG tmp_crc32 = 0;
+    ULONG tmp_counter = 0;
+    
+    file_stream >> tmp_crc32;
+    file_stream >> tmp_counter;
+    
+    file_stream.Close();
+
+    if(mem_stream.GetStreamCRC32_t() == tmp_crc32) {
+        mem_stream.Read_t(mem_alloc, tmp_size);
+        mem_alloc += tmp_size;
+        counter = tmp_counter;
+        return TRUE;
+    }
+    return FALSE;
 }

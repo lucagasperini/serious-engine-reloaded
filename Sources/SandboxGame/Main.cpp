@@ -79,20 +79,20 @@ int submain(char* _cmdline)
     int64_t t0 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     // Add space for 1 MB + 256 Event pointers (32/64 bit per pointer) + 256 Setting pointers (32/64 bit per pointer)
-    Manager::init(1048576, 256, 256);
+    Manager::init((1UL << 20), 256, 256);
 
     load_all_game_setting();
     load_all_game_system();
-    load_all_game_entity();
-    //Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin");
+    if (!Manager::getEntityManager()->loadDisk("Levels\\TestGame.bin")) {
+        load_all_game_entity();
+        Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
+    }
 
     int64_t t1 = _pTimer->GetHighPrecisionTimer().GetMilliseconds();
 
     ULONG number_thread = 1;
     Manager::setThreadNumber(number_thread);
     Manager::splitThreadMemory();
-
-    Manager::getEntityManager()->saveDisk("Levels\\TestGame.bin");
 
     g_world_data = new CWorld;
     g_world_data->Load_t(g_world_file);

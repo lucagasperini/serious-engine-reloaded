@@ -536,7 +536,8 @@ void* CTStream::ReadChunkAlloc_t(SLONG slSize) // throws char *
 }
 void CTStream::ReadStream_t(CTStream &strmOther) // throw char *
 {
-  // implement this !!!! @@@@
+  //TODO: do more testing of this method
+  strmOther.Write_t(ReadChunkAlloc_t(), GetStreamSize());
 }
 
 void CTStream::WriteID_t(const CChunkID &cidSave) // throws char *
@@ -568,7 +569,8 @@ void CTStream::WriteFullChunk_t(const CChunkID &cidSave, void *pvBuffer,
 }
 void CTStream::WriteStream_t(CTStream &strmOther) // throw char *
 {
-  // implement this !!!! @@@@
+  //TODO: do more testing of this method
+  Write_t(strmOther.ReadChunkAlloc_t(), strmOther.GetStreamSize());
 }
 
 // whether or not the given pointer is coming from this stream (mainly used for exception handling)
