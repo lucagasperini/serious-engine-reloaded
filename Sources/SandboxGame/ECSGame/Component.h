@@ -18,7 +18,7 @@
 #ifndef SER_SBGAME_COMPONENT_H
 #define SER_SBGAME_COMPONENT_H
 
-#include <ECS/Component.h>
+#include <SER/ECS/Component.h>
 #include <Engine/Base/SDL/SDLEvents.h>
 #include <Engine/Base/Types.h>
 #include <Engine/Engine.h>

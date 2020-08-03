@@ -19,7 +19,7 @@
 #define SER_SBGAME_RENDERSYSTEM_H
 
 #include "Entity.h"
-#include <ECS/System.h>
+#include <SER/ECS/System.h>
 
 class RenderSystem : public SER::System {
 private:

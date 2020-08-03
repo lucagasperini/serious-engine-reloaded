@@ -16,7 +16,7 @@
 // along with Serious Engine Reloaded.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "RenderSystem.h"
-#include <ECS/Manager.h>
+#include <SER/ECS/Manager.h>
 
 #include <Engine/Templates/Stock_CTextureData.h>
 

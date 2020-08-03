@@ -36,7 +36,7 @@
 #include "EventSystem.h"
 #include "PositionSystem.h"
 #include "RenderSystem.h"
-#include <ECS/Manager.h>
+#include <SER/ECS/Manager.h>
 #include <Engine/Graphics/Font.h>
 #include <SDL.h>
 

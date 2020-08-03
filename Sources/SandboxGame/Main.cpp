@@ -23,7 +23,7 @@
 
 #include "MainWindow.h"
 #include "SplashScreen.h"
-#include <ECS/Manager.h>
+#include <SER/ECS/Manager.h>
 
 #include "ECSGame/Entity.h"
 #include "ECSGame/RenderSystem.h"

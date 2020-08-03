@@ -19,7 +19,7 @@
 #define SER_SBGAME_EVENTSYSTEM_H
 
 #include "Entity.h"
-#include <ECS/System.h>
+#include <SER/ECS/System.h>
 
 #define SER_KEYBIND_MAX 256
 

@@ -954,18 +954,20 @@ add_dependencies(${SSAM} ParseEntities)
 # Make symbols in the main executable available to dynamic objects
 set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 
-set(ECSLIB "ser-ecs${DEBUGSUFFIX}")
-add_library(${ECSLIB} SHARED
-    ECS/Manager.cpp
-    ECS/Entity.cpp
-    ECS/Event.cpp
-    ECS/Setting.cpp
-)
-target_link_libraries(${ECSLIB} ${SENGINELIB})
 
-set_target_properties(${ECSLIB} PROPERTIES ENABLE_EXPORTS ON)
+set(SERENGINE "SER${DEBUGSUFFIX}")
+add_library(${SERENGINE} SHARED
+    SER/Base/Stream.cpp
+    SER/ECS/Manager.cpp
+    SER/ECS/Entity.cpp
+    SER/ECS/Event.cpp
+    SER/ECS/Setting.cpp
+)
+target_link_libraries(${SERENGINE} ${SENGINELIB})
+
+set_target_properties(${SERENGINE} PROPERTIES ENABLE_EXPORTS ON)
 if(DEBUG)
-    set_target_properties(${ECSLIB} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    set_target_properties(${SERENGINE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
 
 set(SANDBOXGAME "sandbox-game")
@@ -980,7 +982,7 @@ add_executable(${SANDBOXGAME}
 )
 
 target_link_libraries(${SANDBOXGAME} ${SENGINELIB})
-target_link_libraries(${SANDBOXGAME} ${ECSLIB})
+target_link_libraries(${SANDBOXGAME} ${SERENGINE})
 add_dependencies(${SANDBOXGAME} ParseEntities)
 
 if(LINUX)

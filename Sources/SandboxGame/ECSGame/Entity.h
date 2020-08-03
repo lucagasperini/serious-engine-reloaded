@@ -19,7 +19,7 @@
 #define SER_SBGAME_ENTITY_H
 
 #include "Component.h"
-#include <ECS/Manager.h>
+#include <SER/ECS/Manager.h>
 
 struct Cursor : SER::Entity, ComponentCursor {
 };

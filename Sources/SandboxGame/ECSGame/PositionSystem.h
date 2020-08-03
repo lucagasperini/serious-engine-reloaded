@@ -19,7 +19,7 @@
 #define SER_SBGAME_POSITIONSYSTEM_H
 
 #include "Entity.h"
-#include <ECS/System.h>
+#include <SER/ECS/System.h>
 
 class PositionSystem : public SER::System {
 private:

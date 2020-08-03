@@ -17,7 +17,7 @@
 
 #include "MainWindow.h"
 #include "ECSGame/Component.h"
-#include <ECS/Manager.h>
+#include <SER/ECS/Manager.h>
 #include <SDL.h>
 
 using namespace SER;

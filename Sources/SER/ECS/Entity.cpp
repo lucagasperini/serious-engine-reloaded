@@ -165,7 +165,6 @@ BOOL EntityManager::loadDisk(CTFileName _file)
     ULONG tmp_size = file_stream.GetSize_t();
     CTMemoryStream mem_stream(mem_alloc, tmp_size, CTStream::OM_WRITE);
     file_stream.Read_t(mem_stream.mstrm_pubBuffer, tmp_size);
-    
     ULONG tmp_crc32 = 0;
     ULONG tmp_counter = 0;
     
