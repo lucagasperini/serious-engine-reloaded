@@ -64,17 +64,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace SER;
 
 // default size of page used for stream IO operations (4Kb)
-ULONG _ulPageSize = 0;
+ULONG g_page_size = 0;
 // maximum length of file that can be saved (default: 128Mb)
-ULONG _ulMaxLenghtOfSavingFile = (1UL << 20) * 128;
-INDEX fil_bPreferZips = FALSE;
+ULONG g_fs_max_save_length = (1UL << 20) * 128;
+INDEX g_fs_prefer_zip = FALSE;
 
 // set if current thread has currently enabled stream handling
-THREADLOCAL(BOOL, _bThreadCanHandleStreams, FALSE);
+THREADLOCAL(BOOL, g_thread_can_handle_stream, FALSE);
 // list of currently opened streams
-ULONG _ulVirtuallyAllocatedSpace = 0;
-ULONG _ulVirtuallyAllocatedSpaceTotal = 0;
-THREADLOCAL(CListHead*, _plhOpenedStreams, NULL);
+ULONG g_mem_virtual_space = 0;
+ULONG g_mem_virtual_space_total = 0;
+THREADLOCAL(CListHead*, g_mem_open_stream, NULL);
 
 // global string with application path
 CTFileName SER::g_app_path;
@@ -95,14 +95,14 @@ CTString SER::g_app_mod_ext;
 CTFileName SER::g_app_cd_path;
 
 // include/exclude lists for base dir writing/browsing
-CDynamicStackArray<CTFileName> _afnmBaseWriteInc;
-CDynamicStackArray<CTFileName> _afnmBaseWriteExc;
-CDynamicStackArray<CTFileName> _afnmBaseBrowseInc;
-CDynamicStackArray<CTFileName> _afnmBaseBrowseExc;
+CDynamicStackArray<CTFileName> g_fs_base_write_include;
+CDynamicStackArray<CTFileName> g_fs_base_write_exclude;
+CDynamicStackArray<CTFileName> g_fs_base_browse_include;
+CDynamicStackArray<CTFileName> g_fs_base_browse_exclude;
 // list of paths or patterns that are not included when making CRCs for network connection
 // this is used to enable connection between different localized versions
-CDynamicStackArray<CTFileName> _afnmNoCRC;
-
+CDynamicStackArray<CTFileName> g_fs_nocrc;
+/*
 // load a filelist
 static BOOL LoadFileList(CDynamicStackArray<CTFileName>& afnm, const CTFileName& fnmList)
 {
@@ -125,7 +125,7 @@ static BOOL LoadFileList(CDynamicStackArray<CTFileName>& afnm, const CTFileName&
         return FALSE;
     }
 }
-
+*/
 extern BOOL FileMatchesList(CDynamicStackArray<CTFileName>& afnm, const CTFileName& fnm)
 {
     for (INDEX i = 0; i < afnm.Count(); i++) {
@@ -135,7 +135,7 @@ extern BOOL FileMatchesList(CDynamicStackArray<CTFileName>& afnm, const CTFileNa
     }
     return FALSE;
 }
-
+/*
 static CTFileName _fnmApp;
 
 void InitStreams(void)
@@ -146,9 +146,9 @@ void InitStreams(void)
     SYSTEM_INFO siSystemInfo;
     GetSystemInfo(&siSystemInfo);
     // and remember page size
-    _ulPageSize = siSystemInfo.dwPageSize * 16; // cca. 64kB on WinNT/Win95
+    g_page_size = siSystemInfo.dwPageSize * 16; // cca. 64kB on WinNT/Win95
 #else
-    _ulPageSize = PAGESIZE;
+    g_page_size = PAGESIZE;
 #endif
 
     // keep a copy of path for setting purposes
@@ -167,10 +167,10 @@ void InitStreams(void)
         // load mod's include/exclude lists
         CPrintF(TRANSV("Loading mod include/exclude lists...\n"));
         BOOL bOK = FALSE;
-        bOK |= LoadFileList(_afnmBaseWriteInc, CTString("BaseWriteInclude.lst"));
-        bOK |= LoadFileList(_afnmBaseWriteExc, CTString("BaseWriteExclude.lst"));
-        bOK |= LoadFileList(_afnmBaseBrowseInc, CTString("BaseBrowseInclude.lst"));
-        bOK |= LoadFileList(_afnmBaseBrowseExc, CTString("BaseBrowseExclude.lst"));
+        bOK |= LoadFileList(g_fs_base_write_include, CTString("BaseWriteInclude.lst"));
+        bOK |= LoadFileList(g_fs_base_write_exclude, CTString("BaseWriteExclude.lst"));
+        bOK |= LoadFileList(g_fs_base_browse_include, CTString("BaseBrowseInclude.lst"));
+        bOK |= LoadFileList(g_fs_base_browse_exclude, CTString("BaseBrowseExclude.lst"));
 
         // if none found
         if (!bOK) {
@@ -256,7 +256,7 @@ void InitStreams(void)
     CPrintF("\n");
 
     const char* dirsep = CFileSystem::GetDirSeparator();
-    LoadFileList(_afnmNoCRC, CTFILENAME("Data") + CTString(dirsep) + CTString("NoCRC.lst"));
+    LoadFileList(g_fs_nocrc, CTFILENAME("Data") + CTString(dirsep) + CTString("NoCRC.lst"));
 
     _pShell->SetINDEX(CTString("sys") + "_iCPU" + "Misc", 1);
 }
@@ -274,27 +274,27 @@ void IgnoreApplicationPath(void)
 {
     g_app_path = CTString("");
 }
-
+*/
 /////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
 /* Static function enable stream handling. */
 void Stream::EnableStreamHandling(void)
 {
-    ASSERT(!_bThreadCanHandleStreams && _plhOpenedStreams == NULL);
+    ASSERT(!g_thread_can_handle_stream && g_mem_open_stream == NULL);
 
-    _bThreadCanHandleStreams = TRUE;
-    _plhOpenedStreams = new CListHead;
+    g_thread_can_handle_stream = TRUE;
+    g_mem_open_stream = new CListHead;
 }
 
 /* Static function disable stream handling. */
 void Stream::DisableStreamHandling(void)
 {
-    ASSERT(_bThreadCanHandleStreams && _plhOpenedStreams != NULL);
+    ASSERT(g_thread_can_handle_stream && g_mem_open_stream != NULL);
 
-    _bThreadCanHandleStreams = FALSE;
-    delete _plhOpenedStreams;
-    _plhOpenedStreams = NULL;
+    g_thread_can_handle_stream = FALSE;
+    delete g_mem_open_stream;
+    g_mem_open_stream = NULL;
 }
 
 /*
@@ -886,7 +886,7 @@ FileStream::~FileStream(void)
 void FileStream::Open_t(const CTFileName& fnFileName, Stream::OpenMode om /*=OM_READ*/)
 {
     // if current thread has not enabled stream handling
-    if (!_bThreadCanHandleStreams) {
+    if (!g_thread_can_handle_stream) {
         // error
         ::ThrowF_t(TRANS("Cannot open file `%s', stream handling is not enabled for this thread"),
             (const char*)(CTString&)fnFileName);
@@ -940,7 +940,7 @@ void FileStream::Open_t(const CTFileName& fnFileName, Stream::OpenMode om /*=OM_
     // if file opening was successfull, set stream description to file name
     strm_strStreamDescription = fnmFullFileName;
     // add this newly opened file into opened stream list
-    _plhOpenedStreams->AddTail(strm_lnListNode);
+    g_mem_open_stream->AddTail(strm_lnListNode);
 }
 
 static void MakeSureDirectoryPathExists(const CTFileName& fnmFullFileName)
@@ -960,7 +960,7 @@ void FileStream::Create_t(const CTFileName& fnFileName,
     fnFileNameAbsolute.SetAbsolutePath();
 
     // if current thread has not enabled stream handling
-    if (!_bThreadCanHandleStreams) {
+    if (!g_thread_can_handle_stream) {
         // error
         ::ThrowF_t(TRANS("Cannot create file `%s', stream handling is not enabled for this thread"),
             (const char*)(CTString&)fnFileNameAbsolute);
@@ -990,7 +990,7 @@ void FileStream::Create_t(const CTFileName& fnFileName,
     // mark that file is created for writing
     fstrm_bReadOnly = FALSE;
     // add this newly created file into opened stream list
-    _plhOpenedStreams->AddTail(strm_lnListNode);
+    g_mem_open_stream->AddTail(strm_lnListNode);
 }
 
 /*
@@ -1020,8 +1020,8 @@ void FileStream::Close(void)
         UNZIPClose(fstrm_iZipHandle);
         fstrm_iZipHandle = -1;
         delete[] fstrm_pubZipBuffer;
-        _ulVirtuallyAllocatedSpace -= fstrm_slZipSize;
-        //CPrintF("Freed virtual memory with size ^c00ff00%d KB^C (now %d KB)\n", (fstrm_slZipSize / 1000), (_ulVirtuallyAllocatedSpace / 1000));
+        g_mem_virtual_space -= fstrm_slZipSize;
+        //CPrintF("Freed virtual memory with size ^c00ff00%d KB^C (now %d KB)\n", (fstrm_slZipSize / 1000), (g_mem_virtual_space / 1000));
     }
 
     // clear dictionary vars
@@ -1148,7 +1148,7 @@ BOOL FileStream::PointerInStream(void* pPointer)
 MemoryStream::MemoryStream(void)
 {
     // if current thread has not enabled stream handling
-    if (!_bThreadCanHandleStreams) {
+    if (!g_thread_can_handle_stream) {
         // error
         ::FatalError(TRANS("Can create memory stream, stream handling is not enabled for this thread"));
     }
@@ -1160,10 +1160,10 @@ MemoryStream::MemoryStream(void)
     // set stream description
     strm_strStreamDescription = "dynamic memory stream";
     // add this newly created memory stream into opened stream list
-    _plhOpenedStreams->AddTail(strm_lnListNode);
+    g_mem_open_stream->AddTail(strm_lnListNode);
     // allocate amount of memory needed to hold maximum allowed file length (when saving)
-    mstrm_pubBuffer = new UBYTE[_ulMaxLenghtOfSavingFile];
-    mstrm_pubBufferEnd = mstrm_pubBuffer + _ulMaxLenghtOfSavingFile;
+    mstrm_pubBuffer = new UBYTE[g_fs_max_save_length];
+    mstrm_pubBufferEnd = mstrm_pubBuffer + g_fs_max_save_length;
     mstrm_pubBufferMax = mstrm_pubBuffer;
 }
 
@@ -1174,14 +1174,14 @@ MemoryStream::MemoryStream(void* pvBuffer, SLONG slSize,
     Stream::OpenMode om /*= Stream::OM_READ*/)
 {
     // if current thread has not enabled stream handling
-    if (!_bThreadCanHandleStreams) {
+    if (!g_thread_can_handle_stream) {
         // error
         ::FatalError(TRANS("Can create memory stream, stream handling is not enabled for this thread"));
     }
 
     // allocate amount of memory needed to hold maximum allowed file length (when saving)
-    mstrm_pubBuffer = new UBYTE[_ulMaxLenghtOfSavingFile];
-    mstrm_pubBufferEnd = mstrm_pubBuffer + _ulMaxLenghtOfSavingFile;
+    mstrm_pubBuffer = new UBYTE[g_fs_max_save_length];
+    mstrm_pubBufferEnd = mstrm_pubBuffer + g_fs_max_save_length;
     mstrm_pubBufferMax = mstrm_pubBuffer + slSize;
     // copy given block of memory into memory file
     memcpy(mstrm_pubBuffer, pvBuffer, slSize);
@@ -1200,7 +1200,7 @@ MemoryStream::MemoryStream(void* pvBuffer, SLONG slSize,
     // set stream description
     strm_strStreamDescription = "dynamic memory stream";
     // add this newly created memory stream into opened stream list
-    _plhOpenedStreams->AddTail(strm_lnListNode);
+    g_mem_open_stream->AddTail(strm_lnListNode);
 }
 
 /* Destructor. */
@@ -1327,7 +1327,7 @@ BOOL MemoryStream::PointerInStream(void* pPointer)
 {
     return pPointer >= mstrm_pubBuffer && pPointer < mstrm_pubBufferEnd;
 }
-
+/*
 // Test if a file exists.
 BOOL FileExists(const CTFileName& fnmFile)
 {
@@ -1361,7 +1361,8 @@ BOOL FileExistsForWriting(const CTFileName& fnmFile)
     }
     // expand the filename to full path for writing
     CTFileName fnmFullFileName;
-    /* INDEX iFile = */ ExpandFilePath(EFP_WRITE, fnmFile, fnmFullFileName);
+    /* INDEX iFile = */
+/* ExpandFilePath(EFP_WRITE, fnmFile, fnmFullFileName);
 
     // check if it exists
     FILE* f = fopen(fnmFullFileName, "rb");
@@ -1481,7 +1482,7 @@ static INDEX ExpandFilePath_read(ULONG ulType, const CTFileName& fnmFile, CTFile
     if (g_app_mod_path != "") {
 
         // first try in the mod's dir
-        if (!fil_bPreferZips) {
+        if (!g_fs_prefer_zip) {
             fnmExpanded = g_app_path + g_app_mod_path + fnmFile;
             if (IsFileReadable_internal(fnmExpanded)) {
                 return EFP_FILE;
@@ -1499,7 +1500,7 @@ static INDEX ExpandFilePath_read(ULONG ulType, const CTFileName& fnmFile, CTFile
         }
 
         // try in the mod's dir after
-        if (fil_bPreferZips) {
+        if (g_fs_prefer_zip) {
             fnmExpanded = g_app_path + g_app_mod_path + fnmFile;
             if (IsFileReadable_internal(fnmExpanded)) {
                 return EFP_FILE;
@@ -1508,7 +1509,7 @@ static INDEX ExpandFilePath_read(ULONG ulType, const CTFileName& fnmFile, CTFile
     }
 
     // try in the app's base dir
-    if (!fil_bPreferZips) {
+    if (!g_fs_prefer_zip) {
         CTFileName fnmAppPath = g_app_path;
         fnmAppPath.SetAbsolutePath();
 
@@ -1534,7 +1535,7 @@ static INDEX ExpandFilePath_read(ULONG ulType, const CTFileName& fnmFile, CTFile
     }
 
     // try in the app's base dir
-    if (fil_bPreferZips) {
+    if (g_fs_prefer_zip) {
         fnmExpanded = g_app_path + fnmFile;
         if (IsFileReadable_internal(fnmExpanded)) {
             return EFP_FILE;
@@ -1607,7 +1608,7 @@ INDEX ExpandFilePath(ULONG ulType, const CTFileName& fnmFile, CTFileName& fnmExp
     // if writing
     if (ulType & EFP_WRITE) {
         // if should write to mod dir
-        if (g_app_mod_path != "" && (!FileMatchesList(_afnmBaseWriteInc, fnmFileAbsolute) || FileMatchesList(_afnmBaseWriteExc, fnmFileAbsolute))) {
+        if (g_app_mod_path != "" && (!FileMatchesList(g_fs_base_write_include, fnmFileAbsolute) || FileMatchesList(g_fs_base_write_exclude, fnmFileAbsolute))) {
             // do that
             fnmExpanded = g_app_path + g_app_mod_path + fnmFileAbsolute;
             fnmExpanded.SetAbsolutePath();
@@ -1654,3 +1655,4 @@ INDEX ExpandFilePath(ULONG ulType, const CTFileName& fnmFile, CTFileName& fnmExp
     fnmExpanded.SetAbsolutePath();
     return EFP_NONE;
 }
+*/
