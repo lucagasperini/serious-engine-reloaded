@@ -478,25 +478,7 @@ ENGINE_API void MakeDirList(
     const CTFileName& fnmPattern, // pattern for each file to match ("" matches all)
     ULONG ulFlags // additional flags
 );
-*/
-// global string with application path
-ENGINE_API extern CTFileName g_app_path;
-// global string with user-specific writable directory.
-ENGINE_API extern CTFileName g_user_dir;
-// global string with current MOD path
-ENGINE_API extern CTFileName g_app_mod_path;
-// global string with current name (the parameter that is passed on cmdline)
-ENGINE_API extern CTString g_app_mod_name;
-// global string with url to be shown to users that don't have the mod installed
-// (should be set by game.dll)
-ENGINE_API extern CTString g_app_mod_url;
-// global string with current MOD extension (for adding to dlls)
-ENGINE_API extern CTString g_app_mod_ext;
-// global string with CD path (for minimal installations)
-ENGINE_API extern CTFileName g_app_cd_path;
-// global string with filename of the started application
-ENGINE_API extern CTFileName g_app_exe;
-/*
+
 // application path usage funtions
 ENGINE_API void UseApplicationPath(void);
 ENGINE_API void IgnoreApplicationPath(void);

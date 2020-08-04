@@ -76,24 +76,6 @@ ULONG g_mem_virtual_space = 0;
 ULONG g_mem_virtual_space_total = 0;
 THREADLOCAL(CListHead*, g_mem_open_stream, NULL);
 
-// global string with application path
-CTFileName SER::g_app_path;
-// global string with filename of the started application
-CTFileName SER::g_app_exe;
-// global string with user-specific writable directory.
-CTFileName SER::g_user_dir;
-// global string with current MOD path
-CTFileName SER::g_app_mod_path;
-// global string with current name (the parameter that is passed on cmdline)
-CTString SER::g_app_mod_name;
-// global string with url to be shown to users that don't have the mod installed
-// (should be set by game.dll)
-CTString SER::g_app_mod_url;
-// global string with current MOD extension (for adding to dlls)
-CTString SER::g_app_mod_ext;
-// global string with CD path (for minimal installations)
-CTFileName SER::g_app_cd_path;
-
 // include/exclude lists for base dir writing/browsing
 CDynamicStackArray<CTFileName> g_fs_base_write_include;
 CDynamicStackArray<CTFileName> g_fs_base_write_exclude;

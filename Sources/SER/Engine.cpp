@@ -18,8 +18,27 @@
 #include "Engine.h"
 
 using namespace SER;
+
+// global string with application path
+CTFileName Engine::app_path;
+// global string with filename of the started application
+CTFileName Engine::app_exe;
+// global string with user-specific writable directory.
+CTFileName Engine::user_dir;
+// global string with current MOD path
+CTFileName Engine::mod_path;
+// global string with current name (the parameter that is passed on cmdline)
+CTString Engine::mod_name;
+// global string with url to be shown to users that don't have the mod installed
+// (should be set by game.dll)
+CTString Engine::mod_url;
+// global string with current MOD extension (for adding to dlls)
+CTString Engine::mod_ext;
+// global string with CD path (for minimal installations)
+CTFileName Engine::cd_path;
+
 // startup engine
-void init_engine(const char* argv0, CTString strGameID)
+void Engine::init(const char* argv0, CTString strGameID)
 { /*
     SanityCheckTypes();
 
