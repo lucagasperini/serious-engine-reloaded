@@ -957,6 +957,7 @@ set_target_properties(${SSAM} PROPERTIES ENABLE_EXPORTS ON)
 
 set(SERENGINE "SER${DEBUGSUFFIX}")
 add_library(${SERENGINE} SHARED
+    SER/Base/FileSystem.cpp
     SER/Base/Stream.cpp
     SER/Engine.cpp
     SER/ECS/Manager.cpp
